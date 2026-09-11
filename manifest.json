@@ -1,0 +1,19 @@
+{
+  "name": "MonDjai/Salon F",
+  "short_name": "Salon F",
+  "description": "Suivi financier des prestations coiffure, pédicure/manicure et revente de mèches.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#11141a",
+  "theme_color": "#11141a",
+  "lang": "fr",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+  ]
+}

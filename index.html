@@ -1,0 +1,3159 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#11141a" />
+<title>MonDjai/Salon F</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="favicon.ico" sizes="any" />
+<link rel="icon" href="icon-192.png" type="image/png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<style>
+  :root{
+    --bg:#11141a;
+    --card:#1b2029;
+    --card-2:#20262f;
+    --border:#2a303c;
+    --text:#eef1f6;
+    --text-dim:#9aa3b2;
+    --accent:#f5a623;
+    --accent-dark:#c9840f;
+    --green:#34b37e;
+    --red:#ff6b5e;
+    --blue:#5b8def;
+    --turquoise:#4fd1c5;
+    --pink:#e8788c;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    height:100%; overscroll-behavior-y:none;}
+  #app{min-height:100%; display:flex; flex-direction:column;}
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  /* ---------- Header ---------- */
+  .header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:calc(14px + var(--safe-top)) 16px 12px;
+    background:linear-gradient(180deg,#161b23,#11141a);
+    border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:5;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-emoji{font-size:22px;}
+  .brand-text{display:flex; flex-direction:column; line-height:1.15;}
+  .brand-title{font-size:16px; font-weight:700;}
+  .brand-sub{font-size:11.5px; color:var(--text-dim);}
+  .icon-btn{
+    background:var(--card); border:1px solid var(--border); color:var(--text);
+    width:40px; height:40px; border-radius:12px; font-size:18px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:active{background:var(--card-2);}
+
+  /* ---------- Main ---------- */
+  .main{flex:1; padding:14px 16px calc(24px + var(--safe-bottom)); display:flex; flex-direction:column;}
+  .main.with-tabbar{padding-bottom: calc(96px + var(--safe-bottom));}
+
+  .section-title{font-size:13px; font-weight:700; color:var(--text-dim); text-transform:uppercase;
+    letter-spacing:.04em; margin:4px 0 10px;}
+  .hint{font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+  .hint.tight{margin-top:4px;}
+
+  /* ---------- Onboarding / full pages (no tabbar) ---------- */
+  .onb{flex:1; display:flex; flex-direction:column; padding:calc(20px + var(--safe-top)) 20px calc(28px + var(--safe-bottom)); min-height:100%;}
+  .onb-head{margin-bottom:18px;}
+  .onb-emoji{font-size:40px;}
+  .onb-title{font-size:22px; font-weight:800; margin:10px 0 6px;}
+  .onb-desc{font-size:14px; color:var(--text-dim); line-height:1.5;}
+  .onb-body{flex:1; display:flex; flex-direction:column; justify-content:center;}
+
+  .choice-grid{display:flex; flex-direction:column; gap:12px;}
+  .choice-card{
+    display:flex; align-items:center; gap:14px;
+    background:var(--card); border:1.5px solid var(--border); border-radius:16px;
+    padding:16px 14px; text-align:left;
+  }
+  .choice-card.selected{border-color:var(--accent); background:linear-gradient(135deg,#241d10,#1c2029);}
+  .choice-card .emoji{font-size:30px; width:40px; text-align:center; flex:none;}
+  .choice-card .cc-text{flex:1; min-width:0;}
+  .choice-card .cc-title{font-size:15.5px; font-weight:700;}
+  .choice-card .cc-desc{font-size:12.5px; color:var(--text-dim); margin-top:2px; line-height:1.4;}
+  .choice-card .cc-check{
+    width:24px; height:24px; border-radius:8px; border:1.5px solid var(--border);
+    display:flex; align-items:center; justify-content:center; flex:none; font-size:14px;
+    color:transparent; background:var(--card-2);
+  }
+  .choice-card.selected .cc-check{background:var(--accent); border-color:var(--accent); color:#1b1200;}
+
+  .error-text{color:var(--red); font-size:12.5px; margin-top:10px; line-height:1.4;}
+
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    border:none; border-radius:14px; padding:14px 16px; font-size:15px; font-weight:700;
+    width:100%;
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-dark)); color:#1b1200;}
+  .btn-secondary{background:var(--card); color:var(--text); border:1px solid var(--border);}
+  .btn-ghost{background:transparent; color:var(--accent); border:none; padding:10px;}
+  .btn-danger{background:rgba(255,107,94,.12); color:var(--red); border:1px solid rgba(255,107,94,.4);}
+  .btn:active{opacity:.85;}
+  .btn-row{display:flex; gap:10px; margin-top:14px;}
+  .btn-row .btn{width:auto; flex:1;}
+
+  /* ---------- Tab bar ---------- */
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:6;
+    display:flex; background:#161b23; border-top:1px solid var(--border);
+    padding:8px 6px calc(8px + var(--safe-bottom));
+  }
+  .tab{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+    background:transparent; border:none; color:var(--text-dim); padding:6px 2px; border-radius:12px;
+  }
+  .tab .tab-emoji{font-size:20px;}
+  .tab .tab-label{font-size:10.5px; font-weight:600;}
+  .tab.active{color:var(--accent);}
+  .tab.active .tab-emoji{transform:translateY(-1px);}
+
+  /* ---------- List cards ---------- */
+  .entry-list{display:flex; flex-direction:column; gap:10px; margin-top:4px;}
+  .entry-card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:13px 14px; display:flex; align-items:center; gap:12px; text-align:left;
+  }
+  .entry-card:active{background:var(--card-2);}
+  .entry-ico{
+    width:38px; height:38px; border-radius:11px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+    background:rgba(245,166,35,.12); color:var(--accent);
+  }
+  .entry-main{flex:1; min-width:0;}
+  .entry-title{font-size:14.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .entry-sub{font-size:12px; color:var(--text-dim); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .entry-amount{font-size:14px; font-weight:700; color:var(--accent); flex:none; white-space:nowrap;}
+  .entry-amount.neg{color:var(--red);}
+  .badge{
+    display:inline-block; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:999px;
+    background:rgba(91,141,239,.15); color:var(--blue); margin-left:6px;
+  }
+
+  .empty-state{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:30px 10px; color:var(--text-dim); gap:8px;
+  }
+  .empty-state .es-emoji{font-size:38px; opacity:.7;}
+  .empty-state .es-title{font-size:14.5px; font-weight:700; color:var(--text);}
+  .empty-state .es-desc{font-size:12.5px; max-width:260px; line-height:1.5;}
+
+  .fab{
+    position:fixed; right:18px; bottom:calc(92px + var(--safe-bottom)); z-index:7;
+    width:56px; height:56px; border-radius:18px; border:none;
+    background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+    color:#1b1200; font-size:26px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(245,166,35,.35);
+  }
+  .fab:active{transform:scale(.96);}
+
+  /* ---------- Forms ---------- */
+  .field{margin-bottom:16px;}
+  .field .label{display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--text-dim); margin-bottom:7px;}
+  .field .label .req{color:var(--accent);}
+  .input, .select, .textarea{
+    width:100%; background:var(--card-2); border:1px solid var(--border); color:var(--text);
+    border-radius:12px; padding:12px 13px; font-size:15px; appearance:none;
+  }
+  .select{background-image:linear-gradient(45deg, transparent 50%, var(--text-dim) 50%), linear-gradient(135deg, var(--text-dim) 50%, transparent 50%);
+    background-position: calc(100% - 20px) 21px, calc(100% - 15px) 21px; background-size:5px 5px, 5px 5px; background-repeat:no-repeat;
+    padding-right:36px;}
+  .input:focus, .select:focus, .textarea:focus{outline:2px solid var(--accent); outline-offset:0;}
+  .field-error{color:var(--red); font-size:12px; margin-top:6px;}
+  .field-note{color:var(--text-dim); font-size:11.5px; margin-top:6px; line-height:1.4;}
+  .inline-new{margin-top:10px; display:flex; gap:8px;}
+  .inline-new .input{flex:1;}
+  .inline-new .btn{width:auto; padding:10px 14px; font-size:13px;}
+
+  .radio-row{display:flex; gap:10px;}
+  .radio-opt{
+    flex:1; text-align:center; background:var(--card-2); border:1.5px solid var(--border); color:var(--text-dim);
+    border-radius:12px; padding:12px 8px; font-size:13px; font-weight:700;
+  }
+  .radio-opt.active{border-color:var(--accent); color:var(--accent); background:rgba(245,166,35,.1);}
+
+  .chip-wrap{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    background:var(--card-2); border:1.5px solid var(--border); color:var(--text-dim);
+    border-radius:999px; padding:9px 14px; font-size:13px; font-weight:600;
+  }
+  .chip.active{border-color:var(--accent); color:var(--accent); background:rgba(245,166,35,.1);}
+  .chip.dashed{border-style:dashed;}
+  .chip-suggest{
+    background:transparent; border:1px dashed var(--border); color:var(--text-dim);
+    border-radius:999px; padding:7px 12px; font-size:12px;
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(6,8,12,.6); z-index:20;
+    display:flex; align-items:flex-end;
+  }
+  .modal{
+    width:100%; max-height:88vh; overflow-y:auto; background:var(--bg);
+    border-radius:20px 20px 0 0; border-top:1px solid var(--border);
+    padding:18px 18px calc(20px + var(--safe-bottom));
+  }
+  .modal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .modal-title{font-size:17px; font-weight:800;}
+  .modal-close{background:var(--card); border:1px solid var(--border); color:var(--text-dim);
+    width:32px; height:32px; border-radius:10px; font-size:15px; display:flex; align-items:center; justify-content:center;}
+
+  .detail-row{display:flex; justify-content:space-between; gap:14px; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px;}
+  .detail-row:last-of-type{border-bottom:none;}
+  .detail-row .dk{color:var(--text-dim);}
+  .detail-row .dv{font-weight:700; text-align:right;}
+
+  .confirm-box{background:rgba(255,107,94,.08); border:1px solid rgba(255,107,94,.3); border-radius:14px; padding:14px; margin-top:14px;}
+  .confirm-box p{margin:0 0 12px; font-size:13.5px; color:var(--text);}
+
+  /* ---------- Réglages / À propos ---------- */
+  .reglages-section{margin-bottom:22px;}
+  .reglages-section .rs-title{font-size:13px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px;}
+  .profil-row{
+    display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:13px 14px; margin-bottom:10px;
+  }
+  .profil-row .pr-emoji{font-size:22px; width:30px; text-align:center; flex:none;}
+  .profil-row .pr-text{flex:1;}
+  .profil-row .pr-title{font-size:14.5px; font-weight:700;}
+  .profil-row .pr-desc{font-size:11.5px; color:var(--text-dim); margin-top:2px;}
+  .switch{
+    width:46px; height:28px; border-radius:999px; background:var(--card-2); border:1px solid var(--border);
+    position:relative; flex:none;
+  }
+  .switch.on{background:var(--accent); border-color:var(--accent);}
+  .switch .knob{position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:50%; background:#fff; transition:left .15s;}
+  .switch.on .knob{left:20px; background:#1b1200;}
+
+  .about-line{font-size:14px; color:var(--text-dim); line-height:1.6; margin-bottom:10px;}
+  .mission{font-size:15.5px; font-weight:700; color:var(--text); margin:18px 0 8px;}
+
+  /* ---------- F7 : Tableau de bord ---------- */
+  .dash-solde{
+    background:linear-gradient(135deg,var(--card),var(--card-2)); border:1px solid var(--border);
+    border-radius:18px; padding:20px 18px; text-align:center; margin-bottom:14px;
+  }
+  .dash-solde .ds-label{font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em;}
+  .dash-solde .ds-amount{font-size:32px; font-weight:800; margin-top:6px;}
+  .dash-solde .ds-amount.neg{color:var(--red);}
+  .dash-perte{
+    margin-top:12px; background:rgba(255,107,94,.12); border:1px solid rgba(255,107,94,.35);
+    border-radius:12px; padding:9px 12px; font-size:12.5px; color:var(--red); font-weight:600; line-height:1.4;
+  }
+  .dash-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px;}
+  .dash-block{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px 10px; text-align:center; appearance:none; -webkit-appearance:none; font:inherit;}
+  .dash-block .db-emoji{font-size:20px;}
+  .dash-block .db-label{font-size:11px; color:var(--text-dim); margin-top:4px; font-weight:700;}
+  .dash-block .db-amount{font-size:16.5px; font-weight:800; margin-top:4px;}
+  .dash-block.charges .db-amount{color:var(--red);}
+
+  /* ---------- F4 : Suivi de stock ---------- */
+  .stock-card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:13px 14px; margin-bottom:10px;}
+  .stock-card .sc-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+  .stock-card .sc-nom{font-size:14.5px; font-weight:700;}
+  .stock-card .sc-alerte{font-size:10.5px; font-weight:700; color:var(--accent); background:rgba(245,166,35,.14); padding:3px 8px; border-radius:999px;}
+  .stock-card .sc-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; font-size:12.5px;}
+  .stock-card .sc-grid .sk{color:var(--text-dim);}
+  .stock-card .sc-grid .sv{font-weight:700; text-align:right;}
+  .stock-card .sc-seuil{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border);}
+  .stock-card .sc-seuil label{font-size:11.5px; color:var(--text-dim);}
+  .stock-card .sc-seuil input{width:60px; background:var(--card-2); border:1px solid var(--border); color:var(--text);
+    border-radius:8px; padding:6px 8px; font-size:13px; text-align:center;}
+
+  /* ---------- F8 : Mon état ---------- */
+  .etat-tabs{display:flex; gap:8px; margin-bottom:14px;}
+  .etat-tab{flex:1; text-align:center; background:var(--card); border:1.5px solid var(--border); color:var(--text-dim);
+    border-radius:12px; padding:10px 6px; font-size:13px; font-weight:700;}
+  .etat-tab.active{border-color:var(--accent); color:var(--accent); background:rgba(245,166,35,.1);}
+  .etat-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  .etat-nav .en-btn{background:var(--card); border:1px solid var(--border); color:var(--text); width:36px; height:36px;
+    border-radius:10px; font-size:16px; display:flex; align-items:center; justify-content:center;}
+  .etat-nav .en-btn:disabled{opacity:.35;}
+  .etat-nav .en-label{font-size:13.5px; font-weight:700; text-align:center; flex:1;}
+  .etat-stats{display:flex; flex-direction:column; gap:8px; margin-bottom:16px;}
+  .etat-stat-row{display:flex; justify-content:space-between; align-items:center; background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:11px 14px;}
+  .etat-stat-row .er-label{font-size:13px; color:var(--text-dim);}
+  .etat-stat-row .er-val{font-size:15px; font-weight:800;}
+  .etat-stat-row .er-val.neg{color:var(--red);}
+  .etat-breakdown{margin-top:6px; margin-bottom:18px;}
+  .etat-breakdown .eb-title{font-size:12.5px; font-weight:700; color:var(--text-dim); margin-bottom:8px;}
+  .eb-row{display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); font-size:13px;}
+  .eb-row:last-child{border-bottom:none;}
+  .eb-row .eb-nom{color:var(--text); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .eb-row .eb-val{font-weight:700; white-space:nowrap;}
+  .eb-row .eb-sub{color:var(--text-dim); font-size:11.5px;}
+
+  /* ---------- Header : plusieurs icônes ---------- */
+  .header-icons{display:flex; align-items:center; gap:8px;}
+
+  /* ---------- Code d'accès / PIN ---------- */
+  .pin-dots{display:flex; justify-content:center; gap:14px; margin:18px 0 22px;}
+  .pin-dot{width:16px; height:16px; border-radius:50%; border:1.5px solid var(--border); background:var(--card-2);}
+  .pin-dot.filled{background:var(--accent); border-color:var(--accent);}
+  .pin-dot.filled.err{background:var(--red); border-color:var(--red);}
+  .pin-keypad{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:280px; margin:0 auto;}
+  .pin-key{
+    background:var(--card); border:1px solid var(--border); color:var(--text);
+    border-radius:16px; font-size:20px; font-weight:700; padding:16px 0;
+  }
+  .pin-key:active{background:var(--card-2);}
+  .pin-key-empty{background:transparent; border:none;}
+
+  /* ---------- F9 : Objectif d'épargne ---------- */
+  .objectif-rappel{
+    background:rgba(91,141,239,.1); border:1px solid rgba(91,141,239,.3); border-radius:14px;
+    padding:12px 14px; font-size:12.5px; color:var(--text); line-height:1.5; margin-bottom:16px;
+  }
+  .objectif-card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:12px;}
+  .objectif-card .oc-head{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .objectif-card .oc-emoji{font-size:22px;}
+  .objectif-card .oc-nom{font-size:15px; font-weight:800; flex:1;}
+  .objectif-card .oc-montant{font-size:22px; font-weight:800; color:var(--accent);}
+  .objectif-card .oc-sub{font-size:12px; color:var(--text-dim); margin-top:2px;}
+  .objectif-card .oc-actions{display:flex; gap:8px; margin-top:12px;}
+  .objectif-card .oc-actions .btn{font-size:12.5px; padding:10px;}
+  .plafond-msg{font-size:12.5px; color:var(--text-dim); text-align:center; padding:14px; line-height:1.5;}
+
+  .scenario-grid{display:flex; flex-direction:column; gap:10px;}
+  .scenario-card{
+    background:var(--card); border:1.5px solid var(--border); border-radius:16px; padding:14px;
+    text-align:left;
+  }
+  .scenario-card.selected{border-color:var(--accent); background:linear-gradient(135deg,#241d10,#1c2029);}
+  .scenario-card .sc-top{display:flex; align-items:center; justify-content:space-between;}
+  .scenario-card .sc-nom{font-size:14.5px; font-weight:800;}
+  .scenario-card .sc-pct{font-size:12px; font-weight:700; color:var(--accent);}
+  .scenario-card .sc-estim{font-size:12px; color:var(--text-dim); margin-top:6px; line-height:1.5;}
+
+  .stepper-row{display:flex; align-items:center; justify-content:center; gap:16px; margin:6px 0 4px;}
+  .stepper-btn{width:40px; height:40px; border-radius:12px; background:var(--card); border:1px solid var(--border);
+    color:var(--text); font-size:18px; font-weight:800;}
+  .stepper-val{font-size:16px; font-weight:800; min-width:70px; text-align:center;}
+
+  /* ---------- F10 : Partager ---------- */
+  .partager-canvas-wrap{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:10px; margin-bottom:16px;}
+  .partager-canvas-wrap canvas{width:100%; height:auto; display:block; border-radius:10px;}
+
+  /* ---------- Autres charges (rubriques) ---------- */
+  .rub-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+  .rub-tile{
+    display:flex; flex-direction:column; align-items:center; gap:6px; background:var(--card-2);
+    border:1.5px solid var(--border); border-radius:14px; padding:12px 6px; text-align:center;
+  }
+  .rub-tile.selected{border-color:var(--accent); background:rgba(245,166,35,.1);}
+  .rub-tile .rub-icon{font-size:20px;}
+  .rub-tile .rub-nom{font-size:11px; font-weight:600; line-height:1.25;}
+  .rub-manage-row{
+    display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:11px 14px; margin-bottom:8px;
+  }
+  .rub-manage-row .rm-emoji{font-size:18px; width:26px; text-align:center; flex:none;}
+  .rub-manage-row .rm-nom{flex:1; font-size:13.5px; font-weight:600;}
+  .rub-manage-row .rm-del{background:none; border:none; color:var(--text-dim); font-size:15px; padding:4px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "mondjai_salonf_state_v1";
+
+  /* ================= Helpers ================= */
+
+  function uid(prefix){
+    return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8);
+  }
+  function pad2(n){ return n < 10 ? "0"+n : ""+n; }
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate());
+  }
+  function formatDateFr(s){
+    if(!s) return "";
+    var parts = s.split("-");
+    if(parts.length !== 3) return s;
+    return parts[2] + "/" + parts[1] + "/" + parts[0];
+  }
+  function formatFCFA(n){
+    var num = Math.round(Number(n) || 0);
+    var neg = num < 0;
+    num = Math.abs(num);
+    var s = String(num).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    return (neg ? "-" : "") + s + " F";
+  }
+  function toNum(v){
+    var n = parseFloat(String(v === undefined || v === null ? "" : v).replace(",", "."));
+    return isNaN(n) ? 0 : n;
+  }
+  function esc(s){
+    return String(s === undefined || s === null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+  function byId(id){ return document.getElementById(id); }
+  function val(id){ var el = byId(id); return el ? el.value : ""; }
+
+  /* ================= Données par défaut ================= */
+
+  var QUARTIERS_DEFAUT = [
+    "Cocody","Yopougon","Abobo","Adjamé","Plateau","Treichville","Marcory",
+    "Koumassi","Port-Bouët","Attécoubé","Bingerville","Songon","Anyama"
+  ];
+  var TYPES_CLIENTE_DEFAUT = ["Jeune fille","Jeune dame","Jeune dame mariée"];
+  var TYPES_COIFFURE_DEFAUT = ["Boho Braids","Knot Less","Faux locs","Tissage","Twist"];
+
+  function seedList(names){
+    return names.map(function(nom){ return { id: uid("d"), nom: nom, perso:false }; });
+  }
+
+  var RUBRIQUES_CHARGES_DEFAUT = [
+    { id:"loyer", nom:"Loyer / local", emoji:"🏠", actif:true },
+    { id:"decoration", nom:"Décoration / aménagement", emoji:"🎨", actif:false },
+    { id:"publicite", nom:"Publicité", emoji:"📣", actif:true },
+    { id:"entretien_salon", nom:"Entretien du salon", emoji:"🧹", actif:true },
+    { id:"electricite", nom:"Électricité / eau", emoji:"💡", actif:false },
+    { id:"autre", nom:"Autre", emoji:"📝", actif:true }
+  ];
+  function seedRubriquesCharges(){
+    return RUBRIQUES_CHARGES_DEFAUT.map(function(r){
+      return { id:r.id, nom:r.nom, emoji:r.emoji, actif:r.actif, perso:false };
+    });
+  }
+
+  function defaultState(){
+    return {
+      version: 1,
+      config: {
+        profils: { coiffure:false, pedicure:false, revente:false },
+        onboardingComplete: false,
+        typesCliente: seedList(TYPES_CLIENTE_DEFAUT),
+        quartiers: seedList(QUARTIERS_DEFAUT),
+        typesCoiffure: seedList(TYPES_COIFFURE_DEFAUT),
+        typesPrestationPedicure: [],
+        produits: [],
+        rubriquesCharges: seedRubriquesCharges(),
+        codeAccesOk: false,
+        pinActif: false,
+        pinCode: null,
+        joursRoulesParSemaine: 6
+      },
+      achats: [],
+      ventes: [],
+      prestationsCoiffure: [],
+      prestationsPedicure: [],
+      autresCharges: [],
+      objectifs: [],
+      meta: { creation: todayStr(), derniereSauvegarde: null, dernierRappelSauvegarde: null }
+    };
+  }
+
+  function merge(base, extra){
+    var out = {};
+    for(var k in base) out[k] = base[k];
+    if(extra) for(var k2 in extra) if(extra[k2] !== undefined) out[k2] = extra[k2];
+    return out;
+  }
+
+  var state;
+  // Fusion défensive d'un état (chargé depuis localStorage ou importé depuis un
+  // fichier JSON de sauvegarde F11) avec l'état par défaut — mêmes règles dans
+  // les deux cas, pour qu'une sauvegarde plus ancienne (sans un champ ajouté par
+  // un sprint récent) se recharge toujours sans erreur.
+  function normaliserEtatImporte(parsed){
+    var base = defaultState();
+    if(!parsed || typeof parsed !== "object") return base;
+    var out = merge(base, parsed);
+    out.config = merge(base.config, parsed.config || {});
+    out.config.profils = merge(base.config.profils, (parsed.config && parsed.config.profils) || {});
+    if(!Array.isArray(out.config.typesCliente) || !out.config.typesCliente.length) out.config.typesCliente = base.config.typesCliente;
+    if(!Array.isArray(out.config.quartiers) || !out.config.quartiers.length) out.config.quartiers = base.config.quartiers;
+    if(!Array.isArray(out.config.typesCoiffure) || !out.config.typesCoiffure.length) out.config.typesCoiffure = base.config.typesCoiffure;
+    if(!Array.isArray(out.config.typesPrestationPedicure)) out.config.typesPrestationPedicure = [];
+    if(!Array.isArray(out.config.produits)) out.config.produits = [];
+    if(!Array.isArray(out.config.rubriquesCharges) || !out.config.rubriquesCharges.length) out.config.rubriquesCharges = base.config.rubriquesCharges;
+    if(!Array.isArray(out.achats)) out.achats = [];
+    if(!Array.isArray(out.ventes)) out.ventes = [];
+    if(!Array.isArray(out.prestationsCoiffure)) out.prestationsCoiffure = [];
+    if(!Array.isArray(out.prestationsPedicure)) out.prestationsPedicure = [];
+    if(!Array.isArray(out.autresCharges)) out.autresCharges = [];
+    if(!Array.isArray(out.objectifs)) out.objectifs = [];
+    out.meta = merge(base.meta, parsed.meta || {});
+    migrerLieuPrestations(out);
+    return out;
+  }
+
+  function loadState(){
+    var raw;
+    try{ raw = localStorage.getItem(STORAGE_KEY); }catch(e){ raw = null; }
+    if(!raw) return defaultState();
+    var parsed;
+    try{ parsed = JSON.parse(raw); }catch(e){ return defaultState(); }
+    return normaliserEtatImporte(parsed);
+  }
+
+  // Amendement post-Sprint 1 : ajout du champ "lieu" (domicile/salon) sur les
+  // prestations. Toute prestation enregistrée avant cet amendement n'a pas de
+  // champ `lieu` et portait systématiquement un quartier (obligatoire à l'époque)
+  // — on la traite donc par défaut comme "à domicile", sans perte ni altération
+  // d'aucune autre donnée déjà saisie.
+  function migrerLieuPrestations(out){
+    [out.prestationsCoiffure, out.prestationsPedicure].forEach(function(list){
+      list.forEach(function(p){
+        if(p.lieu !== "domicile" && p.lieu !== "salon") p.lieu = "domicile";
+      });
+    });
+  }
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){ /* stockage indisponible : on continue quand même */ }
+  }
+
+  /* ================= F11 : Sauvegarde / restauration JSON ================= */
+
+  function exporterJson(){
+    state.meta.derniereSauvegarde = todayStr();
+    saveState();
+    try{
+      var blob = new Blob([JSON.stringify(state, null, 2)], { type:"application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "mondjai-salonf-" + todayStr() + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+      ui.backupMsg = "Sauvegarde téléchargée.";
+    }catch(e){
+      ui.backupMsg = "Impossible de générer le fichier sur cet appareil.";
+    }
+    render();
+  }
+
+  function importerJsonDepuisFichier(file, callback){
+    if(!file){ callback(false); return; }
+    var reader = new FileReader();
+    reader.onload = function(){
+      var parsed;
+      try{ parsed = JSON.parse(reader.result); }catch(e){ callback(false); return; }
+      state = normaliserEtatImporte(parsed);
+      saveState();
+      callback(true);
+    };
+    reader.onerror = function(){ callback(false); };
+    reader.readAsText(file);
+  }
+
+  /* ================= UI (non persisté) ================= */
+
+  var ui = {
+    tab: null,           // 'coiffure' | 'pedicure' | 'achats' | 'ventes'
+    overlay: null,       // null | 'reglages' | 'apropos' | 'objectif' | 'partager'
+    modal: null,         // { type: 'add-...' | 'detail', ... }
+    draft: {},
+    errors: {},
+    onboardingSel: { coiffure:false, pedicure:false, revente:false },
+    onboardingMsg: "",
+    pendingAutofocus: false,
+    locked: false,               // écran de verrouillage PIN (F11)
+    codeAccesInput: "",
+    codeAccesErreur: "",
+    objCreating: false,          // assistant de création d'objectif (F9) affiché plutôt que la liste
+    objEditId: null,             // objectif en cours de modification
+    partagerPeriode: "jour",
+    partagerSemaineRef: null,
+    partagerMoisRef: null,
+    reglagesMsg: "",
+    backupMsg: "",
+    modalReturnTo: null    // "detail-charges-jour" pendant le sous-parcours ajout/suppression d'une autre charge
+  };
+
+  var TAB_DEFS = [
+    { key:"aujourdhui", profil:null, label:"Aujourd’hui", emoji:"🏠" },
+    { key:"coiffure", profil:"coiffure", label:"Coiffure", emoji:"💇" },
+    { key:"pedicure", profil:"pedicure", label:"Pédicure", emoji:"💅" },
+    { key:"achats", profil:"revente", label:"Achats", emoji:"📦" },
+    { key:"ventes", profil:"revente", label:"Ventes", emoji:"🛍️" },
+    { key:"etat", profil:null, label:"Mon état", emoji:"📊" }
+  ];
+  function activeTabs(){
+    return TAB_DEFS.filter(function(t){ return t.profil === null || !!state.config.profils[t.profil]; });
+  }
+  function ensureValidTab(){
+    var tabs = activeTabs();
+    if(!tabs.length){ ui.tab = null; return; }
+    if(!tabs.some(function(t){ return t.key === ui.tab; })) ui.tab = tabs[0].key;
+  }
+
+  /* ================= Listes personnalisables ================= */
+
+  function findList(name){ return state.config[name]; }
+  function addPerso(name, nom){
+    nom = String(nom || "").trim();
+    if(!nom) return null;
+    var list = findList(name);
+    var existing = list.filter(function(it){ return it.nom.toLowerCase() === nom.toLowerCase(); })[0];
+    if(existing) return existing;
+    var item = { id: uid("p"), nom: nom, perso:true };
+    list.push(item);
+    saveState();
+    return item;
+  }
+  function findById(name, id){
+    var list = findList(name);
+    for(var i=0;i<list.length;i++) if(list[i].id === id) return list[i];
+    return null;
+  }
+
+  function findOrCreateProduit(nom, prixAchat, prixVente){
+    nom = String(nom || "").trim();
+    if(!nom) return null;
+    var list = state.config.produits;
+    var existing = list.filter(function(p){ return p.nom.toLowerCase() === nom.toLowerCase(); })[0];
+    if(existing){
+      if(prixAchat !== undefined && prixAchat !== null) existing.dernierPrixAchat = prixAchat;
+      if(prixVente !== undefined && prixVente !== null) existing.dernierPrixVenteEstime = prixVente;
+      return existing;
+    }
+    var item = { id: uid("prod"), nom: nom,
+      dernierPrixAchat: (prixAchat===undefined?null:prixAchat),
+      dernierPrixVenteEstime: (prixVente===undefined?null:prixVente) };
+    list.push(item);
+    return item;
+  }
+  function findProduitById(id){
+    var list = state.config.produits;
+    for(var i=0;i<list.length;i++) if(list[i].id === id) return list[i];
+    return null;
+  }
+
+  /* ================= Rendu racine ================= */
+
+  function render(){
+    var app = byId("app");
+    if(!state.config.codeAccesOk){
+      app.innerHTML = renderCodeAcces();
+      afterRender();
+      return;
+    }
+    if(ui.locked){
+      var htmlLock = renderPinLock();
+      if(ui.modal) htmlLock += renderModal();
+      app.innerHTML = htmlLock;
+      afterRender();
+      return;
+    }
+    if(!state.config.onboardingComplete){
+      app.innerHTML = renderOnboarding();
+      return;
+    }
+    ensureValidTab();
+    var html = "";
+    if(ui.overlay === "reglages"){
+      html = renderReglages();
+    } else if(ui.overlay === "apropos"){
+      html = renderApropos();
+    } else if(ui.overlay === "objectif"){
+      html = renderObjectifOverlay();
+    } else if(ui.overlay === "partager"){
+      html = renderPartager();
+    } else {
+      html = renderHeader() + renderMain() + renderTabBar();
+    }
+    if(ui.modal){
+      html += renderModal();
+    }
+    app.innerHTML = html;
+    afterRender();
+  }
+
+  function afterRender(){
+    // Focus automatique sur le champ "nouveau nom" une seule fois, au moment
+    // précis où il apparaît (ui.pendingAutofocus posé par l'action qui le
+    // révèle). Corrigé pendant ce sprint : le faire à CHAQUE rendu (comme au
+    // Sprint 1) reprenait le focus au champ "nouveau…" dès qu'on tapait dans
+    // le champ suivant (ex. Quantité juste après avoir créé un produit), qui
+    // déclenche son propre re-rendu au blur — empêchant en pratique de
+    // continuer la saisie sur les champs suivants.
+    if(ui.pendingAutofocus){
+      var autoFocus = document.querySelector("[data-autofocus]");
+      if(autoFocus){
+        try{ autoFocus.focus(); }catch(e){}
+      }
+      ui.pendingAutofocus = false;
+    }
+    if(ui.overlay === "partager" && !ui.modal){
+      dessinerCartePartage();
+    }
+  }
+
+  /* ================= Onboarding (F1) ================= */
+
+  var PROFIL_INFO = {
+    coiffure: { emoji:"💇", titre:"Prestations coiffure", desc:"Tresses, tissages, twists, locs… chez la cliente ou en salon." },
+    pedicure: { emoji:"💅", titre:"Pédicure / Manicure", desc:"Soins des pieds et des mains, pose de vernis ou d’ongles." },
+    revente: { emoji:"🛍️", titre:"Revente de mèches / produits", desc:"Achat en gros, revente à l’unité ou au détail." }
+  };
+
+  function renderOnboarding(){
+    var keys = ["coiffure","pedicure","revente"];
+    var cards = keys.map(function(k){
+      var info = PROFIL_INFO[k];
+      var sel = !!ui.onboardingSel[k];
+      return (
+        '<button type="button" class="choice-card' + (sel?" selected":"") + '" data-action="toggle-onboarding" data-key="' + k + '">' +
+          '<div class="emoji">' + info.emoji + '</div>' +
+          '<div class="cc-text">' +
+            '<div class="cc-title">' + esc(info.titre) + '</div>' +
+            '<div class="cc-desc">' + esc(info.desc) + '</div>' +
+          '</div>' +
+          '<div class="cc-check">✓</div>' +
+        '</button>'
+      );
+    }).join("");
+
+    return (
+      '<div class="onb">' +
+        '<div class="onb-head">' +
+          '<div class="onb-emoji">💇💅🛍️</div>' +
+          '<div class="onb-title">Bienvenue sur MonDjai/Salon F</div>' +
+          '<div class="onb-desc">Choisissez ce que vous faites — vous pouvez cocher plusieurs cases, et changer d’avis à tout moment depuis Réglages.</div>' +
+        '</div>' +
+        '<div class="onb-body">' +
+          '<div class="choice-grid">' + cards + '</div>' +
+          (ui.onboardingMsg ? '<div class="error-text">' + esc(ui.onboardingMsg) + '</div>' : '') +
+        '</div>' +
+        '<button type="button" class="btn btn-primary" data-action="onboarding-continuer" style="margin-top:16px;">Continuer</button>' +
+      '</div>'
+    );
+  }
+
+  /* ================= Écran « Code d'accès » (amendement, indépendant du PIN F11) ================= */
+
+  var CODE_ACCES_ATTENDU = "HKETCK";
+  function normaliserCode(s){
+    return String(s||"").toUpperCase().replace(/\s+/g,"");
+  }
+
+  function renderCodeAcces(){
+    return (
+      '<div class="onb">' +
+        '<div class="onb-head">' +
+          '<div class="onb-emoji">🔐</div>' +
+          '<div class="onb-title">Code d’accès</div>' +
+          '<div class="onb-desc">Entrez le code qui vous a été communiqué pour ouvrir MonDjai/Salon F.</div>' +
+        '</div>' +
+        '<div class="onb-body">' +
+          '<div class="field">' +
+            '<div class="label">Code</div>' +
+            '<input type="text" class="input" id="f-codeAcces" autocapitalize="characters" autocomplete="off" ' +
+              'placeholder="Ex. ABCDEF" value="' + esc(ui.codeAccesInput||"") + '" data-autofocus data-action-change="capture-code-acces">' +
+            (ui.codeAccesErreur ? '<div class="error-text">' + esc(ui.codeAccesErreur) + '</div>' : '') +
+          '</div>' +
+        '</div>' +
+        '<button type="button" class="btn btn-primary" data-action="valider-code-acces">Valider</button>' +
+      '</div>'
+    );
+  }
+
+  /* ================= Verrouillage PIN (F11) — indépendant du code d'accès ================= */
+
+  function renderPinDots(n, actif, erreur){
+    var dots = "";
+    for(var i=0;i<4;i++){
+      dots += '<div class="pin-dot' + (i<n?" filled":"") + (erreur?" err":"") + '"></div>';
+    }
+    return '<div class="pin-dots">' + dots + '</div>';
+  }
+  function renderPinKeypad(idPrefix){
+    var touches = ["1","2","3","4","5","6","7","8","9","","0","del"];
+    var cells = touches.map(function(t){
+      if(t === "") return '<div class="pin-key pin-key-empty"></div>';
+      if(t === "del") return '<button type="button" class="pin-key" data-action="pin-key" data-id="' + idPrefix + '" data-val="del">⌫</button>';
+      return '<button type="button" class="pin-key" data-action="pin-key" data-id="' + idPrefix + '" data-val="' + t + '">' + t + '</button>';
+    }).join("");
+    return '<div class="pin-keypad">' + cells + '</div>';
+  }
+
+  function renderPinLock(){
+    var saisie = ui.pinLockInput || "";
+    var erreur = !!ui.pinLockErreur;
+    return (
+      '<div class="onb">' +
+        '<div class="onb-head">' +
+          '<div class="onb-emoji">🔒</div>' +
+          '<div class="onb-title">Code PIN</div>' +
+          '<div class="onb-desc">Entrez votre code à 4 chiffres pour ouvrir l’application.</div>' +
+        '</div>' +
+        '<div class="onb-body">' +
+          renderPinDots(saisie.length, saisie.length>0, erreur) +
+          (erreur ? '<div class="error-text" style="text-align:center;">Code incorrect, réessayez.</div>' : '') +
+          renderPinKeypad("lock") +
+          '<button type="button" class="btn btn-ghost" style="margin-top:8px;" data-action="pin-oublie">Code oublié ?</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderPinSetupModal(){
+    var step = ui.pinSetupStep || "premier";
+    var input = ui.pinSetupInput || "";
+    var titre = step === "premier" ? "Choisissez un code à 4 chiffres" : "Confirmez le code";
+    return (
+      '<div>' +
+        '<div class="hint" style="text-align:center; margin-bottom:6px;">' + esc(titre) + '</div>' +
+        renderPinDots(input.length, input.length>0, false) +
+        (ui.pinSetupErreur ? '<div class="error-text" style="text-align:center;">Les deux codes ne correspondent pas, recommencez.</div>' : '') +
+        renderPinKeypad("setup") +
+      '</div>'
+    );
+  }
+
+  function renderPinOublieModal(){
+    if(ui.modal.confirmErase){
+      return (
+        '<div class="confirm-box"><p>Effacer toutes les données de l’appareil ? Prestations, ventes, achats, objectifs — tout sera perdu, cette action est définitive.</p>' +
+          '<div class="btn-row">' +
+            '<button type="button" class="btn btn-secondary" data-action="annuler-erase">Annuler</button>' +
+            '<button type="button" class="btn btn-danger" data-action="confirmer-erase">Oui, tout effacer</button>' +
+          '</div></div>'
+      );
+    }
+    return (
+      '<div>' +
+        '<div class="hint" style="margin-bottom:14px;">Vous pouvez restaurer une sauvegarde JSON — le code PIN qu’elle contient s’appliquera, sans connaître le code actuel — ou repartir de zéro.</div>' +
+        '<label class="btn btn-secondary" style="display:flex; cursor:pointer; margin-bottom:10px;">📂 Restaurer une sauvegarde JSON' +
+          '<input type="file" accept="application/json" style="display:none;" data-action-change="importer-json-lock"></label>' +
+        (ui.backupMsg ? '<div class="hint tight" style="margin-bottom:10px;">' + esc(ui.backupMsg) + '</div>' : '') +
+        '<button type="button" class="btn btn-danger" data-action="demander-erase">🗑️ Effacer toutes les données</button>' +
+      '</div>'
+    );
+  }
+
+  function handlePinKey(prefix, val){
+    if(prefix === "lock"){
+      if(ui.pinLockErreur){ ui.pinLockInput = ""; ui.pinLockErreur = false; }
+      if(val === "del"){ ui.pinLockInput = (ui.pinLockInput||"").slice(0,-1); render(); return; }
+      var cur = ui.pinLockInput || "";
+      if(cur.length >= 4) return;
+      cur += val;
+      ui.pinLockInput = cur;
+      if(cur.length === 4){
+        if(cur === state.config.pinCode){
+          ui.locked = false; ui.pinLockInput = "";
+        } else {
+          ui.pinLockErreur = true;
+        }
+      }
+      render();
+      return;
+    }
+    if(prefix === "setup"){
+      if(val === "del"){ ui.pinSetupInput = (ui.pinSetupInput||"").slice(0,-1); render(); return; }
+      var cur2 = ui.pinSetupInput || "";
+      if(cur2.length >= 4) return;
+      cur2 += val;
+      ui.pinSetupInput = cur2;
+      if(cur2.length === 4){
+        if((ui.pinSetupStep||"premier") === "premier"){
+          ui.pinSetupPremier = cur2;
+          ui.pinSetupInput = "";
+          ui.pinSetupStep = "confirmer";
+          ui.pinSetupErreur = false;
+        } else {
+          if(cur2 === ui.pinSetupPremier){
+            state.config.pinActif = true;
+            state.config.pinCode = cur2;
+            saveState();
+            closeModal();
+            return;
+          }
+          ui.pinSetupErreur = true;
+          ui.pinSetupStep = "premier";
+          ui.pinSetupPremier = "";
+          ui.pinSetupInput = "";
+        }
+      }
+      render();
+      return;
+    }
+  }
+
+  /* ================= Header + tabbar ================= */
+
+  function renderHeader(){
+    return (
+      '<div class="header">' +
+        '<div class="brand">' +
+          '<div class="brand-emoji">💇</div>' +
+          '<div class="brand-text">' +
+            '<div class="brand-title">MonDjai/Salon F</div>' +
+            '<div class="brand-sub">Suivi financier du salon</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="header-icons">' +
+          '<button type="button" class="icon-btn" data-action="ouvrir-objectif" aria-label="Objectif d’épargne">🎯</button>' +
+          '<button type="button" class="icon-btn" data-action="ouvrir-partager" aria-label="Partager">📤</button>' +
+          '<button type="button" class="icon-btn" data-action="ouvrir-reglages" aria-label="Réglages">⚙️</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderTabBar(){
+    var tabs = activeTabs();
+    if(!tabs.length) return "";
+    var items = tabs.map(function(t){
+      return (
+        '<button type="button" class="tab' + (ui.tab===t.key?" active":"") + '" data-action="go-tab" data-tab="' + t.key + '">' +
+          '<span class="tab-emoji">' + t.emoji + '</span>' +
+          '<span class="tab-label">' + t.label + '</span>' +
+        '</button>'
+      );
+    }).join("");
+    return '<div class="tabbar">' + items + '</div>';
+  }
+
+  function renderMain(){
+    var tabs = activeTabs();
+    if(!tabs.length){
+      return '<div class="main"><div class="empty-state"><div class="es-emoji">🙈</div>' +
+        '<div class="es-title">Aucun profil actif</div>' +
+        '<div class="es-desc">Ouvrez Réglages pour réactiver au moins un profil d’activité.</div></div></div>';
+    }
+    var body = "";
+    switch(ui.tab){
+      case "aujourdhui": body = renderAujourdhui(); break;
+      case "coiffure": body = renderListeCoiffure(); break;
+      case "pedicure": body = renderListePedicure(); break;
+      case "achats": body = renderListeAchats(); break;
+      case "ventes": body = renderListeVentes(); break;
+      case "etat": body = renderMonEtat(); break;
+      default: body = "";
+    }
+    var fab = renderFab();
+    return '<div class="main with-tabbar">' + body + '</div>' + fab;
+  }
+
+  function renderFab(){
+    var action = {
+      coiffure:"add-coiffure", pedicure:"add-pedicure", achats:"add-achat", ventes:"add-vente"
+    }[ui.tab];
+    if(!action) return "";
+    return '<button type="button" class="fab" data-action="' + action + '" aria-label="Ajouter">+</button>';
+  }
+
+  /* ================= Listes ================= */
+
+  function sortByDateDesc(arr){
+    return arr.slice().sort(function(a,b){
+      if(a.date !== b.date) return a.date < b.date ? 1 : -1;
+      return (b.ts||0) - (a.ts||0);
+    });
+  }
+
+  /* ================= Calculs communs — F7 tableau de bord & F8 Mon état ================= */
+
+  function dateFromStr(s){
+    var p = s.split("-");
+    return new Date(+p[0], +p[1]-1, +p[2]);
+  }
+  function dateKey(d){ return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate()); }
+
+  function getDayRange(d){ var k = dateKey(d); return { start:k, end:k }; }
+  function getWeekRange(d){
+    var day = d.getDay(); // 0=dimanche
+    var diffLundi = (day === 0) ? -6 : (1 - day);
+    var lundi = new Date(d); lundi.setDate(d.getDate() + diffLundi);
+    var dimanche = new Date(lundi); dimanche.setDate(lundi.getDate() + 6);
+    return { start: dateKey(lundi), end: dateKey(dimanche) };
+  }
+  function getMonthRange(d){
+    var premier = new Date(d.getFullYear(), d.getMonth(), 1);
+    var dernier = new Date(d.getFullYear(), d.getMonth()+1, 0);
+    return { start: dateKey(premier), end: dateKey(dernier) };
+  }
+  function rangeForPeriode(periode, ref){
+    if(periode === "semaine") return getWeekRange(ref);
+    if(periode === "mois") return getMonthRange(ref);
+    return getDayRange(ref);
+  }
+  function inRange(dateStr, range){ return !!dateStr && dateStr >= range.start && dateStr <= range.end; }
+  function filterRange(arr, range){ return arr.filter(function(x){ return inRange(x.date, range); }); }
+  function sumBy(arr, fn){ return arr.reduce(function(s,x){ return s + (Number(fn(x)) || 0); }, 0); }
+
+  // Bloc "Charges consolidé" (F7/F8) : agrège, pour les profils actifs, les
+  // charges déjà présentes dans les enregistrements existants — pas de rubriques
+  // séparées à ce stade (F11, prévu au Sprint 3). Le coût des achats (Revente)
+  // est compté ici comme une sortie de caisse du jour de l'achat, cohérent avec
+  // le principe Trépor/Salon H « recette − charges = solde net » : le Suivi de
+  // stock (F4) reste, lui, la vue séparée pour le bénéfice réalisé/attendu.
+  function chargesConsolidees(range){
+    var profils = state.config.profils;
+    var total = 0;
+    if(profils.coiffure){
+      total += sumBy(filterRange(state.prestationsCoiffure, range), function(p){ return (p.coutMeches||0) + (p.transport||0); });
+    }
+    if(profils.pedicure){
+      total += sumBy(filterRange(state.prestationsPedicure, range), function(p){ return (p.coutProduits||0) + (p.transport||0); });
+    }
+    if(profils.revente){
+      total += sumBy(filterRange(state.achats, range), function(a){ return (a.quantite||0) * (a.prixAchatUnitaire||0) + (a.charges||0); });
+    }
+    total += autresChargesTotal(range);
+    return total;
+  }
+
+  // "Autres charges" (F11, Sprint 3) : rubriques communes aux 3 profils, pour les
+  // frais qui ne se rattachent à aucune prestation/achat en particulier (loyer,
+  // publicité...). Toujours comptées, quels que soient les profils actifs.
+  function autresChargesTotal(range){
+    return sumBy(filterRange(state.autresCharges, range), function(c){ return c.montant; });
+  }
+  function revenusParSource(range){
+    var profils = state.config.profils;
+    var sources = [];
+    if(profils.coiffure){
+      sources.push({ key:"coiffure", emoji:"💇", label:"Prestations coiffure",
+        montant: sumBy(filterRange(state.prestationsCoiffure, range), function(p){ return p.mainOeuvre; }) });
+    }
+    if(profils.pedicure){
+      sources.push({ key:"pedicure", emoji:"💅", label:"Pédicure / Manicure",
+        montant: sumBy(filterRange(state.prestationsPedicure, range), function(p){ return p.mainOeuvre; }) });
+    }
+    if(profils.revente){
+      sources.push({ key:"ventes", emoji:"🛍️", label:"Ventes",
+        montant: sumBy(filterRange(state.ventes, range), function(v){ return v.montantEncaisse; }) });
+    }
+    return sources;
+  }
+
+  function soldeNetPeriode(range){
+    var revenuTotal = sumBy(revenusParSource(range), function(s){ return s.montant; });
+    return revenuTotal - chargesConsolidees(range);
+  }
+  function soldeNetJour(dateStr){
+    return soldeNetPeriode({ start:dateStr, end:dateStr });
+  }
+
+  // Toutes les dates portant au moins un enregistrement (prestation, vente,
+  // achat ou autre charge) — sert à ne compter, pour la moyenne hebdomadaire de
+  // l'objectif d'épargne comme pour l'épargne "manuelle" jour par jour, que les
+  // jours où quelque chose a vraiment été saisi (jamais une semaine calendaire
+  // vide comptée comme un jour à 0 F).
+  function allActivityDates(){
+    var set = {};
+    state.prestationsCoiffure.forEach(function(p){ if(p.date) set[p.date] = 1; });
+    state.prestationsPedicure.forEach(function(p){ if(p.date) set[p.date] = 1; });
+    state.ventes.forEach(function(v){ if(v.date) set[v.date] = 1; });
+    state.achats.forEach(function(a){ if(a.date) set[a.date] = 1; });
+    state.autresCharges.forEach(function(c){ if(c.date) set[c.date] = 1; });
+    return Object.keys(set).sort();
+  }
+
+  /* ================= F9 : Objectif d'épargne (repris de Trépor/Salon H) ================= */
+
+  var MAX_OBJECTIFS = 3;
+  var NB_SEMAINES_MOYENNE = 4;
+  var POURCENTAGES_SCENARIO = [
+    { key:"tranquille", nom:"Tranquille", pct:10 },
+    { key:"equilibre", nom:"Équilibré", pct:20 },
+    { key:"ambitieux", nom:"Ambitieux", pct:30 }
+  ];
+  var OBJECTIF_MODELES = [
+    { id:"equipement", emoji:"🧰", titre:"Matériel & équipement", desc:"Sèche-cheveux, kit manucure, mobilier…" },
+    { id:"stock", emoji:"📦", titre:"Stock à agrandir", desc:"Plus de mèches et de produits en réserve." },
+    { id:"local", emoji:"🏠", titre:"Salon / local fixe", desc:"Se poser dans un vrai local à vous." },
+    { id:"epargne_libre", emoji:"💰", titre:"Épargne libre", desc:"Mettre de côté, sans projet précis pour l’instant." }
+  ];
+  function objectifModele(id){
+    var m = OBJECTIF_MODELES.filter(function(x){ return x.id===id; })[0];
+    return m || OBJECTIF_MODELES[OBJECTIF_MODELES.length-1];
+  }
+  function nomObjectifParDefaut(modeleId, sousType){
+    var m = objectifModele(modeleId);
+    sousType = String(sousType||"").trim();
+    return sousType ? (m.titre + " / " + sousType) : m.titre;
+  }
+
+  // Liste des lundis (clé AAAA-MM-JJ) des semaines contenant au moins un jour
+  // d'activité, de la plus récente à la plus ancienne.
+  function semainesAvecActivite(){
+    var dates = allActivityDates();
+    var map = {}, ordre = [];
+    dates.forEach(function(d){
+      var lundi = getWeekRange(dateFromStr(d)).start;
+      if(!(lundi in map)){ map[lundi] = true; ordre.push(lundi); }
+    });
+    return ordre.sort().reverse();
+  }
+  function moyenneHebdoRecente(){
+    var semaines = semainesAvecActivite().slice(0, NB_SEMAINES_MOYENNE);
+    if(!semaines.length) return null;
+    var total = semaines.reduce(function(s, lundi){
+      var range = { start: lundi, end: dateKey((function(){ var d=dateFromStr(lundi); d.setDate(d.getDate()+6); return d; })()) };
+      return s + soldeNetPeriode(range);
+    }, 0);
+    return total / semaines.length;
+  }
+
+  function estimationScenarioCompacte(epargneHebdo, joursParSemaine){
+    var jours = joursParSemaine > 0 ? joursParSemaine : 6;
+    var parJour = epargneHebdo / jours;
+    var parMois = epargneHebdo * 4.345;
+    return formatFCFA(parJour) + "/jour · ~" + formatFCFA(epargneHebdo) + "/semaine · ~" + formatFCFA(parMois) + "/mois";
+  }
+  function computeScenarios(moyenneHebdo, joursParSemaine){
+    return POURCENTAGES_SCENARIO.map(function(s){
+      var hebdo = Math.max(0, moyenneHebdo || 0) * s.pct / 100;
+      return {
+        key: s.key, nom: s.nom, pct: s.pct, montantHebdo: hebdo,
+        estimation: estimationScenarioCompacte(hebdo, joursParSemaine)
+      };
+    });
+  }
+
+  function computeEpargneQuotidienneObjectif(obj, dateStr){
+    if(obj.type === "manuel") return obj.montantFixeParJour || 0;
+    var solde = soldeNetJour(dateStr);
+    return Math.max(0, solde) * (obj.pourcentage||0) / 100;
+  }
+  function computeEpargneCumuleeObjectif(obj){
+    var dates = allActivityDates().filter(function(d){ return d >= obj.dateCreation; });
+    return sumBy(dates, function(d){ return computeEpargneQuotidienneObjectif(obj, d); });
+  }
+  function computeEpargneJourTousObjectifs(dateStr){
+    return sumBy((state.objectifs||[]).filter(function(o){ return o.actif && dateStr >= o.dateCreation; }),
+      function(o){ return computeEpargneQuotidienneObjectif(o, dateStr); });
+  }
+  function computeEpargnePeriodeTousObjectifs(range){
+    var dates = allActivityDates().filter(function(d){ return inRange(d, range); });
+    return sumBy(dates, function(d){ return computeEpargneJourTousObjectifs(d); });
+  }
+  function hasObjectifAutoActif(excludeId){
+    return (state.objectifs||[]).some(function(o){ return o.type==="auto" && o.id!==excludeId; });
+  }
+
+  function emptyState(emoji, titre, desc){
+    return '<div class="empty-state"><div class="es-emoji">' + emoji + '</div>' +
+      '<div class="es-title">' + esc(titre) + '</div>' +
+      '<div class="es-desc">' + esc(desc) + '</div></div>';
+  }
+
+  /* ================= F7 : Tableau de bord du jour ================= */
+
+  function renderAujourdhui(){
+    var today = todayStr();
+    var range = { start: today, end: today };
+    var sources = revenusParSource(range);
+    var charges = chargesConsolidees(range);
+    var revenuTotal = sumBy(sources, function(s){ return s.montant; });
+    var soldeNet = revenuTotal - charges;
+    var objectifs = state.objectifs || [];
+    var epargneJour = objectifs.length ? computeEpargneJourTousObjectifs(today) : 0;
+
+    var blocksHtml = sources.map(function(s){
+      return (
+        '<div class="dash-block">' +
+          '<div class="db-emoji">' + s.emoji + '</div>' +
+          '<div class="db-label">' + esc(s.label) + '</div>' +
+          '<div class="db-amount">' + formatFCFA(s.montant) + '</div>' +
+        '</div>'
+      );
+    }).join("") + (
+      '<button type="button" class="dash-block charges" style="color:var(--text); width:100%; cursor:pointer;" data-action="voir-charges-jour">' +
+        '<div class="db-emoji">💸</div>' +
+        '<div class="db-label">Charges</div>' +
+        '<div class="db-amount">' + formatFCFA(charges) + '</div>' +
+      '</button>'
+    ) + (
+      '<button type="button" class="dash-block" style="color:var(--text); width:100%; cursor:pointer;" data-action="ouvrir-objectif">' +
+        '<div class="db-emoji">💰</div>' +
+        '<div class="db-label">Épargne</div>' +
+        '<div class="db-amount">' + (objectifs.length ? formatFCFA(epargneJour) : "Aucun") + '</div>' +
+      '</button>'
+    );
+
+    var perte = soldeNet < 0 ?
+      '<div class="dash-perte">Jour à perte : ' + formatFCFA(Math.abs(soldeNet)) + '. Ça arrive — on note et on avance.</div>' : '';
+
+    var disponible = "";
+    if(objectifs.length && soldeNet > 0){
+      disponible = '<div class="hint tight" style="text-align:center; margin-top:8px; font-size:13px;">Disponible aujourd’hui : <strong style="color:var(--text);">' + formatFCFA(soldeNet - epargneJour) + '</strong></div>';
+    }
+
+    return (
+      '<div class="section-title">Aujourd’hui · ' + formatDateFr(today) + '</div>' +
+      '<div class="dash-solde">' +
+        '<div class="ds-label">Solde net du jour</div>' +
+        '<div class="ds-amount' + (soldeNet < 0 ? " neg" : "") + '">' + formatFCFA(soldeNet) + '</div>' +
+        perte +
+        disponible +
+      '</div>' +
+      '<div class="dash-grid">' + blocksHtml + '</div>'
+    );
+  }
+
+  function renderListeAchats(){
+    var stockHtml = renderStockSection();
+    var items = sortByDateDesc(state.achats);
+    var head = '<div class="section-title">Achats</div>';
+    if(!items.length){
+      return stockHtml + head + emptyState("📦","Aucun achat enregistré","Touchez le bouton + pour enregistrer votre premier réapprovisionnement.");
+    }
+    var rows = items.map(function(a){
+      return (
+        '<button type="button" class="entry-card" data-action="voir-achat" data-id="' + a.id + '">' +
+          '<div class="entry-ico">📦</div>' +
+          '<div class="entry-main">' +
+            '<div class="entry-title">' + esc(a.produitNom) + '</div>' +
+            '<div class="entry-sub">' + formatDateFr(a.date) + ' · ' + a.quantite + ' paquet(s) · ' + formatFCFA(a.prixAchatUnitaire) + '/u</div>' +
+          '</div>' +
+          '<div class="entry-amount">' + formatFCFA(a.quantite * a.prixAchatUnitaire + (a.charges||0)) + '</div>' +
+        '</button>'
+      );
+    }).join("");
+    return stockHtml + head + '<div class="entry-list">' + rows + '</div>';
+  }
+
+  /* ================= F4 : Suivi de stock & réassort ================= */
+
+  var SEUIL_REASSORT_DEFAUT = 3;
+
+  function computeStockProduit(p){
+    var achatsP = state.achats.filter(function(a){ return a.produitId === p.id; });
+    var ventesP = state.ventes.filter(function(v){ return v.produitId === p.id; });
+    var ventesStock = ventesP.filter(function(v){ return v.typeVente !== "commande_speciale"; });
+    var ventesCommande = ventesP.filter(function(v){ return v.typeVente === "commande_speciale"; });
+
+    var totalAchatQte = sumBy(achatsP, function(a){ return a.quantite; });
+    var totalAchatValeur = sumBy(achatsP, function(a){ return a.quantite * a.prixAchatUnitaire; });
+    var coutMoyen = totalAchatQte > 0 ? totalAchatValeur / totalAchatQte : 0;
+
+    var qteVendueStock = sumBy(ventesStock, function(v){ return v.quantite; });
+    var stockRestant = Math.max(0, totalAchatQte - qteVendueStock);
+
+    var prixVenteRef = (p.dernierPrixVenteEstime === null || p.dernierPrixVenteEstime === undefined) ? 0 : p.dernierPrixVenteEstime;
+
+    var caStock = sumBy(ventesStock, function(v){ return v.montantEncaisse; });
+    var beneficeStock = caStock - qteVendueStock * coutMoyen;
+    var caCommande = sumBy(ventesCommande, function(v){ return v.montantEncaisse; });
+    var beneficeCommande = sumBy(ventesCommande, function(v){ return v.montantEncaisse - (v.prixPayeRevendeur||0); });
+
+    // Bénéfice attendu : ce qu'on visait sur tout ce qui a été acheté, à partir
+    // du prix de vente estimé propre à chaque achat (pas une seule estimation globale).
+    var beneficeAttendu = sumBy(achatsP, function(a){ return a.quantite * ((a.prixVenteUnitaireEstime||0) - (a.prixAchatUnitaire||0)); });
+
+    var seuil = (p.seuilReassort===undefined || p.seuilReassort===null) ? SEUIL_REASSORT_DEFAUT : p.seuilReassort;
+
+    return {
+      produit: p, totalAchatQte: totalAchatQte, coutMoyen: coutMoyen, stockRestant: stockRestant,
+      valeurStockCout: stockRestant * coutMoyen, valeurStockVente: stockRestant * prixVenteRef,
+      caTotal: caStock + caCommande, beneficeRealise: beneficeStock + beneficeCommande,
+      beneficeAttendu: beneficeAttendu, seuil: seuil, alerte: stockRestant <= seuil
+    };
+  }
+
+  function renderStockSection(){
+    var produits = state.config.produits.slice().sort(function(a,b){ return a.nom.localeCompare(b.nom); });
+    if(!produits.length) return "";
+    var cards = produits.map(function(p){
+      var s = computeStockProduit(p);
+      return (
+        '<div class="stock-card">' +
+          '<div class="sc-head">' +
+            '<div class="sc-nom">' + esc(p.nom) + '</div>' +
+            (s.alerte ? '<div class="sc-alerte">Stock bas</div>' : '') +
+          '</div>' +
+          '<div class="sc-grid">' +
+            '<div class="sk">Stock restant</div><div class="sv">' + s.stockRestant + ' paquet(s)</div>' +
+            '<div class="sk">Coût moyen</div><div class="sv">' + formatFCFA(s.coutMoyen) + '</div>' +
+            '<div class="sk">Valeur (coût)</div><div class="sv">' + formatFCFA(s.valeurStockCout) + '</div>' +
+            '<div class="sk">Valeur (vente est.)</div><div class="sv">' + formatFCFA(s.valeurStockVente) + '</div>' +
+            '<div class="sk">Bénéfice réalisé</div><div class="sv">' + formatFCFA(s.beneficeRealise) + '</div>' +
+            '<div class="sk">Bénéfice attendu</div><div class="sv">' + formatFCFA(s.beneficeAttendu) + '</div>' +
+          '</div>' +
+          '<div class="sc-seuil">' +
+            '<label>Seuil de réassort</label>' +
+            '<input type="number" min="0" step="1" value="' + s.seuil + '" data-action-change="set-seuil-reassort" data-id="' + p.id + '">' +
+          '</div>' +
+        '</div>'
+      );
+    }).join("");
+    return '<div class="reglages-section"><div class="rs-title">Suivi de stock &amp; réassort</div>' + cards + '</div>';
+  }
+
+  function renderListeVentes(){
+    var items = sortByDateDesc(state.ventes);
+    var head = '<div class="section-title">Ventes</div>';
+    if(!items.length){
+      return head + emptyState("🛍️","Aucune vente enregistrée","Touchez le bouton + pour enregistrer votre première vente.");
+    }
+    var rows = items.map(function(v){
+      var badge = v.typeVente === "commande_speciale" ? '<span class="badge">Commande spéciale</span>' : "";
+      return (
+        '<button type="button" class="entry-card" data-action="voir-vente" data-id="' + v.id + '">' +
+          '<div class="entry-ico">🛍️</div>' +
+          '<div class="entry-main">' +
+            '<div class="entry-title">' + esc(v.produitNom) + badge + '</div>' +
+            '<div class="entry-sub">' + formatDateFr(v.date) + ' · ' + v.quantite + ' vendu(s)</div>' +
+          '</div>' +
+          '<div class="entry-amount">' + formatFCFA(v.montantEncaisse) + '</div>' +
+        '</button>'
+      );
+    }).join("");
+    return head + '<div class="entry-list">' + rows + '</div>';
+  }
+
+  function renderListeCoiffure(){
+    var items = sortByDateDesc(state.prestationsCoiffure);
+    var head = '<div class="section-title">Prestations coiffure</div>';
+    if(!items.length){
+      return head + emptyState("💇","Aucune prestation enregistrée","Touchez le bouton + pour enregistrer votre première prestation.");
+    }
+    var rows = items.map(function(p){
+      var types = (p.typesCoiffureNoms||[]).join(", ") || "Type non précisé";
+      var lieuTxt = p.lieu === "salon" ? "💈 En salon" : esc(p.quartierNom);
+      return (
+        '<button type="button" class="entry-card" data-action="voir-coiffure" data-id="' + p.id + '">' +
+          '<div class="entry-ico">💇</div>' +
+          '<div class="entry-main">' +
+            '<div class="entry-title">' + esc(p.typeClienteNom) + ' · ' + lieuTxt + '</div>' +
+            '<div class="entry-sub">' + formatDateFr(p.date) + ' · ' + esc(types) + '</div>' +
+          '</div>' +
+          '<div class="entry-amount">' + formatFCFA(p.mainOeuvre) + '</div>' +
+        '</button>'
+      );
+    }).join("");
+    return head + '<div class="entry-list">' + rows + '</div>';
+  }
+
+  function renderListePedicure(){
+    var items = sortByDateDesc(state.prestationsPedicure);
+    var head = '<div class="section-title">Pédicure / Manicure</div>';
+    if(!items.length){
+      return head + emptyState("💅","Aucune prestation enregistrée","Touchez le bouton + pour enregistrer votre première prestation.");
+    }
+    var rows = items.map(function(p){
+      var typ = p.typePrestation || "Prestation";
+      var lieuTxt = p.lieu === "salon" ? "💈 En salon" : esc(p.quartierNom);
+      return (
+        '<button type="button" class="entry-card" data-action="voir-pedicure" data-id="' + p.id + '">' +
+          '<div class="entry-ico">💅</div>' +
+          '<div class="entry-main">' +
+            '<div class="entry-title">' + esc(p.typeClienteNom) + ' · ' + lieuTxt + '</div>' +
+            '<div class="entry-sub">' + formatDateFr(p.date) + ' · ' + esc(typ) + '</div>' +
+          '</div>' +
+          '<div class="entry-amount">' + formatFCFA(p.mainOeuvre) + '</div>' +
+        '</button>'
+      );
+    }).join("");
+    return head + '<div class="entry-list">' + rows + '</div>';
+  }
+
+  /* ================= Formulaires : capture / options communes ================= */
+
+  function optionsFor(name, selectedId){
+    var list = findList(name);
+    var opts = list.map(function(it){
+      return '<option value="' + it.id + '"' + (it.id===selectedId?" selected":"") + '>' + esc(it.nom) + '</option>';
+    }).join("");
+    opts += '<option value="__new__"' + (selectedId==="__new__"?" selected":"") + '>+ Autre…</option>';
+    return opts;
+  }
+  function optionsProduits(selectedId, placeholder){
+    var list = state.config.produits.slice().sort(function(a,b){ return a.nom.localeCompare(b.nom); });
+    var opts = '<option value="" disabled' + (!selectedId?" selected":"") + '>' + esc(placeholder||"Choisir un produit") + '</option>';
+    opts += list.map(function(it){
+      return '<option value="' + it.id + '"' + (it.id===selectedId?" selected":"") + '>' + esc(it.nom) + '</option>';
+    }).join("");
+    opts += '<option value="__new__"' + (selectedId==="__new__"?" selected":"") + '>+ Nouveau produit…</option>';
+    return opts;
+  }
+
+  function fieldErr(key){
+    return ui.errors[key] ? '<div class="field-error">' + esc(ui.errors[key]) + '</div>' : "";
+  }
+
+  /* ---------- Capture générique des champs DOM vers ui.draft ---------- */
+
+  function captureDraft(fieldIds){
+    fieldIds.forEach(function(id){
+      var el = byId(id);
+      if(el) ui.draft[id] = el.value;
+    });
+  }
+
+  /* ================= Modal : dispatcher ================= */
+
+  function renderModal(){
+    var m = ui.modal;
+    var body = "";
+    var title = "";
+    switch(m.type){
+      case "add-achat": title = "Nouvel achat"; body = renderFormAchat(); break;
+      case "add-vente": title = "Nouvelle vente"; body = renderFormVente(); break;
+      case "add-coiffure": title = "Nouvelle prestation coiffure"; body = renderFormCoiffure(); break;
+      case "add-pedicure": title = "Nouvelle prestation pédicure/manicure"; body = renderFormPedicure(); break;
+      case "detail-achat": title = "Détail de l’achat"; body = renderDetailAchat(); break;
+      case "detail-vente": title = "Détail de la vente"; body = renderDetailVente(); break;
+      case "detail-coiffure": title = "Détail de la prestation"; body = renderDetailCoiffure(); break;
+      case "detail-pedicure": title = "Détail de la prestation"; body = renderDetailPedicure(); break;
+      case "detail-charges-jour": title = "Charges du jour"; body = renderDetailChargesJour(); break;
+      case "detail-autre-charge": title = "Détail de la charge"; body = renderDetailAutreCharge(); break;
+      case "add-autre-charge": title = "Nouvelle charge"; body = renderFormAutreCharge(); break;
+      case "confirmer-suppression-rubrique": title = "Supprimer la rubrique"; body = renderConfirmSuppressionRubrique(); break;
+      case "modifier-objectif": title = "Modifier l’objectif"; body = renderFormModifierObjectif(); break;
+      case "confirmer-suppression-objectif": title = "Supprimer l’objectif"; body = renderConfirmSuppressionObjectif(); break;
+      case "pin-setup": title = "Code PIN"; body = renderPinSetupModal(); break;
+      case "pin-oublie": title = "Code oublié ?"; body = renderPinOublieModal(); break;
+      default: body = "";
+    }
+    return (
+      '<div class="modal-overlay" data-action="fermer-modal-overlay">' +
+        '<div class="modal" data-stop-close="1">' +
+          '<div class="modal-head">' +
+            '<div class="modal-title">' + esc(title) + '</div>' +
+            '<button type="button" class="modal-close" data-action="fermer-modal">✕</button>' +
+          '</div>' +
+          body +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  /* ---------- F2 : Achats ---------- */
+
+  var ACHAT_FIELDS = ["f-date","f-produitSel","f-produitNouveauNom","f-quantite","f-prixAchat","f-prixVente","f-charges"];
+
+  function renderFormAchat(){
+    var d = ui.draft;
+    if(d.__init !== "achat"){ /* rien */ }
+    var produitSel = d["f-produitSel"] || "";
+    var isNew = produitSel === "__new__";
+    return (
+      '<div>' +
+        '<div class="field"><div class="label">Date d’acquisition <span class="req">*</span></div>' +
+          '<input type="date" class="input" id="f-date" max="' + todayStr() + '" value="' + esc(d["f-date"] || todayStr()) + '" data-action-change="capture-achat">' +
+          fieldErr("date") +
+        '</div>' +
+        '<div class="field"><div class="label">Produit <span class="req">*</span></div>' +
+          '<select class="select" id="f-produitSel" data-action-change="produit-achat-change">' + optionsProduits(produitSel) + '</select>' +
+          (isNew ? '<div class="inline-new"><input type="text" class="input" id="f-produitNouveauNom" placeholder="Nom du nouveau produit" value="' + esc(d["f-produitNouveauNom"]||"") + '" data-autofocus data-action-change="capture-achat"></div>' : '') +
+          fieldErr("produit") +
+        '</div>' +
+        '<div class="field"><div class="label">Quantité achetée (paquets) <span class="req">*</span></div>' +
+          '<input type="number" inputmode="decimal" step="0.1" min="0" class="input" id="f-quantite" placeholder="Ex. 2 ou 0,5" value="' + esc(d["f-quantite"]||"") + '" data-action-change="capture-achat">' +
+          fieldErr("quantite") +
+        '</div>' +
+        '<div class="field"><div class="label">Prix d’achat unitaire (FCFA) <span class="req">*</span></div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-prixAchat" value="' + esc(d["f-prixAchat"]||"") + '" data-action-change="capture-achat">' +
+          fieldErr("prixAchat") +
+        '</div>' +
+        '<div class="field"><div class="label">Prix de vente unitaire estimé (FCFA) <span class="req">*</span></div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-prixVente" value="' + esc(d["f-prixVente"]||"") + '" data-action-change="capture-achat">' +
+          '<div class="field-note">Sert seulement à estimer le bénéfice attendu.</div>' +
+          fieldErr("prixVente") +
+        '</div>' +
+        '<div class="field"><div class="label">Charges (transport, livraison…) (FCFA)</div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-charges" placeholder="0" value="' + esc(d["f-charges"]||"") + '" data-action-change="capture-achat">' +
+        '</div>' +
+        '<button type="button" class="btn btn-primary" data-action="enregistrer-achat">Enregistrer</button>' +
+      '</div>'
+    );
+  }
+
+  /* ---------- F3 : Ventes ---------- */
+
+  var VENTE_FIELDS = ["f-date","f-produitSel","f-produitNouveauNom","f-quantite","f-montant","f-typeVente","f-prixRevendeur"];
+
+  function renderFormVente(){
+    var d = ui.draft;
+    var produitSel = d["f-produitSel"] || "";
+    var isNew = produitSel === "__new__";
+    var typeVente = d["f-typeVente"] || "stock";
+    return (
+      '<div>' +
+        '<div class="field"><div class="label">Date de la vente <span class="req">*</span></div>' +
+          '<input type="date" class="input" id="f-date" max="' + todayStr() + '" value="' + esc(d["f-date"] || todayStr()) + '" data-action-change="capture-vente">' +
+          fieldErr("date") +
+        '</div>' +
+        '<div class="field"><div class="label">Produit vendu <span class="req">*</span></div>' +
+          '<select class="select" id="f-produitSel" data-action-change="produit-vente-change">' + optionsProduits(produitSel, state.config.produits.length? "Choisir un produit" : "Aucun produit — créez-en un") + '</select>' +
+          (isNew ? '<div class="inline-new"><input type="text" class="input" id="f-produitNouveauNom" placeholder="Nom du produit" value="' + esc(d["f-produitNouveauNom"]||"") + '" data-autofocus data-action-change="capture-vente"></div>' : '') +
+          (state.config.produits.length ? '' : '<div class="field-note">Aucun achat enregistré pour l’instant — vous pouvez quand même noter le nom du produit vendu.</div>') +
+          fieldErr("produit") +
+        '</div>' +
+        '<div class="field"><div class="label">Quantité vendue <span class="req">*</span></div>' +
+          '<input type="number" inputmode="decimal" step="0.1" min="0" class="input" id="f-quantite" placeholder="Ex. 1 ou 0,5" value="' + esc(d["f-quantite"]||"") + '" data-action-change="capture-vente">' +
+          fieldErr("quantite") +
+        '</div>' +
+        '<div class="field"><div class="label">Montant total encaissé (FCFA) <span class="req">*</span></div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-montant" value="' + esc(d["f-montant"]||"") + '" data-action-change="capture-vente">' +
+          fieldErr("montant") +
+        '</div>' +
+        '<div class="field"><div class="label">Type de vente <span class="req">*</span></div>' +
+          '<div class="radio-row">' +
+            '<button type="button" class="radio-opt' + (typeVente==="stock"?" active":"") + '" data-action="set-type-vente" data-val="stock">Depuis le stock</button>' +
+            '<button type="button" class="radio-opt' + (typeVente==="commande_speciale"?" active":"") + '" data-action="set-type-vente" data-val="commande_speciale">Commande spéciale</button>' +
+          '</div>' +
+        '</div>' +
+        (typeVente==="commande_speciale" ?
+          '<div class="field"><div class="label">Prix payé au revendeur (FCFA) <span class="req">*</span></div>' +
+            '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-prixRevendeur" value="' + esc(d["f-prixRevendeur"]||"") + '" data-action-change="capture-vente">' +
+            '<div class="field-note">La marge se calcule automatiquement (montant encaissé − prix payé au revendeur).</div>' +
+            fieldErr("prixRevendeur") +
+          '</div>' : '') +
+        '<button type="button" class="btn btn-primary" data-action="enregistrer-vente">Enregistrer</button>' +
+      '</div>'
+    );
+  }
+
+  /* ---------- F5 : Prestations coiffure ---------- */
+
+  function renderFormCoiffure(){
+    var d = ui.draft;
+    var clienteSel = d["f-clienteSel"] || "";
+    var quartierSel = d["f-quartierSel"] || "";
+    var typesSel = d.typesCoiffureSel || [];
+    var showNouveauType = !!d.showNouveauTypeCoiffure;
+    var lieu = d["f-lieu"] || "domicile";
+    var chips = state.config.typesCoiffure.map(function(t){
+      var active = typesSel.indexOf(t.id) !== -1;
+      return '<button type="button" class="chip' + (active?" active":"") + '" data-action="toggle-coiffure-type" data-id="' + t.id + '">' + esc(t.nom) + '</button>';
+    }).join("");
+    chips += '<button type="button" class="chip dashed" data-action="toggle-nouveau-type-coiffure">+ Personnalisé</button>';
+
+    return (
+      '<div>' +
+        '<div class="field"><div class="label">Date de la prestation <span class="req">*</span></div>' +
+          '<input type="date" class="input" id="f-date" max="' + todayStr() + '" value="' + esc(d["f-date"] || todayStr()) + '" data-action-change="capture-coiffure">' +
+          fieldErr("date") +
+        '</div>' +
+        '<div class="field"><div class="label">Type de cliente <span class="req">*</span></div>' +
+          '<select class="select" id="f-clienteSel" data-action-change="cliente-change">' + optionsFor("typesCliente", clienteSel) + '</select>' +
+          (clienteSel==="__new__" ? '<div class="inline-new"><input type="text" class="input" id="f-clienteNouveauNom" placeholder="Nouveau type de cliente" value="' + esc(d["f-clienteNouveauNom"]||"") + '" data-autofocus data-action-change="capture-coiffure"></div>' : '') +
+          fieldErr("cliente") +
+        '</div>' +
+        renderChampLieu("coiffure", lieu) +
+        (lieu === "domicile" ?
+        '<div class="field"><div class="label">Quartier <span class="req">*</span></div>' +
+          '<select class="select" id="f-quartierSel" data-action-change="quartier-change">' + optionsFor("quartiers", quartierSel) + '</select>' +
+          (quartierSel==="__new__" ? '<div class="inline-new"><input type="text" class="input" id="f-quartierNouveauNom" placeholder="Nom du quartier" value="' + esc(d["f-quartierNouveauNom"]||"") + '" data-autofocus data-action-change="capture-coiffure"></div>' : '') +
+          fieldErr("quartier") +
+        '</div>' : '') +
+        '<div class="field"><div class="label">Type(s) de coiffure</div>' +
+          '<div class="chip-wrap">' + chips + '</div>' +
+          (showNouveauType ? '<div class="inline-new"><input type="text" class="input" id="f-nouveauTypeCoiffure" placeholder="Ex. Vanilles" value="' + esc(d["f-nouveauTypeCoiffure"]||"") + '" data-autofocus data-action-change="capture-coiffure">' +
+            '<button type="button" class="btn btn-secondary" data-action="ajouter-type-coiffure">Ajouter</button></div>' : '') +
+        '</div>' +
+        '<div class="field"><div class="label">Main d’œuvre gardée (FCFA) <span class="req">*</span></div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-mainOeuvre" value="' + esc(d["f-mainOeuvre"]||"") + '" data-action-change="capture-coiffure">' +
+          '<div class="field-note">Ce que vous gardez réellement pour vous.</div>' +
+          fieldErr("mainOeuvre") +
+        '</div>' +
+        '<div class="field"><div class="label">Coût des mèches (FCFA)</div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-coutMeches" placeholder="0" value="' + esc(d["f-coutMeches"]||"") + '" data-action-change="capture-coiffure">' +
+        '</div>' +
+        (lieu === "domicile" ?
+        '<div class="field"><div class="label">Transport (FCFA)</div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-transport" placeholder="0" value="' + esc(d["f-transport"]||"") + '" data-action-change="capture-coiffure">' +
+        '</div>' : '') +
+        '<button type="button" class="btn btn-primary" data-action="enregistrer-coiffure">Enregistrer</button>' +
+      '</div>'
+    );
+  }
+
+  /* ---------- Amendement : champ Lieu de la prestation (F5/F6) ---------- */
+
+  function renderChampLieu(module, lieu){
+    return (
+      '<div class="field"><div class="label">Lieu de la prestation <span class="req">*</span></div>' +
+        '<div class="radio-row">' +
+          '<button type="button" class="radio-opt' + (lieu==="domicile"?" active":"") + '" data-action="set-lieu-' + module + '" data-val="domicile">🏠 À domicile</button>' +
+          '<button type="button" class="radio-opt' + (lieu==="salon"?" active":"") + '" data-action="set-lieu-' + module + '" data-val="salon">💈 En salon</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  /* ---------- F6 : Prestations pédicure/manicure ---------- */
+
+  function renderFormPedicure(){
+    var d = ui.draft;
+    var clienteSel = d["f-clienteSel"] || "";
+    var quartierSel = d["f-quartierSel"] || "";
+    var lieu = d["f-lieu"] || "domicile";
+    var suggestions = state.config.typesPrestationPedicure.slice().sort(function(a,b){ return a.nom.localeCompare(b.nom); });
+    var chips = suggestions.map(function(s){
+      return '<button type="button" class="chip-suggest" data-action="suggerer-type-prestation" data-val="' + esc(s.nom) + '">' + esc(s.nom) + '</button>';
+    }).join("");
+
+    return (
+      '<div>' +
+        '<div class="field"><div class="label">Date de la prestation <span class="req">*</span></div>' +
+          '<input type="date" class="input" id="f-date" max="' + todayStr() + '" value="' + esc(d["f-date"] || todayStr()) + '" data-action-change="capture-pedicure">' +
+          fieldErr("date") +
+        '</div>' +
+        '<div class="field"><div class="label">Type de cliente <span class="req">*</span></div>' +
+          '<select class="select" id="f-clienteSel" data-action-change="cliente-change">' + optionsFor("typesCliente", clienteSel) + '</select>' +
+          (clienteSel==="__new__" ? '<div class="inline-new"><input type="text" class="input" id="f-clienteNouveauNom" placeholder="Nouveau type de cliente" value="' + esc(d["f-clienteNouveauNom"]||"") + '" data-autofocus data-action-change="capture-pedicure"></div>' : '') +
+          fieldErr("cliente") +
+        '</div>' +
+        renderChampLieu("pedicure", lieu) +
+        (lieu === "domicile" ?
+        '<div class="field"><div class="label">Quartier <span class="req">*</span></div>' +
+          '<select class="select" id="f-quartierSel" data-action-change="quartier-change">' + optionsFor("quartiers", quartierSel) + '</select>' +
+          (quartierSel==="__new__" ? '<div class="inline-new"><input type="text" class="input" id="f-quartierNouveauNom" placeholder="Nom du quartier" value="' + esc(d["f-quartierNouveauNom"]||"") + '" data-autofocus data-action-change="capture-pedicure"></div>' : '') +
+          fieldErr("quartier") +
+        '</div>' : '') +
+        '<div class="field"><div class="label">Type de prestation</div>' +
+          '<input type="text" class="input" id="f-typePrestation" placeholder="Ex. pédicure, pose de vernis…" value="' + esc(d["f-typePrestation"]||"") + '" data-action-change="capture-pedicure">' +
+          (chips ? '<div class="chip-wrap" style="margin-top:9px;">' + chips + '</div>' : '') +
+          '<div class="field-note">Champ libre — le bon vocabulaire se stabilisera avec l’usage.</div>' +
+        '</div>' +
+        '<div class="field"><div class="label">Main d’œuvre gardée (FCFA) <span class="req">*</span></div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-mainOeuvre" value="' + esc(d["f-mainOeuvre"]||"") + '" data-action-change="capture-pedicure">' +
+          '<div class="field-note">Ce que vous gardez réellement pour vous.</div>' +
+          fieldErr("mainOeuvre") +
+        '</div>' +
+        '<div class="field"><div class="label">Coût des produits (FCFA)</div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-coutProduits" placeholder="0" value="' + esc(d["f-coutProduits"]||"") + '" data-action-change="capture-pedicure">' +
+          '<div class="field-note">Consommable partagé (vernis…) ou élément propre à la cliente (faux ongles…) — comme vous voulez, pour l’instant.</div>' +
+        '</div>' +
+        (lieu === "domicile" ?
+        '<div class="field"><div class="label">Transport (FCFA)</div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-transport" placeholder="0" value="' + esc(d["f-transport"]||"") + '" data-action-change="capture-pedicure">' +
+        '</div>' : '') +
+        '<button type="button" class="btn btn-primary" data-action="enregistrer-pedicure">Enregistrer</button>' +
+      '</div>'
+    );
+  }
+
+  /* ---------- Détails (consultation + suppression) ---------- */
+
+  function detailShell(rowsHtml, kind, id){
+    var confirming = ui.modal.confirmDelete;
+    return (
+      '<div>' + rowsHtml +
+      (confirming ?
+        '<div class="confirm-box"><p>Supprimer cet enregistrement ? Cette action est définitive.</p>' +
+          '<div class="btn-row">' +
+            '<button type="button" class="btn btn-secondary" data-action="annuler-suppression">Annuler</button>' +
+            '<button type="button" class="btn btn-danger" data-action="confirmer-suppression" data-kind="' + kind + '" data-id="' + id + '">Oui, supprimer</button>' +
+          '</div></div>'
+        :
+        '<button type="button" class="btn btn-danger" style="margin-top:14px;" data-action="demander-suppression">🗑️ Supprimer</button>'
+      ) +
+      '</div>'
+    );
+  }
+
+  function drow(k,v){ return '<div class="detail-row"><div class="dk">' + esc(k) + '</div><div class="dv">' + v + '</div></div>'; }
+
+  function renderDetailAchat(){
+    var a = state.achats.filter(function(x){ return x.id === ui.modal.id; })[0];
+    if(!a) return "";
+    var rows =
+      drow("Date", formatDateFr(a.date)) +
+      drow("Produit", esc(a.produitNom)) +
+      drow("Quantité", a.quantite + " paquet(s)") +
+      drow("Prix d’achat unitaire", formatFCFA(a.prixAchatUnitaire)) +
+      drow("Prix de vente estimé", formatFCFA(a.prixVenteUnitaireEstime)) +
+      drow("Charges", formatFCFA(a.charges||0)) +
+      drow("Total dépensé", formatFCFA(a.quantite*a.prixAchatUnitaire + (a.charges||0)));
+    return detailShell(rows, "achat", a.id);
+  }
+  function renderDetailVente(){
+    var v = state.ventes.filter(function(x){ return x.id === ui.modal.id; })[0];
+    if(!v) return "";
+    var rows =
+      drow("Date", formatDateFr(v.date)) +
+      drow("Produit", esc(v.produitNom)) +
+      drow("Quantité", v.quantite + "") +
+      drow("Montant encaissé", formatFCFA(v.montantEncaisse)) +
+      drow("Type de vente", v.typeVente==="commande_speciale" ? "Commande spéciale" : "Depuis le stock");
+    if(v.typeVente === "commande_speciale"){
+      rows += drow("Prix payé au revendeur", formatFCFA(v.prixPayeRevendeur||0));
+      rows += drow("Marge", formatFCFA(v.montantEncaisse - (v.prixPayeRevendeur||0)));
+    }
+    return detailShell(rows, "vente", v.id);
+  }
+  function renderDetailCoiffure(){
+    var p = state.prestationsCoiffure.filter(function(x){ return x.id === ui.modal.id; })[0];
+    if(!p) return "";
+    var rows =
+      drow("Date", formatDateFr(p.date)) +
+      drow("Type de cliente", esc(p.typeClienteNom)) +
+      drow("Lieu", p.lieu === "salon" ? "💈 En salon" : "🏠 À domicile") +
+      (p.lieu === "domicile" ? drow("Quartier", esc(p.quartierNom)) : "") +
+      drow("Type(s) de coiffure", esc((p.typesCoiffureNoms||[]).join(", ") || "—")) +
+      drow("Main d’œuvre gardée", formatFCFA(p.mainOeuvre)) +
+      drow("Coût des mèches", formatFCFA(p.coutMeches||0)) +
+      (p.lieu === "domicile" ? drow("Transport", formatFCFA(p.transport||0)) : "");
+    return detailShell(rows, "coiffure", p.id);
+  }
+  function renderDetailPedicure(){
+    var p = state.prestationsPedicure.filter(function(x){ return x.id === ui.modal.id; })[0];
+    if(!p) return "";
+    var rows =
+      drow("Date", formatDateFr(p.date)) +
+      drow("Type de cliente", esc(p.typeClienteNom)) +
+      drow("Lieu", p.lieu === "salon" ? "💈 En salon" : "🏠 À domicile") +
+      (p.lieu === "domicile" ? drow("Quartier", esc(p.quartierNom)) : "") +
+      drow("Type de prestation", esc(p.typePrestation || "—")) +
+      drow("Main d’œuvre gardée", formatFCFA(p.mainOeuvre)) +
+      drow("Coût des produits", formatFCFA(p.coutProduits||0)) +
+      (p.lieu === "domicile" ? drow("Transport", formatFCFA(p.transport||0)) : "");
+    return detailShell(rows, "pedicure", p.id);
+  }
+
+  /* ================= Autres charges — détail du jour (F11 rubriques) ================= */
+
+  function rubriquesActives(){
+    return state.config.rubriquesCharges.filter(function(r){ return r.actif; });
+  }
+  function findRubriqueCharge(id){
+    var list = state.config.rubriquesCharges;
+    for(var i=0;i<list.length;i++) if(list[i].id === id) return list[i];
+    return null;
+  }
+
+  function renderDetailChargesJour(){
+    var today = todayStr();
+    var range = { start: today, end: today };
+    var profils = state.config.profils;
+    var lignesAuto = [];
+    if(profils.coiffure){
+      filterRange(state.prestationsCoiffure, range).forEach(function(p){
+        var montant = (p.coutMeches||0) + (p.transport||0);
+        if(montant > 0) lignesAuto.push({ label: "💇 Coût mèches / transport", montant: montant });
+      });
+    }
+    if(profils.pedicure){
+      filterRange(state.prestationsPedicure, range).forEach(function(p){
+        var montant = (p.coutProduits||0) + (p.transport||0);
+        if(montant > 0) lignesAuto.push({ label: "💅 Coût produits / transport", montant: montant });
+      });
+    }
+    if(profils.revente){
+      filterRange(state.achats, range).forEach(function(a){
+        var montant = (a.quantite||0)*(a.prixAchatUnitaire||0) + (a.charges||0);
+        if(montant > 0) lignesAuto.push({ label: "📦 Achat " + a.produitNom, montant: montant });
+      });
+    }
+    var autoHtml = lignesAuto.length ?
+      '<div class="reglages-section"><div class="rs-title">Liées à vos prestations, achats</div>' +
+        lignesAuto.map(function(l){ return drow(l.label, formatFCFA(l.montant)); }).join("") +
+        '<div class="hint tight">Ces montants viennent des écrans de saisie — modifiez-les depuis l’enregistrement d’origine.</div>' +
+      '</div>' : "";
+
+    var autres = filterRange(state.autresCharges, range).sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
+    var autresHtml = '<div class="reglages-section"><div class="rs-title">Autres charges du jour</div>' +
+      (autres.length ? autres.map(function(c){
+        return (
+          '<button type="button" class="entry-card" data-action="voir-autre-charge" data-id="' + c.id + '" style="margin-bottom:8px;">' +
+            '<div class="entry-ico">' + esc(c.rubriqueEmoji||"📝") + '</div>' +
+            '<div class="entry-main"><div class="entry-title">' + esc(c.rubriqueNom) + '</div></div>' +
+            '<div class="entry-amount">' + formatFCFA(c.montant) + '</div>' +
+          '</button>'
+        );
+      }).join("") : '<div class="hint tight">Aucune autre charge ajoutée aujourd’hui.</div>') +
+      '<button type="button" class="btn btn-secondary" style="margin-top:8px;" data-action="add-autre-charge">+ Ajouter une charge</button>' +
+    '</div>';
+
+    return autoHtml + autresHtml;
+  }
+
+  function renderFormAutreCharge(){
+    var d = ui.draft;
+    var rubSel = d["f-rubrique"] || "";
+    var rubs = rubriquesActives();
+    var tiles = rubs.map(function(r){
+      return (
+        '<button type="button" class="rub-tile' + (rubSel===r.id?" selected":"") + '" data-action="set-rubrique-charge" data-id="' + r.id + '">' +
+          '<div class="rub-icon">' + esc(r.emoji||"📝") + '</div>' +
+          '<div class="rub-nom">' + esc(r.nom) + '</div>' +
+        '</button>'
+      );
+    }).join("");
+    return (
+      '<div>' +
+        '<div class="field"><div class="label">Rubrique <span class="req">*</span></div>' +
+          '<div class="rub-grid">' + tiles + '</div>' +
+          fieldErr("rubrique") +
+        '</div>' +
+        '<div class="field"><div class="label">Montant (FCFA) <span class="req">*</span></div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-montantAutreCharge" value="' + esc(d["f-montantAutreCharge"]||"") + '" data-action-change="capture-autre-charge">' +
+          fieldErr("montant") +
+        '</div>' +
+        '<button type="button" class="btn btn-primary" data-action="enregistrer-autre-charge">Enregistrer</button>' +
+      '</div>'
+    );
+  }
+
+  function renderDetailAutreCharge(){
+    var c = state.autresCharges.filter(function(x){ return x.id === ui.modal.id; })[0];
+    if(!c) return "";
+    var rows = drow("Date", formatDateFr(c.date)) + drow("Rubrique", esc(c.rubriqueEmoji||"") + " " + esc(c.rubriqueNom)) + drow("Montant", formatFCFA(c.montant));
+    return detailShell(rows, "autre-charge", c.id);
+  }
+
+  function renderConfirmSuppressionRubrique(){
+    var r = findRubriqueCharge(ui.modal.id);
+    if(!r) return "";
+    return (
+      '<div><p style="font-size:13.5px; margin:0 0 14px;">Supprimer la rubrique « ' + esc(r.nom) + ' » ? Les charges déjà enregistrées avec cette rubrique restent dans l’historique.</p>' +
+        '<div class="btn-row">' +
+          '<button type="button" class="btn btn-secondary" data-action="fermer-modal">Annuler</button>' +
+          '<button type="button" class="btn btn-danger" data-action="confirmer-suppression-rubrique" data-id="' + r.id + '">Oui, supprimer</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  /* ================= F8 : Mon état ================= */
+
+  var MOIS_NOMS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  function moisLabelFor(d){ return MOIS_NOMS[d.getMonth()] + " " + d.getFullYear(); }
+
+  function ensureEtatRefs(){
+    if(!ui.etatPeriode) ui.etatPeriode = "jour";
+    if(!ui.etatSemaineRef) ui.etatSemaineRef = todayStr();
+    if(!ui.etatMoisRef) ui.etatMoisRef = todayStr();
+  }
+
+  function shiftEtatRef(periode, delta){
+    if(periode === "semaine"){
+      var d = dateFromStr(ui.etatSemaineRef);
+      d.setDate(d.getDate() + 7*delta);
+      var nouveau = dateKey(d);
+      var refAujourdhui = getWeekRange(new Date()).start;
+      if(nouveau > refAujourdhui) nouveau = refAujourdhui;
+      ui.etatSemaineRef = nouveau;
+    } else if(periode === "mois"){
+      var d2 = dateFromStr(ui.etatMoisRef);
+      d2.setDate(1);
+      d2.setMonth(d2.getMonth() + delta);
+      var nouveau2 = dateKey(d2);
+      var refAujourdhuiM = getMonthRange(new Date()).start;
+      if(nouveau2 > refAujourdhuiM) nouveau2 = refAujourdhuiM;
+      ui.etatMoisRef = nouveau2;
+    }
+  }
+
+  function groupSum(arr, labelFn, valFn){
+    var map = {}, ordre = [];
+    arr.forEach(function(x){
+      var lbl = labelFn(x);
+      if(lbl === null || lbl === undefined || lbl === "") return;
+      if(!(lbl in map)){ map[lbl] = 0; ordre.push(lbl); }
+      map[lbl] += Number(valFn(x)) || 0;
+    });
+    return ordre.map(function(k){ return { label:k, montant:map[k] }; }).sort(function(a,b){ return b.montant - a.montant; });
+  }
+  function groupSumMulti(arr, valuesFn, valFn, labelVide){
+    var map = {}, ordre = [];
+    arr.forEach(function(x){
+      var vals = valuesFn(x);
+      if(!vals || !vals.length) vals = [labelVide];
+      vals.forEach(function(v){
+        if(!(v in map)){ map[v] = 0; ordre.push(v); }
+        map[v] += Number(valFn(x)) || 0;
+      });
+    });
+    return ordre.map(function(k){ return { label:k, montant:map[k] }; }).sort(function(a,b){ return b.montant - a.montant; });
+  }
+  function renderBreakdownRows(titre, rows){
+    if(!rows.length) return "";
+    var body = rows.map(function(r){
+      return '<div class="eb-row"><div class="eb-nom">' + esc(r.label) + '</div><div class="eb-val">' + formatFCFA(r.montant) + '</div></div>';
+    }).join("");
+    return '<div class="etat-breakdown"><div class="eb-title">' + esc(titre) + '</div>' + body + '</div>';
+  }
+
+  function renderBreakdownProduits(range){
+    var produits = state.config.produits;
+    if(!produits.length) return "";
+    var rows = produits.map(function(p){
+      var ventesP = filterRange(state.ventes.filter(function(v){ return v.produitId === p.id; }), range);
+      if(!ventesP.length) return null;
+      var ca = sumBy(ventesP, function(v){ return v.montantEncaisse; });
+      var coutMoyen = computeStockProduit(p).coutMoyen;
+      var benefice = sumBy(ventesP, function(v){
+        if(v.typeVente === "commande_speciale") return v.montantEncaisse - (v.prixPayeRevendeur||0);
+        return v.montantEncaisse - v.quantite * coutMoyen;
+      });
+      return { nom: p.nom, ca: ca, benefice: benefice };
+    }).filter(Boolean).sort(function(a,b){ return b.ca - a.ca; });
+    if(!rows.length) return "";
+    var body = rows.map(function(r){
+      return '<div class="eb-row"><div class="eb-nom">' + esc(r.nom) + '</div>' +
+        '<div class="eb-val">' + formatFCFA(r.ca) + ' <span class="eb-sub">(bénéf. ' + formatFCFA(r.benefice) + ')</span></div></div>';
+    }).join("");
+    return '<div class="etat-breakdown"><div class="eb-title">Par produit — chiffre d’affaires (bénéfice)</div>' + body + '</div>';
+  }
+
+  function renderBreakdownsCoiffure(range){
+    var items = filterRange(state.prestationsCoiffure, range);
+    if(!items.length) return "";
+    var domicile = items.filter(function(p){ return p.lieu === "domicile"; });
+    return (
+      renderBreakdownRows("Par quartier (prestations à domicile)", groupSum(domicile, function(p){ return p.quartierNom; }, function(p){ return p.mainOeuvre; })) +
+      renderBreakdownRows("Par type de coiffure", groupSumMulti(items, function(p){ return p.typesCoiffureNoms; }, function(p){ return p.mainOeuvre; }, "Non précisé")) +
+      renderBreakdownRows("Par type de cliente", groupSum(items, function(p){ return p.typeClienteNom; }, function(p){ return p.mainOeuvre; }))
+    );
+  }
+  function renderBreakdownsPedicure(range){
+    var items = filterRange(state.prestationsPedicure, range);
+    if(!items.length) return "";
+    var domicile = items.filter(function(p){ return p.lieu === "domicile"; });
+    return (
+      renderBreakdownRows("Par quartier (prestations à domicile)", groupSum(domicile, function(p){ return p.quartierNom; }, function(p){ return p.mainOeuvre; })) +
+      renderBreakdownRows("Par type de prestation", groupSum(items, function(p){ return p.typePrestation || "Non précisé"; }, function(p){ return p.mainOeuvre; })) +
+      renderBreakdownRows("Par type de cliente", groupSum(items, function(p){ return p.typeClienteNom; }, function(p){ return p.mainOeuvre; }))
+    );
+  }
+
+  function renderBreakdownAutresCharges(range){
+    var items = filterRange(state.autresCharges, range);
+    if(!items.length) return "";
+    return renderBreakdownRows("Autres charges — par rubrique", groupSum(items, function(c){ return c.rubriqueNom + (c.rubriqueSupprimee ? " (rubrique supprimée)" : ""); }, function(c){ return c.montant; }));
+  }
+
+  function renderMonEtat(){
+    ensureEtatRefs();
+    var periode = ui.etatPeriode;
+    var ref = periode === "semaine" ? dateFromStr(ui.etatSemaineRef) : periode === "mois" ? dateFromStr(ui.etatMoisRef) : new Date();
+    var range = rangeForPeriode(periode, ref);
+
+    var sources = revenusParSource(range);
+    var charges = chargesConsolidees(range);
+    var revenuTotal = sumBy(sources, function(s){ return s.montant; });
+    var soldeNet = revenuTotal - charges;
+
+    var tabs = ["jour","semaine","mois"].map(function(p){
+      var lbl = { jour:"Jour", semaine:"Semaine", mois:"Mois" }[p];
+      return '<button type="button" class="etat-tab' + (periode===p?" active":"") + '" data-action="etat-set-periode" data-val="' + p + '">' + lbl + '</button>';
+    }).join("");
+
+    var navHtml = "";
+    if(periode === "semaine" || periode === "mois"){
+      var label = periode === "semaine" ? (formatDateFr(range.start) + " – " + formatDateFr(range.end)) : (moisLabelFor(ref).charAt(0).toUpperCase() + moisLabelFor(ref).slice(1));
+      var refAujourdhui = periode === "semaine" ? getWeekRange(new Date()).start : getMonthRange(new Date()).start;
+      var estPeriodeActuelle = (periode === "semaine" ? ui.etatSemaineRef : ui.etatMoisRef) >= refAujourdhui;
+      navHtml = (
+        '<div class="etat-nav">' +
+          '<button type="button" class="en-btn" data-action="etat-nav" data-sens="-1" data-periode="' + periode + '">‹</button>' +
+          '<div class="en-label">' + esc(label) + '</div>' +
+          '<button type="button" class="en-btn" data-action="etat-nav" data-sens="1" data-periode="' + periode + '"' + (estPeriodeActuelle?" disabled":"") + '>›</button>' +
+        '</div>'
+      );
+    } else {
+      navHtml = '<div class="etat-nav"><div class="en-label">' + esc(formatDateFr(todayStr())) + '</div></div>';
+    }
+
+    var epargnePeriode = (state.objectifs||[]).length ? computeEpargnePeriodeTousObjectifs(range) : null;
+
+    var statRows = sources.map(function(s){
+      return '<div class="etat-stat-row"><div class="er-label">' + s.emoji + ' ' + esc(s.label) + '</div><div class="er-val">' + formatFCFA(s.montant) + '</div></div>';
+    }).join("") +
+      '<div class="etat-stat-row"><div class="er-label">💸 Charges</div><div class="er-val neg">' + formatFCFA(charges) + '</div></div>' +
+      '<div class="etat-stat-row"><div class="er-label">Solde net</div><div class="er-val' + (soldeNet<0?" neg":"") + '">' + formatFCFA(soldeNet) + '</div></div>' +
+      (epargnePeriode !== null ? '<div class="etat-stat-row"><div class="er-label">💰 Épargne</div><div class="er-val">' + formatFCFA(epargnePeriode) + '</div></div>' : '');
+
+    var profils = state.config.profils;
+    var breakdowns = "";
+    if(profils.revente) breakdowns += renderBreakdownProduits(range);
+    if(profils.coiffure) breakdowns += renderBreakdownsCoiffure(range);
+    if(profils.pedicure) breakdowns += renderBreakdownsPedicure(range);
+    breakdowns += renderBreakdownAutresCharges(range);
+
+    return (
+      '<div class="section-title">Mon état</div>' +
+      '<div class="etat-tabs">' + tabs + '</div>' +
+      navHtml +
+      '<div class="etat-stats">' + statRows + '</div>' +
+      breakdowns
+    );
+  }
+
+  /* ================= F9 : écran Objectif d'épargne ================= */
+
+  function enCreationObjectif(){
+    return ui.objCreating || (state.objectifs||[]).length === 0;
+  }
+
+  function renderObjectifOverlay(){
+    var body = enCreationObjectif() ? renderObjectifCreation() : renderObjectifListe();
+    return (
+      '<div class="onb">' +
+        '<div class="onb-head" style="display:flex; align-items:center; justify-content:space-between;">' +
+          '<div class="onb-title" style="margin:0;">Objectif d’épargne</div>' +
+          '<button type="button" class="icon-btn" data-action="fermer-overlay">✕</button>' +
+        '</div>' +
+        '<div class="objectif-rappel">Faut pas zahé, bloquez votre épargne du jour sur mobile money ou transfert sur votre compte bancaire.</div>' +
+        body +
+      '</div>'
+    );
+  }
+
+  function renderObjectifListe(){
+    var objs = state.objectifs || [];
+    var cards = objs.map(function(o){
+      var m = objectifModele(o.modele);
+      var cumule = computeEpargneCumuleeObjectif(o);
+      var sousTexte = o.type === "auto" ? ("Automatique · " + o.pourcentage + " % du solde net") : ("Manuel · " + formatFCFA(o.montantFixeParJour) + "/jour");
+      return (
+        '<div class="objectif-card">' +
+          '<div class="oc-head"><div class="oc-emoji">' + m.emoji + '</div><div class="oc-nom">' + esc(o.nom) + '</div></div>' +
+          '<div class="oc-montant">' + formatFCFA(cumule) + '</div>' +
+          '<div class="oc-sub">Mis de côté depuis le ' + formatDateFr(o.dateCreation) + ' · ' + esc(sousTexte) + '</div>' +
+          '<div class="oc-actions">' +
+            '<button type="button" class="btn btn-secondary" data-action="ouvrir-modifier-objectif" data-id="' + o.id + '">Modifier</button>' +
+            '<button type="button" class="btn btn-danger" data-action="ouvrir-supprimer-objectif" data-id="' + o.id + '">Supprimer</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join("");
+    var addBtn = objs.length < MAX_OBJECTIFS ?
+      '<button type="button" class="btn btn-primary" data-action="commencer-creation-objectif">＋ Ajouter une autre épargne</button>' :
+      '<div class="plafond-msg">3 objectifs actifs, le maximum pour rester lisible.</div>';
+    return cards + addBtn;
+  }
+
+  function renderObjectifCreation(){
+    var d = ui.objDraft = ui.objDraft || { step:"modele" };
+    if(d.step === "mode") return renderObjCreationMode(d);
+    if(d.step === "details") return renderObjCreationDetails(d);
+    return renderObjCreationModele(d);
+  }
+
+  function renderObjCreationModele(d){
+    var cards = OBJECTIF_MODELES.map(function(m){
+      var sel = d.modele === m.id;
+      return (
+        '<button type="button" class="choice-card' + (sel?" selected":"") + '" data-action="choisir-modele-objectif" data-id="' + m.id + '">' +
+          '<div class="emoji">' + m.emoji + '</div>' +
+          '<div class="cc-text"><div class="cc-title">' + esc(m.titre) + '</div><div class="cc-desc">' + esc(m.desc) + '</div></div>' +
+          '<div class="cc-check">✓</div>' +
+        '</button>'
+      );
+    }).join("");
+    return (
+      '<div class="hint" style="margin-bottom:10px;">Vous mettez de côté pour quoi ?</div>' +
+      '<div class="choice-grid">' + cards + '</div>' +
+      '<div class="field" style="margin-top:14px;"><div class="label">Précisez (optionnel)</div>' +
+        '<input type="text" class="input" id="f-objSousType" placeholder="Ex. Apport, kit complet…" value="' + esc(d.sousType||"") + '" data-action-change="capture-obj-sous-type">' +
+      '</div>' +
+      (d.erreur ? '<div class="error-text">' + esc(d.erreur) + '</div>' : '') +
+      '<button type="button" class="btn btn-primary" style="margin-top:6px;" data-action="obj-etape-mode">Continuer</button>' +
+      ((state.objectifs||[]).length ? '<button type="button" class="btn btn-ghost" data-action="annuler-creation-objectif">Annuler</button>' : '')
+    );
+  }
+
+  function renderObjCreationMode(d){
+    var autoDispo = !hasObjectifAutoActif(null);
+    return (
+      '<div class="hint" style="margin-bottom:10px;">Comment voulez-vous épargner ?</div>' +
+      '<div class="radio-row" style="margin-bottom:10px;">' +
+        '<button type="button" class="radio-opt' + (d.mode==="manuel"?" active":"") + '" data-action="choisir-mode-objectif" data-val="manuel">Manuel</button>' +
+        '<button type="button" class="radio-opt' + (d.mode==="auto"?" active":"") + '"' + (autoDispo?'':' style="opacity:.4;"') + ' data-action="choisir-mode-objectif" data-val="auto">Automatique</button>' +
+      '</div>' +
+      (!autoDispo ? '<div class="hint tight">Un seul objectif automatique à la fois — celui déjà actif reste en pourcentage.</div>' : '') +
+      (d.erreur ? '<div class="error-text">' + esc(d.erreur) + '</div>' : '') +
+      '<div class="btn-row">' +
+        '<button type="button" class="btn btn-secondary" data-action="obj-etape-modele">Retour</button>' +
+        '<button type="button" class="btn btn-primary" data-action="obj-etape-details">Continuer</button>' +
+      '</div>'
+    );
+  }
+
+  function fieldErrObj(key){
+    return (ui.objDraft && ui.objDraft.erreurs && ui.objDraft.erreurs[key]) ? '<div class="field-error">' + esc(ui.objDraft.erreurs[key]) + '</div>' : "";
+  }
+
+  function renderObjCreationDetails(d){
+    var nomDefaut = nomObjectifParDefaut(d.modele, d.sousType);
+    var nom = d.nom !== undefined ? d.nom : nomDefaut;
+    var jours = d.joursRoules || state.config.joursRoulesParSemaine || 6;
+
+    var champsCommuns =
+      '<div class="field"><div class="label">Nom</div>' +
+        '<input type="text" class="input" id="f-objNom" value="' + esc(nom) + '" data-action-change="capture-obj-nom">' +
+      '</div>' +
+      '<div class="field"><div class="label">Jours travaillés par semaine</div>' +
+        '<div class="stepper-row">' +
+          '<button type="button" class="stepper-btn" data-action="obj-jours-delta" data-delta="-1">−</button>' +
+          '<div class="stepper-val">' + jours + ' j/semaine</div>' +
+          '<button type="button" class="stepper-btn" data-action="obj-jours-delta" data-delta="1">+</button>' +
+        '</div>' +
+      '</div>';
+
+    var champsSpecifiques;
+    if(d.mode === "manuel"){
+      champsSpecifiques =
+        '<div class="field"><div class="label">Montant fixe chaque jour (FCFA) <span class="req">*</span></div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-objMontantFixe" value="' + esc(d.montantFixeParJour||"") + '" data-action-change="capture-obj-montant">' +
+          fieldErrObj("montant") +
+        '</div>';
+    } else {
+      var moyenne = moyenneHebdoRecente();
+      var msgPasDeDonnees = "";
+      if(moyenne === null){
+        msgPasDeDonnees = '<div class="hint" style="margin:6px 0 12px;">Pas encore assez de jours saisis pour calculer une moyenne réelle. Choisissez un rythme — les montants s’ajusteront tout seuls dès que vous aurez des données.</div>';
+        moyenne = 0;
+      }
+      var scenarios = computeScenarios(moyenne, jours);
+      champsSpecifiques = msgPasDeDonnees + '<div class="scenario-grid">' + scenarios.map(function(s){
+        var sel = d.scenario === s.key;
+        return (
+          '<button type="button" class="scenario-card' + (sel?" selected":"") + '" data-action="choisir-scenario-objectif" data-key="' + s.key + '">' +
+            '<div class="sc-top"><div class="sc-nom">' + esc(s.nom) + '</div><div class="sc-pct">' + s.pct + ' %</div></div>' +
+            '<div class="sc-estim">' + s.estimation + '</div>' +
+          '</button>'
+        );
+      }).join("") + '</div>' + fieldErrObj("scenario");
+    }
+
+    return (
+      champsCommuns + champsSpecifiques +
+      '<div class="btn-row">' +
+        '<button type="button" class="btn btn-secondary" data-action="obj-etape-mode">Retour</button>' +
+        '<button type="button" class="btn btn-primary" data-action="enregistrer-objectif">Enregistrer</button>' +
+      '</div>'
+    );
+  }
+
+  function enregistrerObjectif(){
+    var d = ui.objDraft;
+    if(!d || !d.modele || !d.mode) return;
+    var jours = d.joursRoules || state.config.joursRoulesParSemaine || 6;
+    d.erreurs = {};
+    var nom = (d.nom !== undefined ? d.nom : nomObjectifParDefaut(d.modele, d.sousType)).trim() || nomObjectifParDefaut(d.modele, d.sousType);
+
+    if(d.mode === "manuel"){
+      var montant = toNum(d.montantFixeParJour);
+      if(!(montant > 0)){ d.erreurs.montant = "Indiquez un montant supérieur à 0."; render(); return; }
+      state.objectifs.push({
+        id: uid("obj"), modele: d.modele, sousType: d.sousType||"", nom: nom,
+        type:"manuel", montantFixeParJour: montant, pourcentage: null,
+        montantCible: 0, dateCreation: todayStr(), actif: true
+      });
+    } else {
+      if(hasObjectifAutoActif(null)){ return; }
+      if(!d.scenario){ d.erreurs.scenario = "Choisissez un rythme."; render(); return; }
+      var pct = POURCENTAGES_SCENARIO.filter(function(s){ return s.key===d.scenario; })[0].pct;
+      state.objectifs.push({
+        id: uid("obj"), modele: d.modele, sousType: d.sousType||"", nom: nom,
+        type:"auto", montantFixeParJour: null, pourcentage: pct,
+        montantCible: 0, dateCreation: todayStr(), actif: true
+      });
+    }
+    state.config.joursRoulesParSemaine = jours;
+    saveState();
+    ui.objCreating = false;
+    ui.objDraft = null;
+    render();
+  }
+
+  function renderFormModifierObjectif(){
+    var o = (state.objectifs||[]).filter(function(x){ return x.id === ui.modal.id; })[0];
+    if(!o) return "";
+    if(ui.draft.__objModifId !== o.id){
+      ui.draft = { __objModifId:o.id, nom:o.nom, joursRoules: state.config.joursRoulesParSemaine||6,
+        montantFixeParJour: o.montantFixeParJour||"", pourcentage: o.pourcentage };
+    }
+    var d = ui.draft;
+    var champsCommuns =
+      '<div class="field"><div class="label">Nom</div>' +
+        '<input type="text" class="input" id="f-modifNom" value="' + esc(d.nom||"") + '" data-action-change="capture-modif-objectif">' +
+      '</div>' +
+      '<div class="field"><div class="label">Jours travaillés par semaine</div>' +
+        '<div class="stepper-row">' +
+          '<button type="button" class="stepper-btn" data-action="modif-jours-delta" data-delta="-1">−</button>' +
+          '<div class="stepper-val">' + (d.joursRoules||6) + ' j/semaine</div>' +
+          '<button type="button" class="stepper-btn" data-action="modif-jours-delta" data-delta="1">+</button>' +
+        '</div>' +
+      '</div>';
+    var champsSpecifiques;
+    if(o.type === "manuel"){
+      champsSpecifiques =
+        '<div class="field"><div class="label">Montant fixe chaque jour (FCFA)</div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-modifMontant" value="' + esc(d.montantFixeParJour||"") + '" data-action-change="capture-modif-objectif">' +
+        '</div>';
+    } else {
+      var moyenne = moyenneHebdoRecente() || 0;
+      var scenarios = computeScenarios(moyenne, d.joursRoules||6);
+      champsSpecifiques = '<div class="scenario-grid">' + scenarios.map(function(s){
+        var sel = d.pourcentage === s.pct;
+        return (
+          '<button type="button" class="scenario-card' + (sel?" selected":"") + '" data-action="modif-scenario" data-pct="' + s.pct + '">' +
+            '<div class="sc-top"><div class="sc-nom">' + esc(s.nom) + '</div><div class="sc-pct">' + s.pct + ' %</div></div>' +
+            '<div class="sc-estim">' + s.estimation + '</div>' +
+          '</button>'
+        );
+      }).join("") + '</div>';
+    }
+    return champsCommuns + champsSpecifiques +
+      '<button type="button" class="btn btn-primary" style="margin-top:10px;" data-action="enregistrer-modif-objectif" data-id="' + o.id + '">Enregistrer</button>';
+  }
+
+  function enregistrerModifObjectif(id){
+    var o = (state.objectifs||[]).filter(function(x){ return x.id === id; })[0];
+    if(!o) return;
+    var d = ui.draft;
+    var nom = (d.nom||"").trim();
+    if(nom) o.nom = nom;
+    var jours = d.joursRoules || state.config.joursRoulesParSemaine || 6;
+    state.config.joursRoulesParSemaine = jours;
+    if(o.type === "manuel"){
+      var m = toNum(d.montantFixeParJour);
+      if(m > 0) o.montantFixeParJour = m;
+    } else if(d.pourcentage){
+      o.pourcentage = d.pourcentage;
+    }
+    saveState();
+    closeModal();
+  }
+
+  function renderConfirmSuppressionObjectif(){
+    var o = (state.objectifs||[]).filter(function(x){ return x.id === ui.modal.id; })[0];
+    if(!o) return "";
+    return (
+      '<div><p style="font-size:13.5px; margin:0 0 14px;">Supprimer l’objectif « ' + esc(o.nom) + ' » ? Ce qui a déjà été mis de côté reste acquis — seul le suivi de cet objectif disparaît.</p>' +
+        '<div class="btn-row">' +
+          '<button type="button" class="btn btn-secondary" data-action="fermer-modal">Annuler</button>' +
+          '<button type="button" class="btn btn-danger" data-action="confirmer-suppr-objectif" data-id="' + o.id + '">Oui, supprimer</button>' +
+        '</div></div>'
+    );
+  }
+
+  /* ================= F10 : Partager / Exporter ================= */
+
+  function ensurePartagerRefs(){
+    if(!ui.partagerPeriode) ui.partagerPeriode = "jour";
+    if(!ui.partagerSemaineRef) ui.partagerSemaineRef = todayStr();
+    if(!ui.partagerMoisRef) ui.partagerMoisRef = todayStr();
+  }
+  function shiftPartagerRef(periode, delta){
+    if(periode === "semaine"){
+      var d = dateFromStr(ui.partagerSemaineRef);
+      d.setDate(d.getDate() + 7*delta);
+      var nouveau = dateKey(d);
+      var refAujourdhui = getWeekRange(new Date()).start;
+      if(nouveau > refAujourdhui) nouveau = refAujourdhui;
+      ui.partagerSemaineRef = nouveau;
+    } else if(periode === "mois"){
+      var d2 = dateFromStr(ui.partagerMoisRef);
+      d2.setDate(1);
+      d2.setMonth(d2.getMonth() + delta);
+      var nouveau2 = dateKey(d2);
+      var refAujourdhuiM = getMonthRange(new Date()).start;
+      if(nouveau2 > refAujourdhuiM) nouveau2 = refAujourdhuiM;
+      ui.partagerMoisRef = nouveau2;
+    }
+  }
+
+  function renderPartager(){
+    ensurePartagerRefs();
+    var periode = ui.partagerPeriode;
+    var ref = periode === "semaine" ? dateFromStr(ui.partagerSemaineRef) : periode === "mois" ? dateFromStr(ui.partagerMoisRef) : new Date();
+    var range = rangeForPeriode(periode, ref);
+
+    var tabs = ["jour","semaine","mois"].map(function(p){
+      var lbl = { jour:"Jour", semaine:"Semaine", mois:"Mois" }[p];
+      return '<button type="button" class="etat-tab' + (periode===p?" active":"") + '" data-action="partager-set-periode" data-val="' + p + '">' + lbl + '</button>';
+    }).join("");
+
+    var navHtml = "";
+    if(periode === "semaine" || periode === "mois"){
+      var label = periode === "semaine" ? (formatDateFr(range.start) + " – " + formatDateFr(range.end)) : (moisLabelFor(ref).charAt(0).toUpperCase() + moisLabelFor(ref).slice(1));
+      var refAujourdhui = periode === "semaine" ? getWeekRange(new Date()).start : getMonthRange(new Date()).start;
+      var estPeriodeActuelle = (periode === "semaine" ? ui.partagerSemaineRef : ui.partagerMoisRef) >= refAujourdhui;
+      navHtml = (
+        '<div class="etat-nav">' +
+          '<button type="button" class="en-btn" data-action="partager-nav" data-sens="-1" data-periode="' + periode + '">‹</button>' +
+          '<div class="en-label">' + esc(label) + '</div>' +
+          '<button type="button" class="en-btn" data-action="partager-nav" data-sens="1" data-periode="' + periode + '"' + (estPeriodeActuelle?" disabled":"") + '>›</button>' +
+        '</div>'
+      );
+    } else {
+      navHtml = '<div class="etat-nav"><div class="en-label">' + esc(formatDateFr(todayStr())) + '</div></div>';
+    }
+
+    return (
+      '<div class="onb">' +
+        '<div class="onb-head" style="display:flex; align-items:center; justify-content:space-between;">' +
+          '<div class="onb-title" style="margin:0;">Partager</div>' +
+          '<button type="button" class="icon-btn" data-action="fermer-overlay">✕</button>' +
+        '</div>' +
+        '<div class="etat-tabs">' + tabs + '</div>' +
+        navHtml +
+        '<div class="partager-canvas-wrap"><canvas id="partager-canvas" width="1080" height="1350"></canvas></div>' +
+        '<div class="btn-row">' +
+          '<button type="button" class="btn btn-secondary" data-action="partager-telecharger">⬇️ Télécharger l’image</button>' +
+          '<button type="button" class="btn btn-primary" data-action="partager-partager">Partager</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  // Dessine la carte de synthèse sur le canvas #partager-canvas — appelé après
+  // chaque rendu de l'écran Partager (afterRender), jamais pendant le build
+  // HTML (le canvas doit déjà être dans le DOM).
+  function dessinerCartePartage(){
+    var canvas = byId("partager-canvas");
+    if(!canvas || !canvas.getContext) return;
+    ensurePartagerRefs();
+    var periode = ui.partagerPeriode;
+    var ref = periode === "semaine" ? dateFromStr(ui.partagerSemaineRef) : periode === "mois" ? dateFromStr(ui.partagerMoisRef) : new Date();
+    var range = rangeForPeriode(periode, ref);
+    var sources = revenusParSource(range);
+    var charges = chargesConsolidees(range);
+    var revenuTotal = sumBy(sources, function(s){ return s.montant; });
+    var soldeNet = revenuTotal - charges;
+    var epargne = (state.objectifs||[]).length ? computeEpargnePeriodeTousObjectifs(range) : 0;
+    var periodeLabel = periode === "jour" ? formatDateFr(todayStr()) :
+      periode === "semaine" ? (formatDateFr(range.start) + " – " + formatDateFr(range.end)) :
+      (moisLabelFor(ref).charAt(0).toUpperCase() + moisLabelFor(ref).slice(1));
+
+    var ctx = canvas.getContext("2d");
+    var W = canvas.width, H = canvas.height;
+    var grad = ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,"#1b2029"); grad.addColorStop(1,"#11141a");
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#f5a623";
+    ctx.font = "700 40px -apple-system,Helvetica,Arial,sans-serif";
+    ctx.fillText("💇💅🛍️ MonDjai / Salon F", W/2, 110);
+    ctx.fillStyle = "#9aa3b2";
+    ctx.font = "500 30px -apple-system,Helvetica,Arial,sans-serif";
+    ctx.fillText(periodeLabel, W/2, 160);
+
+    ctx.fillStyle = "#9aa3b2";
+    ctx.font = "700 26px -apple-system,Helvetica,Arial,sans-serif";
+    ctx.fillText(soldeNet < 0 ? "SOLDE NET (JOUR À PERTE)" : "SOLDE NET", W/2, 260);
+    ctx.fillStyle = soldeNet < 0 ? "#ff6b5e" : "#eef1f6";
+    ctx.font = "800 96px -apple-system,Helvetica,Arial,sans-serif";
+    ctx.fillText(formatFCFA(soldeNet), W/2, 350);
+
+    var colW = W/3;
+    var cols = [
+      { label:"Recettes", val: formatFCFA(revenuTotal), color:"#34b37e" },
+      { label:"Charges", val: formatFCFA(charges), color:"#ff6b5e" },
+      { label:"Épargne", val: formatFCFA(epargne), color:"#f5a623" }
+    ];
+    cols.forEach(function(c, i){
+      var cx = colW*i + colW/2;
+      ctx.fillStyle = "#9aa3b2";
+      ctx.font = "700 26px -apple-system,Helvetica,Arial,sans-serif";
+      ctx.fillText(c.label, cx, 460);
+      ctx.fillStyle = c.color;
+      ctx.font = "800 40px -apple-system,Helvetica,Arial,sans-serif";
+      ctx.fillText(c.val, cx, 510);
+    });
+
+    ctx.strokeStyle = "#2a303c"; ctx.beginPath(); ctx.moveTo(70,570); ctx.lineTo(W-70,570); ctx.stroke();
+
+    var y = 630;
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#eef1f6";
+    ctx.font = "700 32px -apple-system,Helvetica,Arial,sans-serif";
+    ctx.fillText("Détail", 70, y);
+    y += 50;
+    ctx.font = "500 30px -apple-system,Helvetica,Arial,sans-serif";
+    var lignes = sources.map(function(s){ return [s.emoji + " " + s.label, formatFCFA(s.montant)]; });
+    lignes.push(["💸 Charges", formatFCFA(charges)]);
+    lignes.slice(0,7).forEach(function(l){
+      ctx.fillStyle = "#9aa3b2"; ctx.textAlign = "left"; ctx.fillText(l[0], 70, y);
+      ctx.fillStyle = "#eef1f6"; ctx.textAlign = "right"; ctx.fillText(l[1], W-70, y);
+      y += 48;
+    });
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#6b7280";
+    ctx.font = "400 22px -apple-system,Helvetica,Arial,sans-serif";
+    ctx.fillText("Document informatif, non certifié.", W/2, H-60);
+  }
+
+  function canvasVersBlob(callback){
+    var canvas = byId("partager-canvas");
+    if(!canvas){ callback(null); return; }
+    if(canvas.toBlob){ canvas.toBlob(callback, "image/png"); return; }
+    // Repli pour les navigateurs sans toBlob (rare) : conversion via dataURL.
+    try{
+      var dataUrl = canvas.toDataURL("image/png");
+      var bstr = atob(dataUrl.split(",")[1]), n = bstr.length, u8 = new Uint8Array(n);
+      while(n--) u8[n] = bstr.charCodeAt(n);
+      callback(new Blob([u8], { type:"image/png" }));
+    }catch(e){ callback(null); }
+  }
+
+  function nomFichierPartage(){
+    return "mondjai-salonf-" + ui.partagerPeriode + "-" + todayStr() + ".png";
+  }
+
+  function telechargerImagePartage(){
+    canvasVersBlob(function(blob){
+      if(!blob) return;
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = nomFichierPartage();
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    });
+  }
+
+  function partagerImagePartage(){
+    canvasVersBlob(function(blob){
+      if(!blob) return;
+      var fichier;
+      try{ fichier = new File([blob], nomFichierPartage(), { type:"image/png" }); }catch(e){ fichier = null; }
+      if(fichier && navigator.share && navigator.canShare && navigator.canShare({ files:[fichier] })){
+        navigator.share({ files:[fichier], title:"MonDjai/Salon F" }).catch(function(){});
+      } else {
+        telechargerImagePartage();
+      }
+    });
+  }
+
+  /* ================= Réglages minimal ================= */
+
+  function renderReglages(){
+    var keys = ["coiffure","pedicure","revente"];
+    var rows = keys.map(function(k){
+      var info = PROFIL_INFO[k];
+      var on = !!state.config.profils[k];
+      return (
+        '<div class="profil-row">' +
+          '<div class="pr-emoji">' + info.emoji + '</div>' +
+          '<div class="pr-text"><div class="pr-title">' + esc(info.titre) + '</div><div class="pr-desc">' + esc(info.desc) + '</div></div>' +
+          '<button type="button" class="switch' + (on?" on":"") + '" data-action="toggle-profil-reglages" data-key="' + k + '"><span class="knob"></span></button>' +
+        '</div>'
+      );
+    }).join("");
+
+    var rubList = state.config.rubriquesCharges;
+    var rubRows = rubList.map(function(r){
+      return (
+        '<div class="rub-manage-row">' +
+          '<div class="rm-emoji">' + esc(r.emoji||"📝") + '</div>' +
+          '<div class="rm-nom">' + esc(r.nom) + '</div>' +
+          '<button type="button" class="switch' + (r.actif?" on":"") + '" data-action="toggle-rubrique-charge" data-id="' + r.id + '"><span class="knob"></span></button>' +
+          (r.perso ? '<button type="button" class="rm-del" data-action="demander-suppression-rubrique" data-id="' + r.id + '" aria-label="Supprimer">🗑️</button>' : '') +
+        '</div>'
+      );
+    }).join("");
+
+    var pinActif = state.config.pinActif;
+
+    return (
+      '<div class="onb">' +
+        '<div class="onb-head" style="display:flex; align-items:center; justify-content:space-between;">' +
+          '<div class="onb-title" style="margin:0;">Réglages</div>' +
+          '<button type="button" class="icon-btn" data-action="fermer-overlay">✕</button>' +
+        '</div>' +
+        '<div class="reglages-section">' +
+          '<div class="rs-title">Profils actifs</div>' +
+          rows +
+          (ui.reglagesMsg ? '<div class="error-text">' + esc(ui.reglagesMsg) + '</div>' : '') +
+          '<div class="hint tight">Les prestations, achats et ventes déjà enregistrés restent conservés, même si vous désactivez un profil.</div>' +
+        '</div>' +
+        '<div class="reglages-section">' +
+          '<div class="rs-title">Rubriques de charges (communes aux 3 profils)</div>' +
+          rubRows +
+          '<div class="inline-new">' +
+            '<input type="text" class="input" id="f-nouvelleRubrique" placeholder="Nouvelle rubrique" value="' + esc(ui.draft["f-nouvelleRubrique"]||"") + '" data-autofocus data-action-change="capture-nouvelle-rubrique">' +
+            '<button type="button" class="btn btn-secondary" data-action="ajouter-rubrique-charge">Ajouter</button>' +
+          '</div>' +
+          '<div class="hint tight">Servent pour les charges ajoutées depuis le bloc « Charges » du jour (loyer, publicité…). Supprimer une rubrique personnalisée ne touche pas aux charges déjà enregistrées.</div>' +
+        '</div>' +
+        '<div class="reglages-section">' +
+          '<div class="rs-title">Sécurité</div>' +
+          '<div class="profil-row">' +
+            '<div class="pr-emoji">🔒</div>' +
+            '<div class="pr-text"><div class="pr-title">Code PIN à l’ouverture</div><div class="pr-desc">Un verrou simple contre un regard indiscret — pas un chiffrement.</div></div>' +
+            '<button type="button" class="switch' + (pinActif?" on":"") + '" data-action="toggle-pin-reglages"><span class="knob"></span></button>' +
+          '</div>' +
+          (pinActif ? '<button type="button" class="btn btn-secondary" data-action="changer-pin">Changer le code PIN</button>' : '') +
+        '</div>' +
+        '<div class="reglages-section">' +
+          '<div class="rs-title">Sauvegarde et restauration</div>' +
+          '<button type="button" class="btn btn-secondary" data-action="exporter-json">💾 Sauvegarder mes données (JSON)</button>' +
+          '<div style="height:10px;"></div>' +
+          '<label class="btn btn-secondary" style="display:flex; cursor:pointer;">📂 Restaurer une sauvegarde' +
+            '<input type="file" accept="application/json" style="display:none;" data-action-change="importer-json"></label>' +
+          (ui.backupMsg ? '<div class="hint tight">' + esc(ui.backupMsg) + '</div>' : '') +
+          (state.meta.derniereSauvegarde ? '<div class="hint tight">Dernière sauvegarde : ' + esc(formatDateFr(state.meta.derniereSauvegarde)) + '</div>' : '') +
+        '</div>' +
+        '<div class="reglages-section">' +
+          '<button type="button" class="btn btn-secondary" data-action="ouvrir-apropos">À propos</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderApropos(){
+    return (
+      '<div class="onb">' +
+        '<div class="onb-head" style="display:flex; align-items:center; justify-content:space-between;">' +
+          '<div class="onb-title" style="margin:0;">À propos</div>' +
+          '<button type="button" class="icon-btn" data-action="fermer-apropos">✕</button>' +
+        '</div>' +
+        '<div class="mission">Chaque geste compte : on note, on avance.</div>' +
+        '<div class="about-line">MonDjai/Salon F vous aide à suivre vos prestations, vos ventes et vos achats, sans jugement et sans calcul compliqué.</div>' +
+        '<div class="about-line">Vos données restent uniquement sur ce téléphone — rien n’est envoyé sur internet.</div>' +
+        '<div class="about-line">Un objectif d’épargne (🎯) et un écran Partager (📤) sont accessibles depuis les icônes en haut de l’application.</div>' +
+        '<div class="about-line">Le code PIN est un verrou de confort, pas un chiffrement fort — à ne jamais présenter comme une sécurité absolue.</div>' +
+        '<div class="about-line">Version : Sprint 3 — objectif d’épargne, partage, code PIN et sauvegarde JSON. MonDjai/Salon F est maintenant installable comme une application.</div>' +
+      '</div>'
+    );
+  }
+
+  /* ================= Actions ================= */
+
+  function openModal(type, extra){
+    ui.modal = merge({ type:type }, extra || {});
+    ui.draft = {};
+    ui.errors = {};
+    render();
+  }
+  function closeModal(){
+    if(ui.modalReturnTo){
+      var back = ui.modalReturnTo;
+      ui.modalReturnTo = null;
+      openModal(back);
+      return;
+    }
+    ui.modal = null;
+    ui.draft = {};
+    ui.errors = {};
+    render();
+  }
+
+  function handleClick(e){
+    var el = e.target.closest("[data-action]");
+    if(!el) return;
+    var action = el.getAttribute("data-action");
+
+    // Fermeture de la modale en cliquant sur l'overlay (mais pas sur son contenu)
+    if(action === "fermer-modal-overlay"){
+      if(e.target.closest("[data-stop-close]")) return;
+      closeModal();
+      return;
+    }
+    if(action === "fermer-modal"){ closeModal(); return; }
+
+    switch(action){
+      case "toggle-onboarding": {
+        var k = el.getAttribute("data-key");
+        ui.onboardingSel[k] = !ui.onboardingSel[k];
+        ui.onboardingMsg = "";
+        render();
+        return;
+      }
+      case "onboarding-continuer": {
+        var any = ui.onboardingSel.coiffure || ui.onboardingSel.pedicure || ui.onboardingSel.revente;
+        if(!any){
+          ui.onboardingMsg = "Choisissez au moins un profil pour continuer.";
+          render();
+          return;
+        }
+        state.config.profils = {
+          coiffure: !!ui.onboardingSel.coiffure,
+          pedicure: !!ui.onboardingSel.pedicure,
+          revente: !!ui.onboardingSel.revente
+        };
+        state.config.onboardingComplete = true;
+        saveState();
+        ensureValidTab();
+        render();
+        return;
+      }
+      case "ouvrir-reglages": ui.overlay = "reglages"; ui.reglagesMsg = ""; render(); return;
+      case "fermer-overlay": ui.overlay = null; ui.objCreating = false; ui.objDraft = null; render(); return;
+      case "ouvrir-apropos": ui.overlay = "apropos"; render(); return;
+      case "fermer-apropos": ui.overlay = "reglages"; render(); return;
+      case "toggle-profil-reglages": {
+        var key = el.getAttribute("data-key");
+        var current = state.config.profils;
+        var activesCount = (current.coiffure?1:0)+(current.pedicure?1:0)+(current.revente?1:0);
+        if(current[key] && activesCount <= 1){
+          ui.reglagesMsg = "Gardez au moins un profil actif.";
+          render();
+          return;
+        }
+        current[key] = !current[key];
+        ui.reglagesMsg = "";
+        saveState();
+        ensureValidTab();
+        render();
+        return;
+      }
+
+      case "ouvrir-objectif": ui.overlay = "objectif"; render(); return;
+      case "ouvrir-partager": ui.overlay = "partager"; ensurePartagerRefs(); render(); return;
+
+      case "commencer-creation-objectif": ui.objCreating = true; ui.objDraft = { step:"modele" }; render(); return;
+      case "annuler-creation-objectif": ui.objCreating = false; ui.objDraft = null; render(); return;
+      case "choisir-modele-objectif": ui.objDraft.modele = el.getAttribute("data-id"); ui.objDraft.erreur = ""; render(); return;
+      case "obj-etape-mode": {
+        if(!ui.objDraft.modele){ ui.objDraft.erreur = "Choisissez un modèle pour continuer."; render(); return; }
+        ui.objDraft.step = "mode"; render(); return;
+      }
+      case "obj-etape-modele": ui.objDraft.step = "modele"; render(); return;
+      case "choisir-mode-objectif": {
+        var mval = el.getAttribute("data-val");
+        if(mval === "auto" && hasObjectifAutoActif(null)) return;
+        ui.objDraft.mode = mval; ui.objDraft.erreur = ""; render(); return;
+      }
+      case "obj-etape-details": {
+        if(!ui.objDraft.mode){ ui.objDraft.erreur = "Choisissez Manuel ou Automatique."; render(); return; }
+        ui.objDraft.step = "details"; render(); return;
+      }
+      case "obj-jours-delta": {
+        var delta = parseInt(el.getAttribute("data-delta"),10);
+        var cur = ui.objDraft.joursRoules || state.config.joursRoulesParSemaine || 6;
+        ui.objDraft.joursRoules = Math.max(1, Math.min(7, cur + delta));
+        render();
+        return;
+      }
+      case "choisir-scenario-objectif": ui.objDraft.scenario = el.getAttribute("data-key"); ui.objDraft.erreurs = {}; render(); return;
+      case "enregistrer-objectif": enregistrerObjectif(); return;
+
+      case "ouvrir-modifier-objectif": ui.draft = {}; openModal("modifier-objectif", {id: el.getAttribute("data-id")}); return;
+      case "ouvrir-supprimer-objectif": openModal("confirmer-suppression-objectif", {id: el.getAttribute("data-id")}); return;
+      case "confirmer-suppr-objectif": {
+        var oid = el.getAttribute("data-id");
+        state.objectifs = state.objectifs.filter(function(x){ return x.id !== oid; });
+        saveState();
+        closeModal();
+        return;
+      }
+      case "modif-jours-delta": {
+        var delta2 = parseInt(el.getAttribute("data-delta"),10);
+        var cur2 = ui.draft.joursRoules || state.config.joursRoulesParSemaine || 6;
+        ui.draft.joursRoules = Math.max(1, Math.min(7, cur2 + delta2));
+        render();
+        return;
+      }
+      case "modif-scenario": ui.draft.pourcentage = parseInt(el.getAttribute("data-pct"),10); render(); return;
+      case "enregistrer-modif-objectif": enregistrerModifObjectif(el.getAttribute("data-id")); return;
+
+      case "partager-set-periode": ensurePartagerRefs(); ui.partagerPeriode = el.getAttribute("data-val"); render(); return;
+      case "partager-nav": {
+        var psens = parseInt(el.getAttribute("data-sens"),10);
+        var pper = el.getAttribute("data-periode");
+        shiftPartagerRef(pper, psens);
+        render();
+        return;
+      }
+      case "partager-telecharger": telechargerImagePartage(); return;
+      case "partager-partager": partagerImagePartage(); return;
+
+      case "valider-code-acces": {
+        var champCode = byId("f-codeAcces");
+        if(champCode) ui.codeAccesInput = champCode.value;
+        if(normaliserCode(ui.codeAccesInput) === CODE_ACCES_ATTENDU){
+          state.config.codeAccesOk = true;
+          saveState();
+          ui.codeAccesInput = "";
+          ui.codeAccesErreur = "";
+        } else {
+          ui.codeAccesErreur = "Code incorrect, réessayez.";
+        }
+        render();
+        return;
+      }
+
+      case "toggle-pin-reglages": {
+        if(state.config.pinActif){
+          state.config.pinActif = false;
+          state.config.pinCode = null;
+          saveState();
+          render();
+        } else {
+          ui.pinSetupStep = "premier"; ui.pinSetupPremier = ""; ui.pinSetupInput = ""; ui.pinSetupErreur = false;
+          openModal("pin-setup");
+        }
+        return;
+      }
+      case "changer-pin": {
+        ui.pinSetupStep = "premier"; ui.pinSetupPremier = ""; ui.pinSetupInput = ""; ui.pinSetupErreur = false;
+        openModal("pin-setup");
+        return;
+      }
+      case "pin-key": handlePinKey(el.getAttribute("data-id"), el.getAttribute("data-val")); return;
+      case "pin-oublie": openModal("pin-oublie"); return;
+      case "demander-erase": ui.modal.confirmErase = true; render(); return;
+      case "annuler-erase": ui.modal.confirmErase = false; render(); return;
+      case "confirmer-erase": {
+        try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+        state = defaultState();
+        ui.locked = false;
+        ui.modal = null;
+        render();
+        return;
+      }
+
+      case "exporter-json": exporterJson(); return;
+
+      case "toggle-rubrique-charge": {
+        var rid = el.getAttribute("data-id");
+        var rub = findRubriqueCharge(rid);
+        if(rub){ rub.actif = !rub.actif; saveState(); render(); }
+        return;
+      }
+      case "demander-suppression-rubrique": openModal("confirmer-suppression-rubrique", {id: el.getAttribute("data-id")}); return;
+      case "confirmer-suppression-rubrique": {
+        var ridSup = el.getAttribute("data-id");
+        state.config.rubriquesCharges = state.config.rubriquesCharges.filter(function(r){ return r.id !== ridSup; });
+        state.autresCharges.forEach(function(c){ if(c.rubriqueId === ridSup) c.rubriqueSupprimee = true; });
+        saveState();
+        ui.overlay = "reglages";
+        closeModal();
+        return;
+      }
+      case "ajouter-rubrique-charge": {
+        var nomRub = (ui.draft["f-nouvelleRubrique"]||"").trim();
+        if(nomRub){
+          state.config.rubriquesCharges.push({ id: uid("rub"), nom: nomRub, emoji:"📝", actif:true, perso:true });
+          saveState();
+          ui.draft["f-nouvelleRubrique"] = "";
+        }
+        render();
+        return;
+      }
+
+      case "go-tab": ui.tab = el.getAttribute("data-tab"); render(); return;
+
+      case "etat-set-periode": ensureEtatRefs(); ui.etatPeriode = el.getAttribute("data-val"); render(); return;
+      case "etat-nav": {
+        var sens = parseInt(el.getAttribute("data-sens"), 10);
+        var per = el.getAttribute("data-periode");
+        shiftEtatRef(per, sens);
+        render();
+        return;
+      }
+
+      case "add-achat": openModal("add-achat"); return;
+      case "add-vente": openModal("add-vente"); return;
+      case "add-coiffure": openModal("add-coiffure"); return;
+      case "add-pedicure": openModal("add-pedicure"); return;
+
+      case "voir-achat": openModal("detail-achat", {id: el.getAttribute("data-id")}); return;
+      case "voir-vente": openModal("detail-vente", {id: el.getAttribute("data-id")}); return;
+      case "voir-coiffure": openModal("detail-coiffure", {id: el.getAttribute("data-id")}); return;
+      case "voir-pedicure": openModal("detail-pedicure", {id: el.getAttribute("data-id")}); return;
+
+      case "voir-charges-jour": openModal("detail-charges-jour"); return;
+      case "add-autre-charge": {
+        ui.modalReturnTo = "detail-charges-jour";
+        openModal("add-autre-charge");
+        return;
+      }
+      case "voir-autre-charge": {
+        ui.modalReturnTo = "detail-charges-jour";
+        openModal("detail-autre-charge", {id: el.getAttribute("data-id")});
+        return;
+      }
+      case "set-rubrique-charge": {
+        captureDraft(["f-montantAutreCharge"]);
+        ui.draft["f-rubrique"] = el.getAttribute("data-id");
+        render();
+        return;
+      }
+
+      case "demander-suppression": ui.modal.confirmDelete = true; render(); return;
+      case "annuler-suppression": ui.modal.confirmDelete = false; render(); return;
+      case "confirmer-suppression": {
+        var kind = el.getAttribute("data-kind");
+        var id = el.getAttribute("data-id");
+        var map = { achat:"achats", vente:"ventes", coiffure:"prestationsCoiffure", pedicure:"prestationsPedicure", "autre-charge":"autresCharges" };
+        var arrName = map[kind];
+        state[arrName] = state[arrName].filter(function(x){ return x.id !== id; });
+        saveState();
+        closeModal();
+        return;
+      }
+
+      case "produit-achat-change": captureDraft(ACHAT_FIELDS); render(); return;
+      case "produit-vente-change": captureDraft(VENTE_FIELDS); render(); return;
+      case "set-type-vente": {
+        captureDraft(VENTE_FIELDS);
+        ui.draft["f-typeVente"] = el.getAttribute("data-val");
+        render();
+        return;
+      }
+      case "cliente-change": {
+        var fields = ui.modal.type.indexOf("pedicure")!==-1 ? PEDICURE_FIELDS : COIFFURE_FIELDS;
+        captureDraft(fields);
+        render();
+        return;
+      }
+      case "set-lieu-coiffure": {
+        captureDraft(COIFFURE_FIELDS);
+        ui.draft["f-lieu"] = el.getAttribute("data-val");
+        render();
+        return;
+      }
+      case "set-lieu-pedicure": {
+        captureDraft(PEDICURE_FIELDS);
+        ui.draft["f-lieu"] = el.getAttribute("data-val");
+        render();
+        return;
+      }
+      case "quartier-change": {
+        var fields2 = ui.modal.type.indexOf("pedicure")!==-1 ? PEDICURE_FIELDS : COIFFURE_FIELDS;
+        captureDraft(fields2);
+        render();
+        return;
+      }
+      case "toggle-coiffure-type": {
+        captureDraft(COIFFURE_FIELDS);
+        var id2 = el.getAttribute("data-id");
+        var sel = ui.draft.typesCoiffureSel || [];
+        var idx = sel.indexOf(id2);
+        if(idx===-1) sel.push(id2); else sel.splice(idx,1);
+        ui.draft.typesCoiffureSel = sel;
+        render();
+        return;
+      }
+      case "toggle-nouveau-type-coiffure": {
+        captureDraft(COIFFURE_FIELDS);
+        ui.draft.showNouveauTypeCoiffure = !ui.draft.showNouveauTypeCoiffure;
+        if(ui.draft.showNouveauTypeCoiffure) ui.pendingAutofocus = true;
+        render();
+        return;
+      }
+      case "ajouter-type-coiffure": {
+        captureDraft(COIFFURE_FIELDS);
+        var nom = (ui.draft["f-nouveauTypeCoiffure"]||"").trim();
+        if(nom){
+          var item = addPerso("typesCoiffure", nom);
+          var sel2 = ui.draft.typesCoiffureSel || [];
+          if(item && sel2.indexOf(item.id)===-1) sel2.push(item.id);
+          ui.draft.typesCoiffureSel = sel2;
+          ui.draft["f-nouveauTypeCoiffure"] = "";
+          ui.draft.showNouveauTypeCoiffure = false;
+        }
+        render();
+        return;
+      }
+      case "suggerer-type-prestation": {
+        captureDraft(PEDICURE_FIELDS);
+        ui.draft["f-typePrestation"] = el.getAttribute("data-val");
+        render();
+        return;
+      }
+
+      case "capture-achat": captureDraft(ACHAT_FIELDS); return;
+      case "capture-vente": captureDraft(VENTE_FIELDS); return;
+      case "capture-coiffure": captureDraft(COIFFURE_FIELDS); return;
+      case "capture-pedicure": captureDraft(PEDICURE_FIELDS); return;
+      case "capture-autre-charge": captureDraft(["f-montantAutreCharge"]); return;
+
+      case "enregistrer-achat": enregistrerAchat(); return;
+      case "enregistrer-vente": enregistrerVente(); return;
+      case "enregistrer-coiffure": enregistrerCoiffure(); return;
+      case "enregistrer-pedicure": enregistrerPedicure(); return;
+      case "enregistrer-autre-charge": enregistrerAutreCharge(); return;
+    }
+  }
+
+  function handleChange(e){
+    var el = e.target;
+    var action = el.getAttribute && el.getAttribute("data-action-change");
+    if(!action) return;
+    switch(action){
+      case "capture-achat": captureDraft(ACHAT_FIELDS); if(el.id==="f-produitSel"){ onProduitAchatChange(); } render(); return;
+      case "capture-vente": captureDraft(VENTE_FIELDS); if(el.id==="f-produitSel"){ render(); } return;
+      case "capture-coiffure": captureDraft(COIFFURE_FIELDS); return;
+      case "capture-pedicure": captureDraft(PEDICURE_FIELDS); return;
+      case "produit-achat-change": {
+        captureDraft(ACHAT_FIELDS);
+        onProduitAchatChange();
+        if(ui.draft["f-produitSel"] === "__new__") ui.pendingAutofocus = true;
+        render();
+        return;
+      }
+      // Correction apportée pendant ce sprint : le sélecteur de produit de
+      // Ventes déclarait déjà data-action-change="produit-vente-change" mais
+      // aucun cas ne le traitait ici (seul un cas mort, jamais atteint, vivait
+      // dans handleClick) — choisir « + Nouveau produit… » depuis Ventes ne
+      // faisait donc rien. Corrigé sur le même principe que produit-achat-change.
+      case "produit-vente-change": {
+        captureDraft(VENTE_FIELDS);
+        if(ui.draft["f-produitSel"] === "__new__") ui.pendingAutofocus = true;
+        render();
+        return;
+      }
+      case "cliente-change": case "quartier-change": {
+        var fields = ui.modal.type.indexOf("pedicure")!==-1 ? PEDICURE_FIELDS : COIFFURE_FIELDS;
+        captureDraft(fields);
+        if((el.id === "f-clienteSel" && ui.draft["f-clienteSel"] === "__new__") ||
+           (el.id === "f-quartierSel" && ui.draft["f-quartierSel"] === "__new__")){
+          ui.pendingAutofocus = true;
+        }
+        render();
+        return;
+      }
+      case "set-seuil-reassort": {
+        var pid = el.getAttribute("data-id");
+        var produit = findProduitById(pid);
+        if(produit){
+          var n = toNum(el.value);
+          produit.seuilReassort = n >= 0 ? Math.round(n) : SEUIL_REASSORT_DEFAUT;
+          saveState();
+          render();
+        }
+        return;
+      }
+      case "capture-code-acces": ui.codeAccesInput = el.value; ui.codeAccesErreur = ""; return;
+      case "capture-obj-sous-type": ui.objDraft.sousType = el.value; return;
+      case "capture-obj-nom": ui.objDraft.nom = el.value; return;
+      case "capture-obj-montant": ui.objDraft.montantFixeParJour = el.value; return;
+      case "capture-modif-objectif": {
+        if(el.id === "f-modifNom") ui.draft.nom = el.value;
+        if(el.id === "f-modifMontant") ui.draft.montantFixeParJour = el.value;
+        return;
+      }
+      case "capture-autre-charge": captureDraft(["f-montantAutreCharge"]); return;
+      case "capture-nouvelle-rubrique": ui.draft["f-nouvelleRubrique"] = el.value; return;
+      case "importer-json": case "importer-json-lock": {
+        var file = el.files && el.files[0];
+        importerJsonDepuisFichier(file, function(ok){
+          ui.backupMsg = ok ? "Sauvegarde restaurée." : "Ce fichier ne peut pas être lu comme une sauvegarde MonDjai/Salon F.";
+          if(ok){
+            ui.locked = !!(state.config.pinActif && state.config.pinCode);
+            if(!ui.locked){ ui.modal = null; ui.overlay = null; ensureValidTab(); }
+          }
+          render();
+        });
+        return;
+      }
+    }
+  }
+
+  var COIFFURE_FIELDS = ["f-date","f-clienteSel","f-clienteNouveauNom","f-quartierSel","f-quartierNouveauNom","f-nouveauTypeCoiffure","f-mainOeuvre","f-coutMeches","f-transport"];
+  var PEDICURE_FIELDS = ["f-date","f-clienteSel","f-clienteNouveauNom","f-quartierSel","f-quartierNouveauNom","f-typePrestation","f-mainOeuvre","f-coutProduits","f-transport"];
+
+  function onProduitAchatChange(){
+    captureDraft(ACHAT_FIELDS);
+    var sel = ui.draft["f-produitSel"];
+    if(sel && sel !== "__new__"){
+      var p = findProduitById(sel);
+      if(p){
+        if(p.dernierPrixAchat !== null && p.dernierPrixAchat !== undefined) ui.draft["f-prixAchat"] = String(p.dernierPrixAchat);
+        if(p.dernierPrixVenteEstime !== null && p.dernierPrixVenteEstime !== undefined) ui.draft["f-prixVente"] = String(p.dernierPrixVenteEstime);
+      }
+    }
+  }
+
+  /* ---------- Enregistrement des formulaires ---------- */
+
+  function enregistrerAchat(){
+    captureDraft(ACHAT_FIELDS);
+    var d = ui.draft;
+    var errors = {};
+    var date = d["f-date"] || todayStr();
+    var produitSel = d["f-produitSel"];
+    var produitNom = produitSel === "__new__" ? (d["f-produitNouveauNom"]||"").trim() : (findProduitById(produitSel)||{}).nom;
+    var quantite = toNum(d["f-quantite"]);
+    var prixAchat = toNum(d["f-prixAchat"]);
+    var prixVente = toNum(d["f-prixVente"]);
+    var charges = toNum(d["f-charges"]);
+
+    if(!date) errors.date = "Choisissez une date.";
+    if(!produitSel || (produitSel==="__new__" && !produitNom)) errors.produit = "Choisissez ou créez un produit.";
+    if(!(quantite > 0)) errors.quantite = "Indiquez une quantité supérieure à 0.";
+    if(!(prixAchat >= 0) || d["f-prixAchat"]==="") errors.prixAchat = "Indiquez le prix d’achat unitaire.";
+    if(!(prixVente >= 0) || d["f-prixVente"]==="") errors.prixVente = "Indiquez le prix de vente estimé.";
+
+    if(Object.keys(errors).length){ ui.errors = errors; render(); return; }
+
+    var produit = produitSel === "__new__" ? findOrCreateProduit(produitNom, prixAchat, prixVente) : findProduitById(produitSel);
+    if(produit){ produit.dernierPrixAchat = prixAchat; produit.dernierPrixVenteEstime = prixVente; }
+
+    state.achats.push({
+      id: uid("achat"), date: date,
+      produitId: produit ? produit.id : null,
+      produitNom: produit ? produit.nom : produitNom,
+      quantite: quantite, prixAchatUnitaire: prixAchat, prixVenteUnitaireEstime: prixVente,
+      charges: charges, ts: Date.now()
+    });
+    saveState();
+    closeModal();
+  }
+
+  function enregistrerVente(){
+    captureDraft(VENTE_FIELDS);
+    var d = ui.draft;
+    var errors = {};
+    var date = d["f-date"] || todayStr();
+    var produitSel = d["f-produitSel"];
+    var produitNomNouveau = (d["f-produitNouveauNom"]||"").trim();
+    var quantite = toNum(d["f-quantite"]);
+    var montant = toNum(d["f-montant"]);
+    var typeVente = d["f-typeVente"] || "stock";
+    var prixRevendeur = toNum(d["f-prixRevendeur"]);
+
+    if(!date) errors.date = "Choisissez une date.";
+    if(!produitSel || (produitSel==="__new__" && !produitNomNouveau)) errors.produit = "Choisissez ou créez un produit.";
+    if(!(quantite > 0)) errors.quantite = "Indiquez une quantité supérieure à 0.";
+    if(!(montant >= 0) || d["f-montant"]==="") errors.montant = "Indiquez le montant encaissé.";
+    if(typeVente === "commande_speciale" && (d["f-prixRevendeur"]==="" || !(prixRevendeur >= 0))) errors.prixRevendeur = "Indiquez le prix payé au revendeur.";
+
+    if(Object.keys(errors).length){ ui.errors = errors; render(); return; }
+
+    var produit = produitSel === "__new__" ? findOrCreateProduit(produitNomNouveau) : findProduitById(produitSel);
+
+    state.ventes.push({
+      id: uid("vente"), date: date,
+      produitId: produit ? produit.id : null,
+      produitNom: produit ? produit.nom : produitNomNouveau,
+      quantite: quantite, montantEncaisse: montant, typeVente: typeVente,
+      prixPayeRevendeur: typeVente==="commande_speciale" ? prixRevendeur : null,
+      ts: Date.now()
+    });
+    saveState();
+    closeModal();
+  }
+
+  function enregistrerCoiffure(){
+    captureDraft(COIFFURE_FIELDS);
+    var d = ui.draft;
+    var errors = {};
+    var date = d["f-date"] || todayStr();
+    var lieu = (d["f-lieu"] === "salon") ? "salon" : "domicile";
+    var clienteSel = d["f-clienteSel"];
+    var clienteNouveauNom = (d["f-clienteNouveauNom"]||"").trim();
+    var quartierSel = d["f-quartierSel"];
+    var quartierNouveauNom = (d["f-quartierNouveauNom"]||"").trim();
+    var mainOeuvre = toNum(d["f-mainOeuvre"]);
+    var coutMeches = toNum(d["f-coutMeches"]);
+    var transport = lieu === "domicile" ? toNum(d["f-transport"]) : 0;
+
+    if(!date) errors.date = "Choisissez une date.";
+    if(!clienteSel || (clienteSel==="__new__" && !clienteNouveauNom)) errors.cliente = "Choisissez ou précisez le type de cliente.";
+    if(lieu === "domicile" && (!quartierSel || (quartierSel==="__new__" && !quartierNouveauNom))) errors.quartier = "Choisissez ou précisez le quartier.";
+    if(!(mainOeuvre >= 0) || d["f-mainOeuvre"]==="") errors.mainOeuvre = "Indiquez la main d’œuvre gardée.";
+
+    if(Object.keys(errors).length){ ui.errors = errors; render(); return; }
+
+    var cliente = clienteSel === "__new__" ? addPerso("typesCliente", clienteNouveauNom) : findById("typesCliente", clienteSel);
+    var quartier = lieu === "domicile" ? (quartierSel === "__new__" ? addPerso("quartiers", quartierNouveauNom) : findById("quartiers", quartierSel)) : null;
+    var typesIds = d.typesCoiffureSel || [];
+    var typesNoms = typesIds.map(function(id){ var it = findById("typesCoiffure", id); return it ? it.nom : null; }).filter(Boolean);
+
+    state.prestationsCoiffure.push({
+      id: uid("coif"), date: date, lieu: lieu,
+      typeClienteId: cliente ? cliente.id : null, typeClienteNom: cliente ? cliente.nom : clienteNouveauNom,
+      quartierId: quartier ? quartier.id : null, quartierNom: lieu === "domicile" ? (quartier ? quartier.nom : quartierNouveauNom) : null,
+      typesCoiffureIds: typesIds, typesCoiffureNoms: typesNoms,
+      mainOeuvre: mainOeuvre, coutMeches: coutMeches, transport: transport, ts: Date.now()
+    });
+    saveState();
+    closeModal();
+  }
+
+  function enregistrerPedicure(){
+    captureDraft(PEDICURE_FIELDS);
+    var d = ui.draft;
+    var errors = {};
+    var date = d["f-date"] || todayStr();
+    var lieu = (d["f-lieu"] === "salon") ? "salon" : "domicile";
+    var clienteSel = d["f-clienteSel"];
+    var clienteNouveauNom = (d["f-clienteNouveauNom"]||"").trim();
+    var quartierSel = d["f-quartierSel"];
+    var quartierNouveauNom = (d["f-quartierNouveauNom"]||"").trim();
+    var typePrestation = (d["f-typePrestation"]||"").trim();
+    var mainOeuvre = toNum(d["f-mainOeuvre"]);
+    var coutProduits = toNum(d["f-coutProduits"]);
+    var transport = lieu === "domicile" ? toNum(d["f-transport"]) : 0;
+
+    if(!date) errors.date = "Choisissez une date.";
+    if(!clienteSel || (clienteSel==="__new__" && !clienteNouveauNom)) errors.cliente = "Choisissez ou précisez le type de cliente.";
+    if(lieu === "domicile" && (!quartierSel || (quartierSel==="__new__" && !quartierNouveauNom))) errors.quartier = "Choisissez ou précisez le quartier.";
+    if(!(mainOeuvre >= 0) || d["f-mainOeuvre"]==="") errors.mainOeuvre = "Indiquez la main d’œuvre gardée.";
+
+    if(Object.keys(errors).length){ ui.errors = errors; render(); return; }
+
+    var cliente = clienteSel === "__new__" ? addPerso("typesCliente", clienteNouveauNom) : findById("typesCliente", clienteSel);
+    var quartier = lieu === "domicile" ? (quartierSel === "__new__" ? addPerso("quartiers", quartierNouveauNom) : findById("quartiers", quartierSel)) : null;
+    if(typePrestation) addPerso("typesPrestationPedicure", typePrestation);
+
+    state.prestationsPedicure.push({
+      id: uid("pedi"), date: date, lieu: lieu,
+      typeClienteId: cliente ? cliente.id : null, typeClienteNom: cliente ? cliente.nom : clienteNouveauNom,
+      quartierId: quartier ? quartier.id : null, quartierNom: lieu === "domicile" ? (quartier ? quartier.nom : quartierNouveauNom) : null,
+      typePrestation: typePrestation, mainOeuvre: mainOeuvre, coutProduits: coutProduits, transport: transport, ts: Date.now()
+    });
+    saveState();
+    closeModal();
+  }
+
+  function enregistrerAutreCharge(){
+    captureDraft(["f-montantAutreCharge"]);
+    var d = ui.draft;
+    var errors = {};
+    var rubriqueId = d["f-rubrique"];
+    var montant = toNum(d["f-montantAutreCharge"]);
+    var rubrique = rubriqueId ? findRubriqueCharge(rubriqueId) : null;
+
+    if(!rubrique) errors.rubrique = "Choisissez une rubrique.";
+    if(!(montant > 0) || d["f-montantAutreCharge"]==="") errors.montant = "Indiquez un montant supérieur à 0.";
+
+    if(Object.keys(errors).length){ ui.errors = errors; render(); return; }
+
+    state.autresCharges.push({
+      id: uid("acharge"), date: todayStr(),
+      rubriqueId: rubrique.id, rubriqueNom: rubrique.nom, rubriqueEmoji: rubrique.emoji,
+      montant: montant, ts: Date.now()
+    });
+    saveState();
+    closeModal();
+  }
+
+  /* ================= Démarrage ================= */
+
+  document.addEventListener("click", handleClick);
+  document.addEventListener("change", handleChange);
+
+  state = loadState();
+  ui.locked = !!(state.config.pinActif && state.config.pinCode);
+  ensureValidTab();
+  render();
+
+  // Enregistrement du service worker (hors ligne) — silencieux si indisponible.
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+
+  // Exposé pour les tests automatisés (jsdom/Playwright) uniquement.
+  window.__mondjaiSalonF = { getState: function(){ return state; }, STORAGE_KEY: STORAGE_KEY };
+})();
+</script>
+</body>
+</html>
