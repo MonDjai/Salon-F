@@ -30,10 +30,17 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; padding:0; background:var(--bg); color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    height:100%; overscroll-behavior-y:none;}
+    height:100%; overscroll-behavior-y:none; color-scheme:dark;}
   #app{min-height:100%; display:flex; flex-direction:column;}
   a{color:inherit;}
-  button{font-family:inherit;}
+  /* Audit contraste (Sprint 4A) : un <button> ne reprend pas la couleur de texte
+     de son parent par défaut dans certains navigateurs (couleur système, souvent
+     sombre) — d'où des intitulés sombres sur fond sombre repérés à plusieurs
+     endroits (cartes de choix, cartes d'entrée de liste, tuiles de rubrique,
+     cartes de scénario…). `color:inherit` ici règle la cause une bonne fois pour
+     toutes ; les boutons qui veulent une couleur différente (accent, danger…)
+     la déclarent explicitement et restent donc inchangés par cette règle. */
+  button{font-family:inherit; color:inherit;}
 
   /* ---------- Header ---------- */
   .header{
@@ -137,6 +144,18 @@
   .entry-sub{font-size:12px; color:var(--text-dim); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .entry-amount{font-size:14px; font-weight:700; color:var(--accent); flex:none; white-space:nowrap;}
   .entry-amount.neg{color:var(--red);}
+
+  /* ---------- F2/F3 : cartes agrandies (Achats / Ventes, Sprint 4A) ---------- */
+  .entry-list-lg{flex:1;}
+  .entry-card-lg{
+    flex:1; min-height:108px; flex-direction:column; justify-content:center;
+    align-items:center; text-align:center; gap:8px; padding:22px 16px;
+  }
+  .entry-card-lg .entry-ico{width:50px; height:50px; font-size:23px;}
+  .entry-card-lg .entry-main{width:100%;}
+  .entry-card-lg .entry-title{white-space:normal; font-size:16px;}
+  .entry-card-lg .entry-sub{white-space:normal; margin-top:3px;}
+  .entry-card-lg .entry-amount{font-size:21px; margin-top:2px;}
   .badge{
     display:inline-block; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:999px;
     background:rgba(91,141,239,.15); color:var(--blue); margin-left:6px;
@@ -260,6 +279,18 @@
   .dash-block .db-label{font-size:11px; color:var(--text-dim); margin-top:4px; font-weight:700;}
   .dash-block .db-amount{font-size:16.5px; font-weight:800; margin-top:4px;}
   .dash-block.charges .db-amount{color:var(--red);}
+  /* Sprint 4B : bloc "informatif" (ex. Mèche) — ni recette ni charge, ne
+     compte pas dans le solde du profil, distingué visuellement en neutre. */
+  .dash-block.info{border-style:dashed;}
+  .dash-block.info .db-amount{color:var(--text-dim);}
+
+  /* ---------- Sprint 4B : caisses séparées par profil (Aujourd'hui) ---------- */
+  .caisse-zone{margin-bottom:22px;}
+  .caisse-zone:last-child{margin-bottom:6px;}
+  .caisse-zone + .caisse-zone{padding-top:18px; border-top:1px dashed var(--border);}
+  .cz-header{font-size:13px; font-weight:800; color:var(--accent); margin-bottom:10px;
+    text-transform:uppercase; letter-spacing:.03em;}
+  .cz-header.cz-header-muted{color:var(--text-dim);}
 
   /* ---------- F4 : Suivi de stock ---------- */
   .stock-card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:13px 14px; margin-bottom:10px;}
@@ -302,6 +333,19 @@
   .header-icons{display:flex; align-items:center; gap:8px;}
 
   /* ---------- Code d'accès / PIN ---------- */
+  .code-acces-onb .onb-body{align-items:center; text-align:center;}
+  .code-acces-onb .onb-title, .code-acces-onb .onb-desc{width:100%;}
+  .code-acces-lock{font-size:52px; margin-bottom:4px;}
+  .code-acces-field{width:100%; margin-top:22px; margin-bottom:0;}
+  .code-acces-input{
+    text-align:center; letter-spacing:.2em; text-transform:uppercase;
+    font-size:19px; font-weight:800; border:2px solid var(--accent);
+    background:rgba(245,166,35,.07);
+  }
+  .code-acces-input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .code-acces-mention{
+    margin-top:16px; font-size:11px; color:var(--text-dim); text-align:center; line-height:1.5;
+  }
   .pin-dots{display:flex; justify-content:center; gap:14px; margin:18px 0 22px;}
   .pin-dot{width:16px; height:16px; border-radius:50%; border:1.5px solid var(--border); background:var(--card-2);}
   .pin-dot.filled{background:var(--accent); border-color:var(--accent);}
@@ -451,6 +495,7 @@
         produits: [],
         rubriquesCharges: seedRubriquesCharges(),
         codeAccesOk: false,
+        derniereValidationAcces: null,
         pinActif: false,
         pinCode: null,
         joursRoulesParSemaine: 6
@@ -497,7 +542,23 @@
     if(!Array.isArray(out.objectifs)) out.objectifs = [];
     out.meta = merge(base.meta, parsed.meta || {});
     migrerLieuPrestations(out);
+    migrerObjectifsParProfil(out);
+    migrerValidationAcces(out);
     return out;
+  }
+
+  // Amendement Sprint 4C (accès mensuel) : un état déjà validé (codeAccesOk
+  // vrai) mais sans horodatage de dernière validation vient forcément d'avant
+  // ce sprint (Sprint ≤ 4B) — on lui accorde une nouvelle période de 30 jours
+  // à partir de maintenant plutôt que de considérer l'accès expiré dès la
+  // mise à jour de l'application, ce qui surprendrait une utilisatrice sans
+  // qu'aucun mois ne se soit réellement écoulé. Un état jamais validé
+  // (codeAccesOk faux) n'est pas concerné : il redemandera le Code d'accès
+  // initial comme avant, ce qui posera l'horodatage normalement.
+  function migrerValidationAcces(out){
+    if(out.config.codeAccesOk && !out.config.derniereValidationAcces){
+      out.config.derniereValidationAcces = Date.now();
+    }
   }
 
   function loadState(){
@@ -519,6 +580,25 @@
       list.forEach(function(p){
         if(p.lieu !== "domicile" && p.lieu !== "salon") p.lieu = "domicile";
       });
+    });
+  }
+
+  // Amendement Sprint 4B (remarques de terrain 2026-09-13) : l'épargne devient
+  // séparée par profil — jusqu'à 3 objectifs par profil plutôt qu'un objectif
+  // global unique pour toute l'application. Tout objectif déjà enregistré au
+  // Sprint 3 n'a pas de champ `profil` : on le rattache au premier profil actif
+  // dans l'ordre Coiffure > Pédicure > Revente, sans perdre aucune donnée de
+  // l'objectif lui-même (nom, montants, date de création, historique…). C'est
+  // une approximation raisonnable — l'ancien calcul se basait sur le solde
+  // combiné de tous les profils — à confirmer avec Hamadou si ce n'est pas le
+  // profil auquel il pensait pour un objectif donné.
+  function migrerObjectifsParProfil(out){
+    var profils = out.config.profils;
+    var defaut = PROFIL_ORDRE.filter(function(k){ return profils[k]; })[0] || "coiffure";
+    (out.objectifs||[]).forEach(function(o){
+      if(o.profil !== "coiffure" && o.profil !== "pedicure" && o.profil !== "revente"){
+        o.profil = defaut;
+      }
     });
   }
   function saveState(){
@@ -649,7 +729,12 @@
   function render(){
     var app = byId("app");
     if(!state.config.codeAccesOk){
-      app.innerHTML = renderCodeAcces();
+      app.innerHTML = renderCodeAcces("initial");
+      afterRender();
+      return;
+    }
+    if(accesMensuelExpire()){
+      app.innerHTML = renderCodeAcces("renouvellement");
       afterRender();
       return;
     }
@@ -672,6 +757,8 @@
       html = renderApropos();
     } else if(ui.overlay === "objectif"){
       html = renderObjectifOverlay();
+    } else if(ui.overlay === "habitudes"){
+      html = renderHabitudesOverlay();
     } else if(ui.overlay === "partager"){
       html = renderPartager();
     } else {
@@ -713,7 +800,12 @@
   };
 
   function renderOnboarding(){
-    var keys = ["coiffure","pedicure","revente"];
+    // Remarques de terrain (2026-09-13) : seuls Coiffure et Revente de mèches
+    // sont proposés à l'onboarding pour l'instant. Le profil Pédicure/Manicure
+    // (PROFIL_INFO.pedicure) n'est PAS retiré du code — il reste disponible,
+    // désactivé par défaut, réactivable depuis Réglages (voir renderReglages,
+    // qui continue d'afficher les 3 profils) si le besoin se confirme plus tard.
+    var keys = ["coiffure","revente"];
     var cards = keys.map(function(k){
       var info = PROFIL_INFO[k];
       var sel = !!ui.onboardingSel[k];
@@ -732,7 +824,7 @@
     return (
       '<div class="onb">' +
         '<div class="onb-head">' +
-          '<div class="onb-emoji">💇💅🛍️</div>' +
+          '<div class="onb-emoji">💇🛍️</div>' +
           '<div class="onb-title">Bienvenue sur MonDjai/Salon F</div>' +
           '<div class="onb-desc">Choisissez ce que vous faites — vous pouvez cocher plusieurs cases, et changer d’avis à tout moment depuis Réglages.</div>' +
         '</div>' +
@@ -752,23 +844,96 @@
     return String(s||"").toUpperCase().replace(/\s+/g,"");
   }
 
-  function renderCodeAcces(){
+  // ---- Amendement Sprint 4C : accès mensuel (renouvellement à 30 jours) ----
+  // Aucun serveur, aucun appel réseau : le code du mois est calculé entièrement
+  // en local par une fonction déterministe (mois + année + secret fixe intégré
+  // au fichier), la même que celle de l'outil séparé fourni à Hamadou (voir
+  // outil-code-mensuel-salonf.html, non inclus dans le zip livré aux
+  // utilisatrices). Même niveau de protection — dissuasif, pas une sécurité
+  // réelle — que le Code d'accès initial HKETCK, déjà en clair dans ce fichier.
+  var JOURS_VALIDITE_ACCES = 30;
+  var SECRET_MENSUEL_SALONF = "MDJ-SALONF-2026-K7QT";
+  var LETTRES_CODE_MENSUEL = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // sans I/O, pour éviter la confusion avec 1/0
+
+  // Hachage FNV-1a 32 bits — déterministe, aucune dépendance externe.
+  function hashFnv1a(str){
+    var h = 2166136261;
+    for(var i=0;i<str.length;i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    return h >>> 0;
+  }
+  // Finalisation (mélange final façon MurmurHash3) : FNV-1a seul répartit mal
+  // ses bits de poids faible quand deux chaînes ne diffèrent que d'un caractère
+  // en fin de chaîne (ex. "...|2026-02|" vs "...|2026-04|") — sans ce mélange,
+  // plusieurs mois de suite pouvaient produire exactement le même code une fois
+  // réduit à 24 lettres (vérifié pendant les tests de ce sprint). Ce mélange
+  // supplémentaire n'ajoute aucune dépendance externe, juste des opérations
+  // arithmétiques suivantes.
+  function fmix32(h){
+    h ^= h >>> 16;
+    h = Math.imul(h, 0x85ebca6b) >>> 0;
+    h ^= h >>> 13;
+    h = Math.imul(h, 0xc2b2ae35) >>> 0;
+    h ^= h >>> 16;
+    return h >>> 0;
+  }
+  // Code de renouvellement d'un mois donné (mois: 1-12, annee: ex. 2026).
+  // Reproduite à l'identique dans outil-code-mensuel-salonf.html : toute
+  // modification ici doit être répercutée là-bas, sinon les codes calculés
+  // par Hamadou ne correspondront plus à ceux attendus par l'application.
+  function codeAccesDuMois(mois, annee, secret){
+    var base = String(secret) + "|" + String(annee) + "-" + pad2(mois) + "|";
+    var code = "";
+    for(var i=0;i<6;i++){
+      var h = fmix32(hashFnv1a(base + i));
+      code += LETTRES_CODE_MENSUEL.charAt(h % LETTRES_CODE_MENSUEL.length);
+    }
+    return code;
+  }
+  function codeAccesDuMoisAttenduAujourdhui(){
+    var d = new Date();
+    return codeAccesDuMois(d.getMonth()+1, d.getFullYear(), SECRET_MENSUEL_SALONF);
+  }
+  // true si l'accès initial a bien été validé un jour ET que 30 jours (ou plus)
+  // se sont écoulés depuis la dernière validation (initiale ou de renouvellement).
+  // Ne supprime jamais aucune donnée : tant que le nouveau code n'est pas
+  // entré, l'écran de renouvellement bloque juste l'affichage — même principe
+  // que le PIN oublié (F11), jamais d'effacement automatique.
+  function accesMensuelExpire(){
+    if(!state.config.codeAccesOk) return false;
+    var derniere = state.config.derniereValidationAcces;
+    if(!derniere) return false; // migration d'un état pré-Sprint 4C, voir migrerValidationAcces
+    var joursEcoules = (Date.now() - derniere) / (1000*60*60*24);
+    return joursEcoules >= JOURS_VALIDITE_ACCES;
+  }
+
+  function renderCodeAcces(mode){
+    // Sprint 4A : repris sur le modèle exact de l'écran Code d'accès de
+    // MonDjai/Trépor — cadenas/clé centré, champ encadré en ambre, bouton
+    // "Continuer" pleine largeur, mention dissuasive sous le formulaire
+    // (dissuasive uniquement : elle n'affirme aucun dépôt BURIDA/OAPI déjà fait).
+    // Sprint 4C : même écran réutilisé pour le renouvellement mensuel, avec un
+    // texte adapté (mode === "renouvellement").
+    var estRenouvellement = (mode === "renouvellement");
+    var desc = estRenouvellement
+      ? "Votre accès du mois est arrivé à échéance. Entrez le code reçu pour continuer."
+      : "Entrez le code qui vous a été communiqué pour ouvrir MonDjai/Salon F.";
     return (
-      '<div class="onb">' +
-        '<div class="onb-head">' +
-          '<div class="onb-emoji">🔐</div>' +
-          '<div class="onb-title">Code d’accès</div>' +
-          '<div class="onb-desc">Entrez le code qui vous a été communiqué pour ouvrir MonDjai/Salon F.</div>' +
-        '</div>' +
+      '<div class="onb code-acces-onb">' +
         '<div class="onb-body">' +
-          '<div class="field">' +
-            '<div class="label">Code</div>' +
-            '<input type="text" class="input" id="f-codeAcces" autocapitalize="characters" autocomplete="off" ' +
+          '<div class="code-acces-lock">🔐</div>' +
+          '<div class="onb-title">Code d’accès</div>' +
+          '<div class="onb-desc">' + desc + '</div>' +
+          '<div class="field code-acces-field">' +
+            '<input type="text" class="input code-acces-input" id="f-codeAcces" autocapitalize="characters" autocomplete="off" ' +
               'placeholder="Ex. ABCDEF" value="' + esc(ui.codeAccesInput||"") + '" data-autofocus data-action-change="capture-code-acces">' +
-            (ui.codeAccesErreur ? '<div class="error-text">' + esc(ui.codeAccesErreur) + '</div>' : '') +
+            (ui.codeAccesErreur ? '<div class="error-text" style="text-align:center;">' + esc(ui.codeAccesErreur) + '</div>' : '') +
           '</div>' +
         '</div>' +
-        '<button type="button" class="btn btn-primary" data-action="valider-code-acces">Valider</button>' +
+        '<button type="button" class="btn btn-primary" data-action="valider-code-acces">Continuer</button>' +
+        '<div class="code-acces-mention">Application protégée. Toute reproduction ou utilisation non autorisée est interdite.</div>' +
       '</div>'
     );
   }
@@ -909,8 +1074,17 @@
           '</div>' +
         '</div>' +
         '<div class="header-icons">' +
-          '<button type="button" class="icon-btn" data-action="ouvrir-objectif" aria-label="Objectif d’épargne">🎯</button>' +
-          '<button type="button" class="icon-btn" data-action="ouvrir-partager" aria-label="Partager">📤</button>' +
+          /* Sprint 4B : icône Objectif (🎯) retirée de l'en-tête — l'épargne est
+             désormais séparée par profil et s'ouvre depuis le bloc « Épargne »
+             de chaque profil sur l'écran Aujourd'hui (data-action="ouvrir-objectif"
+             data-profil="..."). À sa place : Mes habitudes (📈), qui reprend les
+             statistiques (par quartier, type de coiffure/prestation, type de
+             cliente, produit) précédemment dans Mon état.
+             Sprint 4A : icône Partager (📤, F10) retirée de l'interface pour cette
+             version — le code (renderPartager, ouvrir-partager, dessinerCartePartage…)
+             reste intact dans le fichier, simplement inaccessible depuis l'en-tête,
+             pour être réactivé facilement à une prochaine version. */
+          '<button type="button" class="icon-btn" data-action="ouvrir-habitudes" aria-label="Mes habitudes">📈</button>' +
           '<button type="button" class="icon-btn" data-action="ouvrir-reglages" aria-label="Réglages">⚙️</button>' +
         '</div>' +
       '</div>'
@@ -1068,6 +1242,87 @@
     return Object.keys(set).sort();
   }
 
+  /* ================= Sprint 4B : caisses séparées par profil ================= */
+  // Les fonctions "globales" ci-dessus (chargesConsolidees, revenusParSource,
+  // soldeNetPeriode, soldeNetJour, allActivityDates) restent inchangées et ne
+  // servent plus qu'au code F10 (Partager), retiré de l'interface depuis le
+  // Sprint 4A mais gardé fonctionnel sur son ancien modèle combiné. L'écran
+  // Aujourd'hui et Mon état utilisent désormais les variantes "par profil"
+  // ci-dessous, qui EXCLUENT le coût des mèches du calcul des charges/du solde
+  // de Coiffure (remarques de terrain 2026-09-13, point 13) : la mèche reste
+  // enregistrée sur chaque prestation (traçabilité) mais n'est plus une charge
+  // réelle pour la coiffeuse, puisque payée par la cliente.
+
+  var PROFIL_ORDRE = ["coiffure","pedicure","revente"];
+  var PROFIL_LABEL_COURT = { coiffure:"Coiffure", pedicure:"Pédicure/Manicure", revente:"Revente de mèches" };
+
+  function objectifsProfil(profil){
+    return (state.objectifs||[]).filter(function(o){ return o.profil === profil; });
+  }
+
+  function recetteProfil(profil, range){
+    if(profil === "coiffure") return sumBy(filterRange(state.prestationsCoiffure, range), function(p){ return p.mainOeuvre; });
+    if(profil === "pedicure") return sumBy(filterRange(state.prestationsPedicure, range), function(p){ return p.mainOeuvre; });
+    if(profil === "revente") return sumBy(filterRange(state.ventes, range), function(v){ return v.montantEncaisse; });
+    return 0;
+  }
+  // Charge de Coiffure = transport uniquement (mèche exclue, voir plus haut).
+  // Pédicure/Manicure n'a reçu aucun amendement équivalent pour "coût des
+  // produits" (point resté ouvert au cahier des charges) : il reste compté
+  // comme charge, comme depuis le Sprint 2 — à confirmer avec Hamadou si le
+  // même traitement que la mèche doit s'appliquer une fois Pédicure réactivé.
+  function chargeProfil(profil, range){
+    if(profil === "coiffure") return sumBy(filterRange(state.prestationsCoiffure, range), function(p){ return p.transport||0; });
+    if(profil === "pedicure") return sumBy(filterRange(state.prestationsPedicure, range), function(p){ return (p.coutProduits||0) + (p.transport||0); });
+    if(profil === "revente") return sumBy(filterRange(state.achats, range), function(a){ return (a.quantite||0)*(a.prixAchatUnitaire||0) + (a.charges||0); });
+    return 0;
+  }
+  function soldeNetPeriodeProfil(profil, range){ return recetteProfil(profil, range) - chargeProfil(profil, range); }
+  function soldeNetJourProfil(profil, dateStr){ return soldeNetPeriodeProfil(profil, { start:dateStr, end:dateStr }); }
+
+  // Bénéfice (marge réelle, pas juste encaissé − dépensé) pour la Revente —
+  // même méthode que le Suivi de stock F4 (coût moyen d'achat par produit).
+  function beneficeReventePeriode(range){
+    return sumBy(filterRange(state.ventes, range), function(v){
+      if(v.typeVente === "commande_speciale") return v.montantEncaisse - (v.prixPayeRevendeur||0);
+      var p = findProduitById(v.produitId);
+      var coutMoyen = p ? computeStockProduit(p).coutMoyen : 0;
+      return v.montantEncaisse - v.quantite * coutMoyen;
+    });
+  }
+  function beneficeReventeTotal(){
+    return sumBy(state.config.produits, function(p){ return computeStockProduit(p).beneficeRealise; });
+  }
+
+  function allActivityDatesProfil(profil){
+    var set = {};
+    if(profil === "coiffure") state.prestationsCoiffure.forEach(function(p){ if(p.date) set[p.date] = 1; });
+    else if(profil === "pedicure") state.prestationsPedicure.forEach(function(p){ if(p.date) set[p.date] = 1; });
+    else if(profil === "revente"){
+      state.achats.forEach(function(a){ if(a.date) set[a.date] = 1; });
+      state.ventes.forEach(function(v){ if(v.date) set[v.date] = 1; });
+    }
+    return Object.keys(set).sort();
+  }
+  function semainesAvecActiviteProfil(profil){
+    var dates = allActivityDatesProfil(profil);
+    var map = {}, ordre = [];
+    dates.forEach(function(d){
+      var lundi = getWeekRange(dateFromStr(d)).start;
+      if(!(lundi in map)){ map[lundi] = true; ordre.push(lundi); }
+    });
+    return ordre.sort().reverse();
+  }
+
+  function computeEpargneJourProfil(profil, dateStr){
+    return sumBy(objectifsProfil(profil).filter(function(o){ return o.actif && dateStr >= o.dateCreation; }),
+      function(o){ return computeEpargneQuotidienneObjectif(o, dateStr); });
+  }
+  function computeEpargnePeriodeProfil(profil, range){
+    var dates = allActivityDatesProfil(profil).filter(function(d){ return inRange(d, range); });
+    return sumBy(dates, function(d){ return computeEpargneJourProfil(profil, d); });
+  }
+
   /* ================= F9 : Objectif d'épargne (repris de Trépor/Salon H) ================= */
 
   var MAX_OBJECTIFS = 3;
@@ -1104,12 +1359,14 @@
     });
     return ordre.sort().reverse();
   }
-  function moyenneHebdoRecente(){
-    var semaines = semainesAvecActivite().slice(0, NB_SEMAINES_MOYENNE);
+  // Sprint 4B : moyenne hebdomadaire calculée sur le solde net du PROFIL
+  // concerné uniquement (semaines avec activité pour ce profil précis).
+  function moyenneHebdoRecente(profil){
+    var semaines = semainesAvecActiviteProfil(profil).slice(0, NB_SEMAINES_MOYENNE);
     if(!semaines.length) return null;
     var total = semaines.reduce(function(s, lundi){
       var range = { start: lundi, end: dateKey((function(){ var d=dateFromStr(lundi); d.setDate(d.getDate()+6); return d; })()) };
-      return s + soldeNetPeriode(range);
+      return s + soldeNetPeriodeProfil(profil, range);
     }, 0);
     return total / semaines.length;
   }
@@ -1130,13 +1387,20 @@
     });
   }
 
+  // Sprint 4B : le solde utilisé pour le mode Automatique est désormais celui
+  // du profil propre à l'objectif (obj.profil) — voir les fonctions "par
+  // profil" ci-dessus. computeEpargneJourTousObjectifs/PeriodeTousObjectifs
+  // ci-dessous restent des agrégats "tous profils confondus" utilisés
+  // uniquement par le code F10 (Partager, retiré de l'interface) : ils
+  // continuent de fonctionner correctement puisque chaque objectif calcule
+  // maintenant son propre montant à partir de son propre profil.
   function computeEpargneQuotidienneObjectif(obj, dateStr){
     if(obj.type === "manuel") return obj.montantFixeParJour || 0;
-    var solde = soldeNetJour(dateStr);
+    var solde = soldeNetJourProfil(obj.profil, dateStr);
     return Math.max(0, solde) * (obj.pourcentage||0) / 100;
   }
   function computeEpargneCumuleeObjectif(obj){
-    var dates = allActivityDates().filter(function(d){ return d >= obj.dateCreation; });
+    var dates = allActivityDatesProfil(obj.profil).filter(function(d){ return d >= obj.dateCreation; });
     return sumBy(dates, function(d){ return computeEpargneQuotidienneObjectif(obj, d); });
   }
   function computeEpargneJourTousObjectifs(dateStr){
@@ -1147,8 +1411,8 @@
     var dates = allActivityDates().filter(function(d){ return inRange(d, range); });
     return sumBy(dates, function(d){ return computeEpargneJourTousObjectifs(d); });
   }
-  function hasObjectifAutoActif(excludeId){
-    return (state.objectifs||[]).some(function(o){ return o.type==="auto" && o.id!==excludeId; });
+  function hasObjectifAutoActif(profil, excludeId){
+    return (state.objectifs||[]).some(function(o){ return o.profil === profil && o.type==="auto" && o.id!==excludeId; });
   }
 
   function emptyState(emoji, titre, desc){
@@ -1159,55 +1423,151 @@
 
   /* ================= F7 : Tableau de bord du jour ================= */
 
+  // Sprint 4B — remarques de terrain (2026-09-13) : « plus de solde combiné
+  // entre profils ». Un seul profil actif → sa zone occupe toute la page ; 2
+  // (ou 3, si Pédicure est réactivé) → l'écran empile une zone par profil
+  // actif, chacune clairement intitulée, sans jamais mélanger leurs montants.
+  // Les « Charges communes » (rubriques F11 — loyer, publicité…, non liées à
+  // un profil précis) restent visibles à part, sous les zones, elles aussi
+  // jamais mélangées au solde d'un profil.
   function renderAujourdhui(){
     var today = todayStr();
-    var range = { start: today, end: today };
-    var sources = revenusParSource(range);
-    var charges = chargesConsolidees(range);
-    var revenuTotal = sumBy(sources, function(s){ return s.montant; });
-    var soldeNet = revenuTotal - charges;
-    var objectifs = state.objectifs || [];
-    var epargneJour = objectifs.length ? computeEpargneJourTousObjectifs(today) : 0;
-
-    var blocksHtml = sources.map(function(s){
-      return (
-        '<div class="dash-block">' +
-          '<div class="db-emoji">' + s.emoji + '</div>' +
-          '<div class="db-label">' + esc(s.label) + '</div>' +
-          '<div class="db-amount">' + formatFCFA(s.montant) + '</div>' +
-        '</div>'
-      );
-    }).join("") + (
-      '<button type="button" class="dash-block charges" style="color:var(--text); width:100%; cursor:pointer;" data-action="voir-charges-jour">' +
-        '<div class="db-emoji">💸</div>' +
-        '<div class="db-label">Charges</div>' +
-        '<div class="db-amount">' + formatFCFA(charges) + '</div>' +
-      '</button>'
-    ) + (
-      '<button type="button" class="dash-block" style="color:var(--text); width:100%; cursor:pointer;" data-action="ouvrir-objectif">' +
-        '<div class="db-emoji">💰</div>' +
-        '<div class="db-label">Épargne</div>' +
-        '<div class="db-amount">' + (objectifs.length ? formatFCFA(epargneJour) : "Aucun") + '</div>' +
-      '</button>'
-    );
-
-    var perte = soldeNet < 0 ?
-      '<div class="dash-perte">Jour à perte : ' + formatFCFA(Math.abs(soldeNet)) + '. Ça arrive — on note et on avance.</div>' : '';
-
-    var disponible = "";
-    if(objectifs.length && soldeNet > 0){
-      disponible = '<div class="hint tight" style="text-align:center; margin-top:8px; font-size:13px;">Disponible aujourd’hui : <strong style="color:var(--text);">' + formatFCFA(soldeNet - epargneJour) + '</strong></div>';
-    }
+    var actives = PROFIL_ORDRE.filter(function(k){ return !!state.config.profils[k]; });
+    var multi = actives.length > 1;
+    var zonesHtml = actives.map(function(k){
+      if(k === "coiffure") return renderZoneCoiffure(multi);
+      if(k === "pedicure") return renderZonePedicure(multi);
+      return renderZoneRevente(multi);
+    }).join("");
 
     return (
       '<div class="section-title">Aujourd’hui · ' + formatDateFr(today) + '</div>' +
-      '<div class="dash-solde">' +
-        '<div class="ds-label">Solde net du jour</div>' +
-        '<div class="ds-amount' + (soldeNet < 0 ? " neg" : "") + '">' + formatFCFA(soldeNet) + '</div>' +
-        perte +
-        disponible +
-      '</div>' +
-      '<div class="dash-grid">' + blocksHtml + '</div>'
+      zonesHtml +
+      renderChargesCommunesCard()
+    );
+  }
+
+  function renderZoneCoiffure(multi){
+    var today = todayStr();
+    var range = { start: today, end: today };
+    var mainOeuvre = sumBy(filterRange(state.prestationsCoiffure, range), function(p){ return p.mainOeuvre; });
+    var transport = sumBy(filterRange(state.prestationsCoiffure, range), function(p){ return p.transport||0; });
+    var meche = sumBy(filterRange(state.prestationsCoiffure, range), function(p){ return p.coutMeches||0; });
+    var objs = objectifsProfil("coiffure");
+    var epargneJour = objs.length ? computeEpargneJourProfil("coiffure", today) : 0;
+    var disponible = mainOeuvre - transport - epargneJour;
+    var perte = disponible < 0 ? '<div class="dash-perte">Jour à perte : ' + formatFCFA(Math.abs(disponible)) + '. Ça arrive — on note et on avance.</div>' : '';
+
+    var blocks =
+      '<button type="button" class="dash-block" style="color:var(--text);" data-action="voir-jour-profil" data-profil="coiffure">' +
+        '<div class="db-emoji">💇</div><div class="db-label">Main d’œuvre</div><div class="db-amount">' + formatFCFA(mainOeuvre) + '</div>' +
+      '</button>' +
+      '<button type="button" class="dash-block charges" style="color:var(--text);" data-action="voir-jour-profil" data-profil="coiffure">' +
+        '<div class="db-emoji">🚗</div><div class="db-label">Transport</div><div class="db-amount">' + formatFCFA(transport) + '</div>' +
+      '</button>' +
+      '<button type="button" class="dash-block info" style="color:var(--text);" data-action="voir-jour-profil" data-profil="coiffure">' +
+        '<div class="db-emoji">🧶</div><div class="db-label">Mèche (non comptée)</div><div class="db-amount">' + formatFCFA(meche) + '</div>' +
+      '</button>' +
+      '<button type="button" class="dash-block" style="color:var(--text);" data-action="ouvrir-objectif" data-profil="coiffure">' +
+        '<div class="db-emoji">💰</div><div class="db-label">Épargne</div><div class="db-amount">' + (objs.length ? formatFCFA(epargneJour) : "Aucun") + '</div>' +
+      '</button>';
+
+    return (
+      '<div class="caisse-zone">' +
+        (multi ? '<div class="cz-header">' + PROFIL_INFO.coiffure.emoji + ' ' + PROFIL_LABEL_COURT.coiffure + '</div>' : '') +
+        '<div class="dash-solde">' +
+          '<div class="ds-label">Disponible aujourd’hui</div>' +
+          '<div class="ds-amount' + (disponible < 0 ? " neg" : "") + '">' + formatFCFA(disponible) + '</div>' +
+          perte +
+        '</div>' +
+        '<div class="dash-grid">' + blocks + '</div>' +
+      '</div>'
+    );
+  }
+
+  // Pédicure/Manicure : mirroir de Coiffure, à une différence près — « Coût des
+  // produits » n'a reçu aucun amendement de terrain équivalent à la mèche (le
+  // cahier le laisse volontairement ouvert) : il reste compté comme charge,
+  // inchangé depuis le Sprint 2. Profil désactivé par défaut depuis le Sprint
+  // 4A (réactivable depuis Réglages) — cet écran doit donc rester correct s'il
+  // est un jour réactivé, même si ce n'est pas le principal cas testé ici.
+  function renderZonePedicure(multi){
+    var today = todayStr();
+    var range = { start: today, end: today };
+    var mainOeuvre = sumBy(filterRange(state.prestationsPedicure, range), function(p){ return p.mainOeuvre; });
+    var transport = sumBy(filterRange(state.prestationsPedicure, range), function(p){ return p.transport||0; });
+    var produits = sumBy(filterRange(state.prestationsPedicure, range), function(p){ return p.coutProduits||0; });
+    var objs = objectifsProfil("pedicure");
+    var epargneJour = objs.length ? computeEpargneJourProfil("pedicure", today) : 0;
+    var disponible = mainOeuvre - transport - produits - epargneJour;
+    var perte = disponible < 0 ? '<div class="dash-perte">Jour à perte : ' + formatFCFA(Math.abs(disponible)) + '. Ça arrive — on note et on avance.</div>' : '';
+
+    var blocks =
+      '<button type="button" class="dash-block" style="color:var(--text);" data-action="voir-jour-profil" data-profil="pedicure">' +
+        '<div class="db-emoji">💅</div><div class="db-label">Main d’œuvre</div><div class="db-amount">' + formatFCFA(mainOeuvre) + '</div>' +
+      '</button>' +
+      '<button type="button" class="dash-block charges" style="color:var(--text);" data-action="voir-jour-profil" data-profil="pedicure">' +
+        '<div class="db-emoji">🚗</div><div class="db-label">Transport</div><div class="db-amount">' + formatFCFA(transport) + '</div>' +
+      '</button>' +
+      '<button type="button" class="dash-block charges" style="color:var(--text);" data-action="voir-jour-profil" data-profil="pedicure">' +
+        '<div class="db-emoji">🧴</div><div class="db-label">Produits</div><div class="db-amount">' + formatFCFA(produits) + '</div>' +
+      '</button>' +
+      '<button type="button" class="dash-block" style="color:var(--text);" data-action="ouvrir-objectif" data-profil="pedicure">' +
+        '<div class="db-emoji">💰</div><div class="db-label">Épargne</div><div class="db-amount">' + (objs.length ? formatFCFA(epargneJour) : "Aucun") + '</div>' +
+      '</button>';
+
+    return (
+      '<div class="caisse-zone">' +
+        (multi ? '<div class="cz-header">' + PROFIL_INFO.pedicure.emoji + ' ' + PROFIL_LABEL_COURT.pedicure + '</div>' : '') +
+        '<div class="dash-solde">' +
+          '<div class="ds-label">Disponible aujourd’hui</div>' +
+          '<div class="ds-amount' + (disponible < 0 ? " neg" : "") + '">' + formatFCFA(disponible) + '</div>' +
+          perte +
+        '</div>' +
+        '<div class="dash-grid">' + blocks + '</div>' +
+      '</div>'
+    );
+  }
+
+  // Revente : uniquement des totaux, sans détail listé en dessous (demande
+  // explicite des remarques de terrain) — achats du jour, ventes du jour,
+  // bénéfice réalisé cumulé depuis le début (même méthode que le Suivi de
+  // stock F4), et épargne. Seule l'épargne est cliquable.
+  function renderZoneRevente(multi){
+    var today = todayStr();
+    var range = { start: today, end: today };
+    var achatsJour = sumBy(filterRange(state.achats, range), function(a){ return (a.quantite||0)*(a.prixAchatUnitaire||0) + (a.charges||0); });
+    var ventesJour = sumBy(filterRange(state.ventes, range), function(v){ return v.montantEncaisse; });
+    var beneficeTotal = beneficeReventeTotal();
+    var objs = objectifsProfil("revente");
+    var epargneJour = objs.length ? computeEpargneJourProfil("revente", today) : 0;
+
+    var tiles =
+      '<div class="dash-block"><div class="db-emoji">📦</div><div class="db-label">Achats du jour</div><div class="db-amount">' + formatFCFA(achatsJour) + '</div></div>' +
+      '<div class="dash-block"><div class="db-emoji">🛍️</div><div class="db-label">Ventes du jour</div><div class="db-amount">' + formatFCFA(ventesJour) + '</div></div>' +
+      '<div class="dash-block"><div class="db-emoji">💹</div><div class="db-label">Bénéfice réalisé (à date)</div><div class="db-amount">' + formatFCFA(beneficeTotal) + '</div></div>' +
+      '<button type="button" class="dash-block" style="color:var(--text);" data-action="ouvrir-objectif" data-profil="revente">' +
+        '<div class="db-emoji">💰</div><div class="db-label">Épargne</div><div class="db-amount">' + (objs.length ? formatFCFA(epargneJour) : "Aucun") + '</div>' +
+      '</button>';
+
+    return (
+      '<div class="caisse-zone">' +
+        (multi ? '<div class="cz-header">' + PROFIL_INFO.revente.emoji + ' ' + PROFIL_LABEL_COURT.revente + '</div>' : '') +
+        '<div class="dash-grid">' + tiles + '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderChargesCommunesCard(){
+    var today = todayStr();
+    var total = autresChargesTotal({ start: today, end: today });
+    return (
+      '<div class="caisse-zone">' +
+        '<div class="cz-header cz-header-muted">🧾 Charges communes du salon</div>' +
+        '<button type="button" class="dash-block charges" style="width:100%; color:var(--text);" data-action="voir-charges-jour">' +
+          '<div class="db-emoji">💸</div><div class="db-label">Aujourd’hui</div><div class="db-amount">' + formatFCFA(total) + '</div>' +
+        '</button>' +
+      '</div>'
     );
   }
 
@@ -1218,9 +1578,11 @@
     if(!items.length){
       return stockHtml + head + emptyState("📦","Aucun achat enregistré","Touchez le bouton + pour enregistrer votre premier réapprovisionnement.");
     }
+    // Sprint 4A : cartes agrandies, contenu centré, occupant tout l'espace
+    // disponible de l'écran (entry-list-lg / entry-card-lg).
     var rows = items.map(function(a){
       return (
-        '<button type="button" class="entry-card" data-action="voir-achat" data-id="' + a.id + '">' +
+        '<button type="button" class="entry-card entry-card-lg" data-action="voir-achat" data-id="' + a.id + '">' +
           '<div class="entry-ico">📦</div>' +
           '<div class="entry-main">' +
             '<div class="entry-title">' + esc(a.produitNom) + '</div>' +
@@ -1230,7 +1592,7 @@
         '</button>'
       );
     }).join("");
-    return stockHtml + head + '<div class="entry-list">' + rows + '</div>';
+    return stockHtml + head + '<div class="entry-list entry-list-lg">' + rows + '</div>';
   }
 
   /* ================= F4 : Suivi de stock & réassort ================= */
@@ -1306,10 +1668,11 @@
     if(!items.length){
       return head + emptyState("🛍️","Aucune vente enregistrée","Touchez le bouton + pour enregistrer votre première vente.");
     }
+    // Sprint 4A : cartes agrandies, contenu centré (même modèle qu'Achats).
     var rows = items.map(function(v){
       var badge = v.typeVente === "commande_speciale" ? '<span class="badge">Commande spéciale</span>' : "";
       return (
-        '<button type="button" class="entry-card" data-action="voir-vente" data-id="' + v.id + '">' +
+        '<button type="button" class="entry-card entry-card-lg" data-action="voir-vente" data-id="' + v.id + '">' +
           '<div class="entry-ico">🛍️</div>' +
           '<div class="entry-main">' +
             '<div class="entry-title">' + esc(v.produitNom) + badge + '</div>' +
@@ -1319,7 +1682,7 @@
         '</button>'
       );
     }).join("");
-    return head + '<div class="entry-list">' + rows + '</div>';
+    return head + '<div class="entry-list entry-list-lg">' + rows + '</div>';
   }
 
   function renderListeCoiffure(){
@@ -1416,7 +1779,8 @@
       case "detail-vente": title = "Détail de la vente"; body = renderDetailVente(); break;
       case "detail-coiffure": title = "Détail de la prestation"; body = renderDetailCoiffure(); break;
       case "detail-pedicure": title = "Détail de la prestation"; body = renderDetailPedicure(); break;
-      case "detail-charges-jour": title = "Charges du jour"; body = renderDetailChargesJour(); break;
+      case "detail-charges-jour": title = "Charges communes"; body = renderDetailChargesJour(); break;
+      case "jour-profil": title = "Aujourd’hui · " + (PROFIL_LABEL_COURT[m.profil]||""); body = renderJourProfilModal(m.profil); break;
       case "detail-autre-charge": title = "Détail de la charge"; body = renderDetailAutreCharge(); break;
       case "add-autre-charge": title = "Nouvelle charge"; body = renderFormAutreCharge(); break;
       case "confirmer-suppression-rubrique": title = "Supprimer la rubrique"; body = renderConfirmSuppressionRubrique(); break;
@@ -1736,37 +2100,18 @@
     return null;
   }
 
+  // Sprint 4B : cette liste ne montre plus que les « Autres charges » (F11,
+  // rubriques loyer/publicité/…) — les charges liées à une prestation ou un
+  // achat (transport, coût mèches/produits, coût d'achat…) sont désormais
+  // visibles depuis le détail du jour propre à chaque profil (bloc « Main
+  // d'œuvre »/« Transport »/« Mèche » sur Aujourd'hui), puisque les caisses
+  // sont maintenant séparées par profil plutôt que consolidées ici.
   function renderDetailChargesJour(){
     var today = todayStr();
     var range = { start: today, end: today };
-    var profils = state.config.profils;
-    var lignesAuto = [];
-    if(profils.coiffure){
-      filterRange(state.prestationsCoiffure, range).forEach(function(p){
-        var montant = (p.coutMeches||0) + (p.transport||0);
-        if(montant > 0) lignesAuto.push({ label: "💇 Coût mèches / transport", montant: montant });
-      });
-    }
-    if(profils.pedicure){
-      filterRange(state.prestationsPedicure, range).forEach(function(p){
-        var montant = (p.coutProduits||0) + (p.transport||0);
-        if(montant > 0) lignesAuto.push({ label: "💅 Coût produits / transport", montant: montant });
-      });
-    }
-    if(profils.revente){
-      filterRange(state.achats, range).forEach(function(a){
-        var montant = (a.quantite||0)*(a.prixAchatUnitaire||0) + (a.charges||0);
-        if(montant > 0) lignesAuto.push({ label: "📦 Achat " + a.produitNom, montant: montant });
-      });
-    }
-    var autoHtml = lignesAuto.length ?
-      '<div class="reglages-section"><div class="rs-title">Liées à vos prestations, achats</div>' +
-        lignesAuto.map(function(l){ return drow(l.label, formatFCFA(l.montant)); }).join("") +
-        '<div class="hint tight">Ces montants viennent des écrans de saisie — modifiez-les depuis l’enregistrement d’origine.</div>' +
-      '</div>' : "";
-
+    var hint = '<div class="hint tight" style="margin-bottom:14px;">Ces charges concernent le salon dans son ensemble (loyer, publicité…) — elles ne sont rattachées à aucun profil en particulier.</div>';
     var autres = filterRange(state.autresCharges, range).sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
-    var autresHtml = '<div class="reglages-section"><div class="rs-title">Autres charges du jour</div>' +
+    var autresHtml = '<div class="reglages-section"><div class="rs-title">Charges communes du jour</div>' +
       (autres.length ? autres.map(function(c){
         return (
           '<button type="button" class="entry-card" data-action="voir-autre-charge" data-id="' + c.id + '" style="margin-bottom:8px;">' +
@@ -1775,11 +2120,44 @@
             '<div class="entry-amount">' + formatFCFA(c.montant) + '</div>' +
           '</button>'
         );
-      }).join("") : '<div class="hint tight">Aucune autre charge ajoutée aujourd’hui.</div>') +
+      }).join("") : '<div class="hint tight">Aucune charge commune ajoutée aujourd’hui.</div>') +
       '<button type="button" class="btn btn-secondary" style="margin-top:8px;" data-action="add-autre-charge">+ Ajouter une charge</button>' +
     '</div>';
 
-    return autoHtml + autresHtml;
+    return hint + autresHtml;
+  }
+
+  // Détail du jour d'un profil (Coiffure/Pédicure) — ouvert depuis les blocs
+  // Main d'œuvre / Transport / Mèche (ou Produits) d'Aujourd'hui : les 3 (ou 4)
+  // blocs partagent le même écran, comme demandé (« pas besoin de 3 écrans de
+  // détail différents »). Reprend la présentation de la liste des prestations
+  // du jour, chaque carte ouvrant le détail complet existant (via modalReturnTo
+  // pour revenir ici après consultation/suppression).
+  function renderJourProfilModal(profil){
+    var today = todayStr();
+    var estPedicure = profil === "pedicure";
+    var arr = estPedicure ? state.prestationsPedicure : state.prestationsCoiffure;
+    var items = sortByDateDesc(arr.filter(function(p){ return p.date === today; }));
+    if(!items.length){
+      return emptyState(estPedicure?"💅":"💇", "Aucune prestation aujourd’hui",
+        "Les prestations enregistrées aujourd’hui pour " + (estPedicure?"Pédicure/Manicure":"Coiffure") + " apparaîtront ici.");
+    }
+    var actionVoir = estPedicure ? "voir-pedicure-du-jour" : "voir-coiffure-du-jour";
+    var rows = items.map(function(p){
+      var types = estPedicure ? (p.typePrestation || "Prestation") : ((p.typesCoiffureNoms||[]).join(", ") || "Type non précisé");
+      var lieuTxt = p.lieu === "salon" ? "💈 En salon" : esc(p.quartierNom);
+      return (
+        '<button type="button" class="entry-card" data-action="' + actionVoir + '" data-id="' + p.id + '">' +
+          '<div class="entry-ico">' + (estPedicure?"💅":"💇") + '</div>' +
+          '<div class="entry-main">' +
+            '<div class="entry-title">' + esc(p.typeClienteNom) + ' · ' + lieuTxt + '</div>' +
+            '<div class="entry-sub">' + esc(types) + '</div>' +
+          '</div>' +
+          '<div class="entry-amount">' + formatFCFA(p.mainOeuvre) + '</div>' +
+        '</button>'
+      );
+    }).join("");
+    return '<div class="entry-list">' + rows + '</div>';
   }
 
   function renderFormAutreCharge(){
@@ -1938,46 +2316,243 @@
     return renderBreakdownRows("Autres charges — par rubrique", groupSum(items, function(c){ return c.rubriqueNom + (c.rubriqueSupprimee ? " (rubrique supprimée)" : ""); }, function(c){ return c.montant; }));
   }
 
+  // Sprint 4B — remarques de terrain : « Mon état » garde les chiffres, séparés
+  // par profil (sélecteur en haut si plusieurs profils actifs, un seul à la
+  // fois). Semaine = liste des jours de la semaine, chacun cliquable pour voir
+  // son détail. Mois = liste des semaines du mois, chacune cliquable pour voir
+  // le détail semaine (qui détaille elle-même les jours) — même mécanique de
+  // navigation Mois → Semaines → Jour que MonDjai/Trépor (Sprint 7B). Les
+  // statistiques par quartier/type/produit ont déménagé vers « Mes habitudes »
+  // (overlay séparé, accessible depuis l'en-tête).
   function renderMonEtat(){
     ensureEtatRefs();
+    var profilsActifs = PROFIL_ORDRE.filter(function(k){ return !!state.config.profils[k]; });
+    if(!profilsActifs.length){
+      return '<div class="section-title">Mon état</div>' +
+        emptyState("📊","Aucun profil actif","Activez au moins un profil depuis Réglages pour voir vos chiffres.");
+    }
+    if(!ui.etatProfil || profilsActifs.indexOf(ui.etatProfil) === -1) ui.etatProfil = profilsActifs[0];
+    var profil = ui.etatProfil;
+
+    var selectorHtml = "";
+    if(profilsActifs.length > 1){
+      selectorHtml = '<div class="etat-tabs">' + profilsActifs.map(function(k){
+        var lbl = PROFIL_INFO[k].emoji + " " + PROFIL_LABEL_COURT[k];
+        return '<button type="button" class="etat-tab' + (profil===k?" active":"") + '" data-action="etat-set-profil" data-val="' + k + '">' + lbl + '</button>';
+      }).join("") + '</div>';
+    }
+
     var periode = ui.etatPeriode;
-    var ref = periode === "semaine" ? dateFromStr(ui.etatSemaineRef) : periode === "mois" ? dateFromStr(ui.etatMoisRef) : new Date();
-    var range = rangeForPeriode(periode, ref);
-
-    var sources = revenusParSource(range);
-    var charges = chargesConsolidees(range);
-    var revenuTotal = sumBy(sources, function(s){ return s.montant; });
-    var soldeNet = revenuTotal - charges;
-
     var tabs = ["jour","semaine","mois"].map(function(p){
       var lbl = { jour:"Jour", semaine:"Semaine", mois:"Mois" }[p];
       return '<button type="button" class="etat-tab' + (periode===p?" active":"") + '" data-action="etat-set-periode" data-val="' + p + '">' + lbl + '</button>';
+    }).join("");
+
+    var body = "";
+    if(periode === "jour"){
+      body = renderEtatJourDetail(profil, todayStr());
+    } else if(periode === "semaine"){
+      if(ui.etatSelJour){
+        body = renderEtatBack() + renderEtatJourDetail(profil, ui.etatSelJour);
+      } else {
+        body = renderEtatSemaineNav() + renderEtatListeJours(profil, getWeekRange(dateFromStr(ui.etatSemaineRef)), "semaine");
+      }
+    } else {
+      if(ui.etatSelJour){
+        body = renderEtatBack() + renderEtatJourDetail(profil, ui.etatSelJour);
+      } else if(ui.etatSelSemaine){
+        var wr = getWeekRange(dateFromStr(ui.etatSelSemaine));
+        body = renderEtatBack() +
+          '<div class="hint tight" style="margin-bottom:10px; font-weight:700; color:var(--text);">' + esc(formatDateFr(wr.start) + " – " + formatDateFr(wr.end)) + '</div>' +
+          renderEtatListeJours(profil, wr, "mois");
+      } else {
+        body = renderEtatMoisNav() + renderEtatListeSemaines(profil, getMonthRange(dateFromStr(ui.etatMoisRef)));
+      }
+    }
+
+    return (
+      '<div class="section-title">Mon état</div>' +
+      selectorHtml +
+      '<div class="etat-tabs">' + tabs + '</div>' +
+      body
+    );
+  }
+
+  function renderEtatBack(){
+    return '<button type="button" class="btn btn-ghost" style="padding:8px 0; margin-bottom:6px;" data-action="etat-back">‹ Retour</button>';
+  }
+  function renderEtatSemaineNav(){
+    var range = getWeekRange(dateFromStr(ui.etatSemaineRef));
+    var label = formatDateFr(range.start) + " – " + formatDateFr(range.end);
+    var estActuelle = ui.etatSemaineRef >= getWeekRange(new Date()).start;
+    return (
+      '<div class="etat-nav">' +
+        '<button type="button" class="en-btn" data-action="etat-nav" data-sens="-1" data-periode="semaine">‹</button>' +
+        '<div class="en-label">' + esc(label) + '</div>' +
+        '<button type="button" class="en-btn" data-action="etat-nav" data-sens="1" data-periode="semaine"' + (estActuelle?" disabled":"") + '>›</button>' +
+      '</div>'
+    );
+  }
+  function renderEtatMoisNav(){
+    var ref = dateFromStr(ui.etatMoisRef);
+    var label = moisLabelFor(ref).charAt(0).toUpperCase() + moisLabelFor(ref).slice(1);
+    var estActuelle = ui.etatMoisRef >= getMonthRange(new Date()).start;
+    return (
+      '<div class="etat-nav">' +
+        '<button type="button" class="en-btn" data-action="etat-nav" data-sens="-1" data-periode="mois">‹</button>' +
+        '<div class="en-label">' + esc(label) + '</div>' +
+        '<button type="button" class="en-btn" data-action="etat-nav" data-sens="1" data-periode="mois"' + (estActuelle?" disabled":"") + '>›</button>' +
+      '</div>'
+    );
+  }
+
+  var JOURS_NOMS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+
+  function renderEtatListeJours(profil, range, from){
+    var jours = [];
+    var d = dateFromStr(range.start);
+    var end = dateFromStr(range.end);
+    while(dateKey(d) <= dateKey(end)){
+      jours.push(dateKey(d));
+      d.setDate(d.getDate()+1);
+    }
+    var today = todayStr();
+    var rows = jours.map(function(ds){
+      var dd = dateFromStr(ds);
+      var label = JOURS_NOMS[dd.getDay()].charAt(0).toUpperCase() + JOURS_NOMS[dd.getDay()].slice(1) + " " + formatDateFr(ds);
+      if(ds > today){
+        return '<div class="etat-stat-row" style="opacity:.4;"><div class="er-label">' + esc(label) + '</div><div class="er-val">—</div></div>';
+      }
+      var solde = soldeNetPeriodeProfil(profil, { start:ds, end:ds });
+      return (
+        '<button type="button" class="entry-card" style="width:100%; text-align:left;" data-action="etat-select-jour" data-date="' + ds + '" data-from="' + from + '">' +
+          '<div class="entry-main"><div class="entry-title">' + esc(label) + '</div></div>' +
+          '<div class="entry-amount' + (solde<0?" neg":"") + '">' + formatFCFA(solde) + '</div>' +
+        '</button>'
+      );
+    }).join("");
+    return '<div class="entry-list">' + rows + '</div>';
+  }
+
+  function renderEtatListeSemaines(profil, monthRange){
+    var firstWeekStart = getWeekRange(dateFromStr(monthRange.start)).start;
+    var lastWeekStart = getWeekRange(dateFromStr(monthRange.end)).start;
+    var semaines = [];
+    var cur = firstWeekStart;
+    while(cur <= lastWeekStart){
+      semaines.push(cur);
+      var d = dateFromStr(cur); d.setDate(d.getDate()+7);
+      cur = dateKey(d);
+    }
+    var today = todayStr();
+    var rows = semaines.map(function(ws){
+      var range = getWeekRange(dateFromStr(ws));
+      var label = formatDateFr(range.start) + " – " + formatDateFr(range.end);
+      if(range.start > today){
+        return '<div class="etat-stat-row" style="opacity:.4;"><div class="er-label">' + esc(label) + '</div><div class="er-val">—</div></div>';
+      }
+      var solde = soldeNetPeriodeProfil(profil, range);
+      return (
+        '<button type="button" class="entry-card" style="width:100%; text-align:left;" data-action="etat-select-semaine" data-week-start="' + ws + '">' +
+          '<div class="entry-main"><div class="entry-title">' + esc(label) + '</div></div>' +
+          '<div class="entry-amount' + (solde<0?" neg":"") + '">' + formatFCFA(solde) + '</div>' +
+        '</button>'
+      );
+    }).join("");
+    return '<div class="entry-list">' + rows + '</div>';
+  }
+
+  function renderEtatJourDetail(profil, dateStr){
+    var range = { start:dateStr, end:dateStr };
+    var recette = recetteProfil(profil, range);
+    var charge = chargeProfil(profil, range);
+    var solde = recette - charge;
+    var objs = objectifsProfil(profil);
+    var epargneJour = objs.length ? computeEpargneJourProfil(profil, dateStr) : null;
+
+    var labelRecette = profil === "revente" ? "🛍️ Ventes" : (profil === "pedicure" ? "💅 Main d’œuvre" : "💇 Main d’œuvre");
+    var labelCharge = profil === "revente" ? "📦 Achats" : "🚗 Transport";
+
+    var rows =
+      '<div class="etat-stat-row"><div class="er-label">' + labelRecette + '</div><div class="er-val">' + formatFCFA(recette) + '</div></div>' +
+      '<div class="etat-stat-row"><div class="er-label">' + labelCharge + '</div><div class="er-val neg">' + formatFCFA(charge) + '</div></div>';
+
+    if(profil === "coiffure"){
+      var meche = sumBy(filterRange(state.prestationsCoiffure, range), function(p){ return p.coutMeches||0; });
+      rows += '<div class="etat-stat-row"><div class="er-label">🧶 Mèche (non comptée)</div><div class="er-val">' + formatFCFA(meche) + '</div></div>';
+    }
+    if(profil === "pedicure"){
+      var prod = sumBy(filterRange(state.prestationsPedicure, range), function(p){ return p.coutProduits||0; });
+      rows += '<div class="etat-stat-row"><div class="er-label">🧴 Dont produits (inclus dans Transport ci-dessus)</div><div class="er-val">' + formatFCFA(prod) + '</div></div>';
+    }
+    if(profil === "revente"){
+      var benefice = beneficeReventePeriode(range);
+      rows += '<div class="etat-stat-row"><div class="er-label">💹 Bénéfice (période)</div><div class="er-val">' + formatFCFA(benefice) + '</div></div>';
+    }
+
+    rows += '<div class="etat-stat-row"><div class="er-label">Solde net</div><div class="er-val' + (solde<0?" neg":"") + '">' + formatFCFA(solde) + '</div></div>';
+    if(epargneJour !== null) rows += '<div class="etat-stat-row"><div class="er-label">💰 Épargne</div><div class="er-val">' + formatFCFA(epargneJour) + '</div></div>';
+
+    var titre = '<div class="hint tight" style="margin-bottom:10px; font-weight:700; color:var(--text);">' + esc(formatDateFr(dateStr)) + '</div>';
+    return titre + '<div class="etat-stats">' + rows + '</div>';
+  }
+
+  /* ================= « Mes habitudes » (Sprint 4B) ================= */
+  // Reprend les statistiques (par produit, quartier, type de coiffure/
+  // prestation, type de cliente, rubrique de charge commune) qui étaient dans
+  // Mon état avant ce sprint — non séparées par profil (ce sont des habitudes,
+  // pas des soldes) mais toujours filtrées Jour/Semaine/Mois avec navigation.
+
+  function ensureHabitudesRefs(){
+    if(!ui.habitudesPeriode) ui.habitudesPeriode = "jour";
+    if(!ui.habitudesSemaineRef) ui.habitudesSemaineRef = todayStr();
+    if(!ui.habitudesMoisRef) ui.habitudesMoisRef = todayStr();
+  }
+  function shiftHabitudesRef(periode, delta){
+    if(periode === "semaine"){
+      var d = dateFromStr(ui.habitudesSemaineRef);
+      d.setDate(d.getDate() + 7*delta);
+      var nouveau = dateKey(d);
+      var refAujourdhui = getWeekRange(new Date()).start;
+      if(nouveau > refAujourdhui) nouveau = refAujourdhui;
+      ui.habitudesSemaineRef = nouveau;
+    } else if(periode === "mois"){
+      var d2 = dateFromStr(ui.habitudesMoisRef);
+      d2.setDate(1);
+      d2.setMonth(d2.getMonth() + delta);
+      var nouveau2 = dateKey(d2);
+      var refAujourdhuiM = getMonthRange(new Date()).start;
+      if(nouveau2 > refAujourdhuiM) nouveau2 = refAujourdhuiM;
+      ui.habitudesMoisRef = nouveau2;
+    }
+  }
+
+  function renderHabitudesOverlay(){
+    ensureHabitudesRefs();
+    var periode = ui.habitudesPeriode;
+    var ref = periode === "semaine" ? dateFromStr(ui.habitudesSemaineRef) : periode === "mois" ? dateFromStr(ui.habitudesMoisRef) : new Date();
+    var range = rangeForPeriode(periode, ref);
+
+    var tabs = ["jour","semaine","mois"].map(function(p){
+      var lbl = { jour:"Jour", semaine:"Semaine", mois:"Mois" }[p];
+      return '<button type="button" class="etat-tab' + (periode===p?" active":"") + '" data-action="habitudes-set-periode" data-val="' + p + '">' + lbl + '</button>';
     }).join("");
 
     var navHtml = "";
     if(periode === "semaine" || periode === "mois"){
       var label = periode === "semaine" ? (formatDateFr(range.start) + " – " + formatDateFr(range.end)) : (moisLabelFor(ref).charAt(0).toUpperCase() + moisLabelFor(ref).slice(1));
       var refAujourdhui = periode === "semaine" ? getWeekRange(new Date()).start : getMonthRange(new Date()).start;
-      var estPeriodeActuelle = (periode === "semaine" ? ui.etatSemaineRef : ui.etatMoisRef) >= refAujourdhui;
+      var estPeriodeActuelle = (periode === "semaine" ? ui.habitudesSemaineRef : ui.habitudesMoisRef) >= refAujourdhui;
       navHtml = (
         '<div class="etat-nav">' +
-          '<button type="button" class="en-btn" data-action="etat-nav" data-sens="-1" data-periode="' + periode + '">‹</button>' +
+          '<button type="button" class="en-btn" data-action="habitudes-nav" data-sens="-1" data-periode="' + periode + '">‹</button>' +
           '<div class="en-label">' + esc(label) + '</div>' +
-          '<button type="button" class="en-btn" data-action="etat-nav" data-sens="1" data-periode="' + periode + '"' + (estPeriodeActuelle?" disabled":"") + '>›</button>' +
+          '<button type="button" class="en-btn" data-action="habitudes-nav" data-sens="1" data-periode="' + periode + '"' + (estPeriodeActuelle?" disabled":"") + '>›</button>' +
         '</div>'
       );
     } else {
       navHtml = '<div class="etat-nav"><div class="en-label">' + esc(formatDateFr(todayStr())) + '</div></div>';
     }
-
-    var epargnePeriode = (state.objectifs||[]).length ? computeEpargnePeriodeTousObjectifs(range) : null;
-
-    var statRows = sources.map(function(s){
-      return '<div class="etat-stat-row"><div class="er-label">' + s.emoji + ' ' + esc(s.label) + '</div><div class="er-val">' + formatFCFA(s.montant) + '</div></div>';
-    }).join("") +
-      '<div class="etat-stat-row"><div class="er-label">💸 Charges</div><div class="er-val neg">' + formatFCFA(charges) + '</div></div>' +
-      '<div class="etat-stat-row"><div class="er-label">Solde net</div><div class="er-val' + (soldeNet<0?" neg":"") + '">' + formatFCFA(soldeNet) + '</div></div>' +
-      (epargnePeriode !== null ? '<div class="etat-stat-row"><div class="er-label">💰 Épargne</div><div class="er-val">' + formatFCFA(epargnePeriode) + '</div></div>' : '');
 
     var profils = state.config.profils;
     var breakdowns = "";
@@ -1985,28 +2560,36 @@
     if(profils.coiffure) breakdowns += renderBreakdownsCoiffure(range);
     if(profils.pedicure) breakdowns += renderBreakdownsPedicure(range);
     breakdowns += renderBreakdownAutresCharges(range);
+    if(!breakdowns){
+      breakdowns = emptyState("📈","Pas encore d’habitudes à montrer","Vos statistiques par quartier, type de coiffure/prestation, type de cliente, produit ou rubrique de charge apparaîtront ici au fil de vos saisies.");
+    }
 
     return (
-      '<div class="section-title">Mon état</div>' +
-      '<div class="etat-tabs">' + tabs + '</div>' +
-      navHtml +
-      '<div class="etat-stats">' + statRows + '</div>' +
-      breakdowns
+      '<div class="onb">' +
+        '<div class="onb-head" style="display:flex; align-items:center; justify-content:space-between;">' +
+          '<div class="onb-title" style="margin:0;">Mes habitudes</div>' +
+          '<button type="button" class="icon-btn" data-action="fermer-overlay">✕</button>' +
+        '</div>' +
+        '<div class="etat-tabs">' + tabs + '</div>' +
+        navHtml +
+        breakdowns +
+      '</div>'
     );
   }
 
   /* ================= F9 : écran Objectif d'épargne ================= */
 
   function enCreationObjectif(){
-    return ui.objCreating || (state.objectifs||[]).length === 0;
+    return ui.objCreating || objectifsProfil(ui.objectifProfil).length === 0;
   }
 
   function renderObjectifOverlay(){
     var body = enCreationObjectif() ? renderObjectifCreation() : renderObjectifListe();
+    var titreProfil = PROFIL_LABEL_COURT[ui.objectifProfil] || "";
     return (
       '<div class="onb">' +
         '<div class="onb-head" style="display:flex; align-items:center; justify-content:space-between;">' +
-          '<div class="onb-title" style="margin:0;">Objectif d’épargne</div>' +
+          '<div class="onb-title" style="margin:0;">Objectif · ' + esc(titreProfil) + '</div>' +
           '<button type="button" class="icon-btn" data-action="fermer-overlay">✕</button>' +
         '</div>' +
         '<div class="objectif-rappel">Faut pas zahé, bloquez votre épargne du jour sur mobile money ou transfert sur votre compte bancaire.</div>' +
@@ -2016,7 +2599,7 @@
   }
 
   function renderObjectifListe(){
-    var objs = state.objectifs || [];
+    var objs = objectifsProfil(ui.objectifProfil);
     var cards = objs.map(function(o){
       var m = objectifModele(o.modele);
       var cumule = computeEpargneCumuleeObjectif(o);
@@ -2065,12 +2648,12 @@
       '</div>' +
       (d.erreur ? '<div class="error-text">' + esc(d.erreur) + '</div>' : '') +
       '<button type="button" class="btn btn-primary" style="margin-top:6px;" data-action="obj-etape-mode">Continuer</button>' +
-      ((state.objectifs||[]).length ? '<button type="button" class="btn btn-ghost" data-action="annuler-creation-objectif">Annuler</button>' : '')
+      (objectifsProfil(ui.objectifProfil).length ? '<button type="button" class="btn btn-ghost" data-action="annuler-creation-objectif">Annuler</button>' : '')
     );
   }
 
   function renderObjCreationMode(d){
-    var autoDispo = !hasObjectifAutoActif(null);
+    var autoDispo = !hasObjectifAutoActif(ui.objectifProfil, null);
     return (
       '<div class="hint" style="margin-bottom:10px;">Comment voulez-vous épargner ?</div>' +
       '<div class="radio-row" style="margin-bottom:10px;">' +
@@ -2115,7 +2698,7 @@
           fieldErrObj("montant") +
         '</div>';
     } else {
-      var moyenne = moyenneHebdoRecente();
+      var moyenne = moyenneHebdoRecente(ui.objectifProfil);
       var msgPasDeDonnees = "";
       if(moyenne === null){
         msgPasDeDonnees = '<div class="hint" style="margin:6px 0 12px;">Pas encore assez de jours saisis pour calculer une moyenne réelle. Choisissez un rythme — les montants s’ajusteront tout seuls dès que vous aurez des données.</div>';
@@ -2153,16 +2736,16 @@
       var montant = toNum(d.montantFixeParJour);
       if(!(montant > 0)){ d.erreurs.montant = "Indiquez un montant supérieur à 0."; render(); return; }
       state.objectifs.push({
-        id: uid("obj"), modele: d.modele, sousType: d.sousType||"", nom: nom,
+        id: uid("obj"), profil: ui.objectifProfil, modele: d.modele, sousType: d.sousType||"", nom: nom,
         type:"manuel", montantFixeParJour: montant, pourcentage: null,
         montantCible: 0, dateCreation: todayStr(), actif: true
       });
     } else {
-      if(hasObjectifAutoActif(null)){ return; }
+      if(hasObjectifAutoActif(ui.objectifProfil, null)){ return; }
       if(!d.scenario){ d.erreurs.scenario = "Choisissez un rythme."; render(); return; }
       var pct = POURCENTAGES_SCENARIO.filter(function(s){ return s.key===d.scenario; })[0].pct;
       state.objectifs.push({
-        id: uid("obj"), modele: d.modele, sousType: d.sousType||"", nom: nom,
+        id: uid("obj"), profil: ui.objectifProfil, modele: d.modele, sousType: d.sousType||"", nom: nom,
         type:"auto", montantFixeParJour: null, pourcentage: pct,
         montantCible: 0, dateCreation: todayStr(), actif: true
       });
@@ -2200,7 +2783,7 @@
           '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-modifMontant" value="' + esc(d.montantFixeParJour||"") + '" data-action-change="capture-modif-objectif">' +
         '</div>';
     } else {
-      var moyenne = moyenneHebdoRecente() || 0;
+      var moyenne = moyenneHebdoRecente(o.profil) || 0;
       var scenarios = computeScenarios(moyenne, d.joursRoules||6);
       champsSpecifiques = '<div class="scenario-grid">' + scenarios.map(function(s){
         var sel = d.pourcentage === s.pct;
@@ -2485,7 +3068,7 @@
             '<input type="text" class="input" id="f-nouvelleRubrique" placeholder="Nouvelle rubrique" value="' + esc(ui.draft["f-nouvelleRubrique"]||"") + '" data-autofocus data-action-change="capture-nouvelle-rubrique">' +
             '<button type="button" class="btn btn-secondary" data-action="ajouter-rubrique-charge">Ajouter</button>' +
           '</div>' +
-          '<div class="hint tight">Servent pour les charges ajoutées depuis le bloc « Charges » du jour (loyer, publicité…). Supprimer une rubrique personnalisée ne touche pas aux charges déjà enregistrées.</div>' +
+          '<div class="hint tight">Servent pour les charges communes ajoutées depuis la carte « Charges communes du salon » de l’écran Aujourd’hui (loyer, publicité…) — non liées à un profil en particulier. Supprimer une rubrique personnalisée ne touche pas aux charges déjà enregistrées.</div>' +
         '</div>' +
         '<div class="reglages-section">' +
           '<div class="rs-title">Sécurité</div>' +
@@ -2520,11 +3103,12 @@
           '<button type="button" class="icon-btn" data-action="fermer-apropos">✕</button>' +
         '</div>' +
         '<div class="mission">Chaque geste compte : on note, on avance.</div>' +
-        '<div class="about-line">MonDjai/Salon F vous aide à suivre vos prestations, vos ventes et vos achats, sans jugement et sans calcul compliqué.</div>' +
+        '<div class="about-line">MonDjai/Salon F vous aide à suivre vos prestations, vos ventes et vos achats, profil par profil, sans jugement et sans calcul compliqué.</div>' +
         '<div class="about-line">Vos données restent uniquement sur ce téléphone — rien n’est envoyé sur internet.</div>' +
-        '<div class="about-line">Un objectif d’épargne (🎯) et un écran Partager (📤) sont accessibles depuis les icônes en haut de l’application.</div>' +
+        '<div class="about-line">Chaque profil actif a sa propre caisse sur Aujourd’hui, avec son propre objectif d’épargne (💰). Vos statistiques (Mes habitudes 📈) et vos réglages (⚙️) sont accessibles depuis les icônes en haut de l’application.</div>' +
         '<div class="about-line">Le code PIN est un verrou de confort, pas un chiffrement fort — à ne jamais présenter comme une sécurité absolue.</div>' +
-        '<div class="about-line">Version : Sprint 3 — objectif d’épargne, partage, code PIN et sauvegarde JSON. MonDjai/Salon F est maintenant installable comme une application.</div>' +
+        '<div class="about-line">L’accès se renouvelle chaque mois par un code communiqué séparément — sans connexion internet, tout est calculé sur ce téléphone. Vos données ne sont jamais supprimées pendant qu’un renouvellement est en attente.</div>' +
+        '<div class="about-line">Version : Sprint 4C — accès mensuel (renouvellement après 30 jours).</div>' +
       '</div>'
     );
   }
@@ -2541,7 +3125,7 @@
     if(ui.modalReturnTo){
       var back = ui.modalReturnTo;
       ui.modalReturnTo = null;
-      openModal(back);
+      openModal(back.type, back.extra);
       return;
     }
     ui.modal = null;
@@ -2610,7 +3194,18 @@
         return;
       }
 
-      case "ouvrir-objectif": ui.overlay = "objectif"; render(); return;
+      case "ouvrir-objectif": {
+        var profilObj = el.getAttribute("data-profil");
+        ui.objectifProfil = profilObj || ui.objectifProfil || "coiffure";
+        ui.overlay = "objectif";
+        render();
+        return;
+      }
+      case "ouvrir-habitudes": {
+        ui.overlay = "habitudes";
+        render();
+        return;
+      }
       case "ouvrir-partager": ui.overlay = "partager"; ensurePartagerRefs(); render(); return;
 
       case "commencer-creation-objectif": ui.objCreating = true; ui.objDraft = { step:"modele" }; render(); return;
@@ -2623,7 +3218,7 @@
       case "obj-etape-modele": ui.objDraft.step = "modele"; render(); return;
       case "choisir-mode-objectif": {
         var mval = el.getAttribute("data-val");
-        if(mval === "auto" && hasObjectifAutoActif(null)) return;
+        if(mval === "auto" && hasObjectifAutoActif(ui.objectifProfil, null)) return;
         ui.objDraft.mode = mval; ui.objDraft.erreur = ""; render(); return;
       }
       case "obj-etape-details": {
@@ -2673,13 +3268,30 @@
       case "valider-code-acces": {
         var champCode = byId("f-codeAcces");
         if(champCode) ui.codeAccesInput = champCode.value;
-        if(normaliserCode(ui.codeAccesInput) === CODE_ACCES_ATTENDU){
-          state.config.codeAccesOk = true;
-          saveState();
-          ui.codeAccesInput = "";
-          ui.codeAccesErreur = "";
+        var saisieNorm = normaliserCode(ui.codeAccesInput);
+        if(!state.config.codeAccesOk){
+          // Code d'accès initial (HKETCK) — inchangé depuis le Sprint 3.
+          if(saisieNorm === CODE_ACCES_ATTENDU){
+            state.config.codeAccesOk = true;
+            state.config.derniereValidationAcces = Date.now();
+            saveState();
+            ui.codeAccesInput = "";
+            ui.codeAccesErreur = "";
+          } else {
+            ui.codeAccesErreur = "Code incorrect, réessayez.";
+          }
         } else {
-          ui.codeAccesErreur = "Code incorrect, réessayez.";
+          // Sprint 4C — renouvellement mensuel : code du mois en cours,
+          // calculé localement (aucun appel réseau). Aucune donnée n'est
+          // touchée par cette validation, seul l'horodatage avance.
+          if(saisieNorm === codeAccesDuMoisAttenduAujourdhui()){
+            state.config.derniereValidationAcces = Date.now();
+            saveState();
+            ui.codeAccesInput = "";
+            ui.codeAccesErreur = "";
+          } else {
+            ui.codeAccesErreur = "Code incorrect, réessayez.";
+          }
         }
         render();
         return;
@@ -2746,11 +3358,49 @@
 
       case "go-tab": ui.tab = el.getAttribute("data-tab"); render(); return;
 
-      case "etat-set-periode": ensureEtatRefs(); ui.etatPeriode = el.getAttribute("data-val"); render(); return;
+      case "etat-set-periode": {
+        ensureEtatRefs();
+        ui.etatPeriode = el.getAttribute("data-val");
+        ui.etatSelSemaine = null; ui.etatSelJour = null;
+        render();
+        return;
+      }
       case "etat-nav": {
         var sens = parseInt(el.getAttribute("data-sens"), 10);
         var per = el.getAttribute("data-periode");
         shiftEtatRef(per, sens);
+        ui.etatSelSemaine = null; ui.etatSelJour = null;
+        render();
+        return;
+      }
+      case "etat-set-profil": {
+        ui.etatProfil = el.getAttribute("data-val");
+        ui.etatSelSemaine = null; ui.etatSelJour = null;
+        render();
+        return;
+      }
+      case "etat-select-jour": {
+        ui.etatSelJour = el.getAttribute("data-date");
+        ui.etatSelJourFrom = el.getAttribute("data-from");
+        render();
+        return;
+      }
+      case "etat-select-semaine": {
+        ui.etatSelSemaine = el.getAttribute("data-week-start");
+        render();
+        return;
+      }
+      case "etat-back": {
+        if(ui.etatSelJour){ ui.etatSelJour = null; ui.etatSelJourFrom = null; render(); return; }
+        if(ui.etatSelSemaine){ ui.etatSelSemaine = null; render(); return; }
+        return;
+      }
+
+      case "habitudes-set-periode": ensureHabitudesRefs(); ui.habitudesPeriode = el.getAttribute("data-val"); render(); return;
+      case "habitudes-nav": {
+        var hsens = parseInt(el.getAttribute("data-sens"), 10);
+        var hper = el.getAttribute("data-periode");
+        shiftHabitudesRef(hper, hsens);
         render();
         return;
       }
@@ -2767,13 +3417,25 @@
 
       case "voir-charges-jour": openModal("detail-charges-jour"); return;
       case "add-autre-charge": {
-        ui.modalReturnTo = "detail-charges-jour";
+        ui.modalReturnTo = { type: "detail-charges-jour" };
         openModal("add-autre-charge");
         return;
       }
       case "voir-autre-charge": {
-        ui.modalReturnTo = "detail-charges-jour";
+        ui.modalReturnTo = { type: "detail-charges-jour" };
         openModal("detail-autre-charge", {id: el.getAttribute("data-id")});
+        return;
+      }
+
+      case "voir-jour-profil": openModal("jour-profil", { profil: el.getAttribute("data-profil") }); return;
+      case "voir-coiffure-du-jour": {
+        ui.modalReturnTo = { type: "jour-profil", extra: { profil: "coiffure" } };
+        openModal("detail-coiffure", {id: el.getAttribute("data-id")});
+        return;
+      }
+      case "voir-pedicure-du-jour": {
+        ui.modalReturnTo = { type: "jour-profil", extra: { profil: "pedicure" } };
+        openModal("detail-pedicure", {id: el.getAttribute("data-id")});
         return;
       }
       case "set-rubrique-charge": {
