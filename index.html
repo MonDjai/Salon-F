@@ -54,6 +54,11 @@
     display:flex; align-items:center; justify-content:center;
   }
   .icon-btn:active{background:var(--card-2);}
+  .icon-btn.epargne-shortcut{
+    width:auto; padding:0 12px; gap:6px; flex-direction:row; font-size:16px; font-weight:800;
+  }
+  .icon-btn.epargne-shortcut .es-emoji{font-size:16px;}
+  .icon-btn.epargne-shortcut .es-val{font-size:12px; font-weight:800; color:var(--text); white-space:nowrap;}
 
   /* ---------- Main ---------- */
   .main{flex:1; padding:14px 16px calc(24px + var(--safe-bottom)); display:flex; flex-direction:column;}
@@ -102,6 +107,7 @@
   .btn-ghost{background:transparent; color:var(--accent); border:none; padding:10px;}
   .btn-danger{background:rgba(255,107,94,.12); color:var(--red); border:1px solid rgba(255,107,94,.4);}
   .btn:active{opacity:.85;}
+  .btn:disabled{opacity:.4; pointer-events:none;}
   .btn-row{display:flex; gap:10px; margin-top:14px;}
   .btn-row .btn{width:auto; flex:1;}
 
@@ -265,6 +271,9 @@
   .dash-block.charges .db-amount{color:var(--red);}
   .dash-block.info{border-style:dashed;}
   .dash-block.info .db-amount{color:var(--text-dim);}
+  /* Sprint 7 (observations terrain post-Sprint 6) : espacement plus généreux
+     entre les tuiles Aujourd'hui et la carte Charges communes du salon. */
+  .charges-card-wrap{margin-top:26px;}
 
   .caisse-zone{margin-bottom:22px;}
   .caisse-zone:last-child{margin-bottom:6px;}
@@ -339,21 +348,41 @@
   .objectif-card .oc-actions .btn{font-size:12.5px; padding:10px;}
   .objectif-slot-vide{
     background:var(--card-2); border:1.5px dashed var(--border); border-radius:16px; padding:16px;
-    margin-bottom:12px; text-align:center; opacity:.85;
+    margin-bottom:12px; text-align:center; position:relative; overflow:hidden;
   }
-  .objectif-slot-vide .osv-emoji{font-size:22px; margin-bottom:6px;}
-  .objectif-slot-vide .osv-titre{font-size:13.5px; font-weight:700;}
-  .objectif-slot-vide .osv-desc{font-size:11.5px; color:var(--text-dim); margin-top:4px; line-height:1.4;}
+  .objectif-slot-vide .osv-ghost-icons{font-size:26px; letter-spacing:12px; opacity:.35; filter:blur(0.5px);}
   .objectif-slot-vide .osv-badge{
-    display:inline-block; margin-top:8px; font-size:11.5px; font-weight:800; color:var(--accent);
+    display:inline-block; margin-top:10px; font-size:11.5px; font-weight:800; color:var(--accent);
     background:rgba(245,166,35,.14); border:1px solid rgba(245,166,35,.4); border-radius:999px; padding:5px 12px;
   }
+
+  /* ---------- F9 : étape « Vous mettez de côté pour quoi ? » (modèles) ---------- */
+  .modele-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;}
+  .modele-tile{
+    background:var(--card); border:1.5px solid var(--border); border-radius:16px; padding:18px 10px;
+    text-align:center; appearance:none; -webkit-appearance:none; font:inherit; color:var(--text);
+  }
+  .modele-tile.active{border-color:var(--accent); background:rgba(245,166,35,.1);}
+  .modele-tile .mt-emoji{font-size:30px; margin-bottom:8px;}
+  .modele-tile .mt-nom{font-size:14px; font-weight:800;}
+  .modele-tile .mt-desc{font-size:11px; color:var(--text-dim); margin-top:4px; line-height:1.3;}
 
   /* ---------- F10 : Télécharger ---------- */
   .partager-canvas-wrap{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:10px; margin-bottom:16px; overflow:hidden;}
   .partager-canvas-wrap canvas{width:100%; height:auto; display:block; border-radius:10px;}
+  /* Sprint 7 (observations terrain) : flou progressif de l'aperçu Télécharger —
+     un second canvas, copie du premier, flouté et masqué en dégradé pour ne
+     couvrir que le bas de l'image (le haut — titre + solde net — reste net
+     pour donner envie). Les boutons Télécharger/Partager utilisent toujours le
+     canvas net sous-jacent, jamais celui-ci. */
+  .tc-blur-layer{
+    position:absolute; left:0; top:0; right:0;
+    filter:blur(16px);
+    -webkit-mask-image:linear-gradient(to bottom, transparent 0%, transparent 28%, black 36%, black 100%);
+    mask-image:linear-gradient(to bottom, transparent 0%, transparent 28%, black 36%, black 100%);
+  }
   .partager-overlay-abo{
-    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    position:absolute; left:50%; top:74%; transform:translate(-50%,-50%);
     background:rgba(17,20,26,.75); border:1px solid rgba(245,166,35,.5); color:var(--accent);
     font-size:14px; font-weight:800; text-align:center; padding:12px 20px; border-radius:14px;
     max-width:80%; line-height:1.4;
@@ -1057,9 +1086,24 @@
           '</div>' +
         '</div>' +
         '<div class="header-icons">' +
+          renderEpargneShortcut() +
           '<button type="button" class="icon-btn" data-action="ouvrir-reglages" aria-label="Réglages">⚙️</button>' +
         '</div>' +
       '</div>'
+    );
+  }
+
+  // Sprint 7 (observations terrain) : raccourci permanent vers l'objectif
+  // d'épargne, visible sur tous les écrans à côté de ⚙️ Réglages — mêmes
+  // informations que la tuile Épargne d'Aujourd'hui (montant du jour /
+  // objectif actif), sans passer par la tuile de l'accueil.
+  function renderEpargneShortcut(){
+    var epargne = state.objectifEpargne ? epargneJour(todayStr()) : 0;
+    var val = state.objectifEpargne ? formatFCFA(epargne) : "Aucun";
+    return (
+      '<button type="button" class="icon-btn epargne-shortcut" data-action="ouvrir-objectif" aria-label="Objectif épargne">' +
+        '<span class="es-emoji">' + esc(epargneEmoji()) + '</span><span class="es-val">' + esc(val) + '</span>' +
+      '</button>'
     );
   }
 
@@ -1147,8 +1191,18 @@
   function chargesCommunesTotal(range){
     return sumBy(filterRange(state.autresCharges, range), function(c){ return c.montant; });
   }
+  // Sprint 7 (observations terrain, confirmé par Hamadou) : le Solde net de
+  // « Mon état » (et de l'aperçu Télécharger, même notion) déduit désormais à
+  // la fois l'Épargne et les Charges communes de la Main d'œuvre — et non plus
+  // les seules Charges communes. Les Charges communes restent affichées telles
+  // quelles dans la mini-rangée de stats sous ce solde, à titre d'information,
+  // même si elles n'apparaissent plus isolément dans le calcul. Ce changement
+  // ne touche pas « Disponible aujourd'hui » sur l'écran Aujourd'hui, qui reste
+  // Main d'œuvre − Charges communes − Épargne (formule inchangée, déjà
+  // équivalente arithmétiquement, mais gardée comme fonction séparée pour ne
+  // jamais coupler par erreur les deux écrans si l'un venait à évoluer seul).
   function soldeNetPeriode(range){
-    return recetteCoiffure(range) - chargesCommunesTotal(range);
+    return recetteCoiffure(range) - epargnePeriode(range) - chargesCommunesTotal(range);
   }
   function soldeNetJour(dateStr){ return soldeNetPeriode({ start:dateStr, end:dateStr }); }
 
@@ -1199,6 +1253,28 @@
   }
   function epargneJour(dateStr){ return epargnePeriode({ start:dateStr, end:dateStr }); }
 
+  // Sprint 7 (observations terrain) : 4 modèles d'objectif d'épargne, repris du
+  // format de l'écran « Mon objectif » de Trépor mais adaptés au métier de la
+  // coiffure — utilisés pour l'étape « Vous mettez de côté pour quoi ? » avant
+  // le choix Auto/Manuel, et pour l'habillage (icônes fantômes) des 2
+  // emplacements verrouillés.
+  var OBJECTIF_MODELES = [
+    { id:"vehicule", emoji:"🏍️", nom:"Véhicule", desc:"Moto pour les visites à domicile, apport véhicule" },
+    { id:"famille", emoji:"👨‍👩‍👧", nom:"Famille", desc:"Mariage, scolarité, santé" },
+    { id:"securite", emoji:"🛟", nom:"Filet de sécurité", desc:"Jour sans clientes, panne, imprévu" },
+    { id:"libre", emoji:"💰", nom:"Épargne libre", desc:"Juste mettre de côté, sans montant précis" }
+  ];
+  function findObjectifModele(id){
+    for(var i=0;i<OBJECTIF_MODELES.length;i++) if(OBJECTIF_MODELES[i].id === id) return OBJECTIF_MODELES[i];
+    return null;
+  }
+  // Emoji affiché pour l'épargne (tuile Aujourd'hui, raccourci d'en-tête, carte
+  // objectif active) : celui du modèle choisi à la création si disponible,
+  // sinon 💰 par défaut (objectifs créés avant ce sprint, ou modèle non choisi).
+  function epargneEmoji(){
+    return (state.objectifEpargne && state.objectifEpargne.emoji) || "💰";
+  }
+
   function emptyState(emoji, titre, desc){
     return '<div class="empty-state"><div class="es-emoji">' + emoji + '</div>' +
       '<div class="es-title">' + esc(titre) + '</div>' +
@@ -1220,16 +1296,16 @@
 
     var blocks =
       '<button type="button" class="dash-block" style="color:var(--text);" data-action="voir-jour-mainoeuvre">' +
-        '<div class="db-emoji">💇</div><div class="db-amount">' + formatFCFA(mainOeuvre) + '</div><div class="db-label">Main d’œuvre</div>' +
+        '<div class="db-emoji">✂️</div><div class="db-amount">' + formatFCFA(mainOeuvre) + '</div><div class="db-label">Main d’œuvre</div>' +
       '</button>' +
       '<button type="button" class="dash-block info" style="color:var(--text);" data-action="voir-jour-champ" data-champ="transport">' +
         '<div class="db-emoji">🚗</div><div class="db-amount">' + formatFCFA(transport) + '</div><div class="db-label">Transport</div>' +
       '</button>' +
       '<button type="button" class="dash-block info" style="color:var(--text);" data-action="voir-jour-champ" data-champ="meche">' +
-        '<div class="db-emoji">🧶</div><div class="db-amount">' + formatFCFA(meche) + '</div><div class="db-label">Mèche</div>' +
+        '<div class="db-emoji">🪮</div><div class="db-amount">' + formatFCFA(meche) + '</div><div class="db-label">Mèche</div>' +
       '</button>' +
       '<button type="button" class="dash-block" style="color:var(--text);" data-action="ouvrir-objectif">' +
-        '<div class="db-emoji">💰</div><div class="db-amount">' + (state.objectifEpargne ? formatFCFA(epargne) : "Aucun") + '</div><div class="db-label">Épargne</div>' +
+        '<div class="db-emoji">' + esc(epargneEmoji()) + '</div><div class="db-amount">' + (state.objectifEpargne ? formatFCFA(epargne) : "Aucun") + '</div><div class="db-label">Épargne</div>' +
       '</button>';
 
     return (
@@ -1240,7 +1316,7 @@
         perte +
       '</div>' +
       '<div class="dash-grid">' + blocks + '</div>' +
-      renderChargesCommunesCard()
+      '<div class="charges-card-wrap">' + renderChargesCommunesCard() + '</div>'
     );
   }
 
@@ -1488,7 +1564,7 @@
     items = sortByDateDesc(items);
     var total = sumBy(items, function(p){ return estTransport ? (p.transport||0) : (p.coutMeches||0); });
     var titreChamp = estTransport ? "Transport" : "Mèche";
-    var emojiChamp = estTransport ? "🚗" : "🧶";
+    var emojiChamp = estTransport ? "🚗" : "🪮";
     if(!items.length){
       return (
         '<div class="hint tight" style="margin-bottom:10px;">Aucun montant ' + (estTransport?"transport":"mèche") + ' enregistré aujourd’hui.</div>'
@@ -1773,8 +1849,8 @@
     var range = { start: dateStr, end: dateStr };
     var recette = recetteCoiffure(range);
     var charges = chargesCommunesTotal(range);
-    var solde = recette - charges;
     var eparg = epargnePeriode(range);
+    var solde = recette - eparg - charges;
     var titre = '<div class="hint tight" style="margin-bottom:10px; font-weight:700; color:var(--text);">' + esc(formatDateFr(dateStr)) + '</div>';
     var soldeCard = (
       '<div class="dash-solde" style="margin-bottom:16px;">' +
@@ -1791,8 +1867,8 @@
   function renderBlocEtatPeriode(range){
     var recette = recetteCoiffure(range);
     var charges = chargesCommunesTotal(range);
-    var solde = recette - charges;
     var eparg = epargnePeriode(range);
+    var solde = recette - eparg - charges;
     var soldeCard = (
       '<div class="dash-solde" style="margin-bottom:16px;">' +
         '<div class="ds-label">Solde net</div>' +
@@ -1985,11 +2061,11 @@
   }
 
   function renderObjectifSlotsGrises(){
+    var ghosts = OBJECTIF_MODELES.map(function(m){ return '<span>' + m.emoji + '</span>'; }).join("");
     var tile = function(){
       return (
         '<div class="objectif-slot-vide">' +
-          '<div class="osv-emoji">🔒</div>' +
-          '<div class="osv-titre">Emplacement supplémentaire</div>' +
+          '<div class="osv-ghost-icons">' + ghosts + '</div>' +
           '<div class="osv-badge">Abonnez-vous pour plus de fonctionnalités</div>' +
         '</div>'
       );
@@ -1997,8 +2073,33 @@
     return '<div style="margin-top:8px;">' + tile() + tile() + '</div>';
   }
 
+  // Sprint 7 (observations terrain) : étape « Vous mettez de côté pour quoi ? »
+  // réintroduite avant le choix Auto/Manuel, sur le modèle de l'écran « Mon
+  // objectif » de Trépor — 4 modèles adaptés au métier de la coiffure. Le
+  // modèle choisi préremplit le nom et l'emoji de l'objectif (confirmé par
+  // Hamadou) ; l'utilisatrice garde la main pour modifier le nom ensuite.
   function renderObjectifCreation(){
-    var d = ui.objDraft = ui.objDraft || { mode:"auto", pourcentage:"10", montant:"", nom:"Épargne" };
+    var d = ui.objDraft = ui.objDraft || { step:"modele", modeleId:null, mode:"auto", pourcentage:"10", montant:"", nom:"" };
+
+    if(d.step !== "form"){
+      var tiles = OBJECTIF_MODELES.map(function(m){
+        var active = d.modeleId === m.id;
+        return (
+          '<button type="button" class="modele-tile' + (active?" active":"") + '" data-action="choisir-modele-objectif" data-val="' + m.id + '">' +
+            '<div class="mt-emoji">' + m.emoji + '</div>' +
+            '<div class="mt-nom">' + esc(m.nom) + '</div>' +
+            '<div class="mt-desc">' + esc(m.desc) + '</div>' +
+          '</button>'
+        );
+      }).join("");
+      return (
+        '<div class="hint" style="margin-bottom:4px;">Vous mettez de côté pour quoi ?</div>' +
+        '<div class="hint tight" style="margin-bottom:14px;">Choisissez ce qui vous ressemble le plus.</div>' +
+        '<div class="modele-grid">' + tiles + '</div>' +
+        '<button type="button" class="btn btn-primary" data-action="continuer-objectif-modele"' + (d.modeleId ? "" : " disabled") + '>Continuer</button>'
+      );
+    }
+
     var scenarios = [
       { val:"10", label:"Tranquille" },
       { val:"20", label:"Équilibré" },
@@ -2009,6 +2110,7 @@
       return '<button type="button" class="radio-opt' + (active?" active":"") + '" data-action="choisir-pourcentage-objectif" data-val="' + s.val + '">' + s.val + ' %<br><span style="font-weight:600; font-size:11px;">' + esc(s.label) + '</span></button>';
     }).join("");
     return (
+      '<button type="button" class="btn btn-secondary" style="margin-bottom:14px;" data-action="revenir-objectif-modele">‹ Changer de modèle</button>' +
       '<div class="hint" style="margin-bottom:10px;">Comment voulez-vous épargner ? Automatique : un pourcentage de votre Main d’œuvre à chaque prestation. Manuel : un montant fixe visé chaque jour où vous travaillez.</div>' +
       '<div class="radio-row" style="margin-bottom:14px;">' +
         '<button type="button" class="radio-opt' + (d.mode==="auto"?" active":"") + '" data-action="choisir-mode-objectif" data-val="auto">Auto (%)</button>' +
@@ -2041,6 +2143,8 @@
     if(!d) return;
     d.erreurs = {};
     var nom = (d.nom||"").trim() || "Épargne";
+    var modele = findObjectifModele(d.modeleId);
+    var emoji = modele ? modele.emoji : "💰";
     if(d.mode === "manuel"){
       var montant = toNum(d.montant);
       if(!(montant > 0)){
@@ -2049,13 +2153,13 @@
         return;
       }
       state.objectifEpargne = {
-        id: uid("obj"), nom: nom, type: "manuel",
+        id: uid("obj"), nom: nom, type: "manuel", emoji: emoji,
         montant: montant, dateCreation: todayStr()
       };
     } else {
       var pourcentage = toNum(d.pourcentage) || 10;
       state.objectifEpargne = {
-        id: uid("obj"), nom: nom, type: "auto",
+        id: uid("obj"), nom: nom, type: "auto", emoji: emoji,
         pourcentage: pourcentage, dateCreation: todayStr()
       };
     }
@@ -2073,7 +2177,7 @@
       : "Automatique · " + o.pourcentage + " % de la Main d’œuvre";
     return (
       '<div class="objectif-card">' +
-        '<div class="oc-head"><div class="oc-emoji">💰</div><div class="oc-nom">' + esc(o.nom) + '</div></div>' +
+        '<div class="oc-head"><div class="oc-emoji">' + esc(epargneEmoji()) + '</div><div class="oc-nom">' + esc(o.nom) + '</div></div>' +
         '<div class="oc-montant">' + formatFCFA(cumule) + '</div>' +
         '<div class="oc-sub">Mis de côté depuis le ' + formatDateFr(o.dateCreation) + ' · ' + esc(sousTexte) + '</div>' +
         '<div class="oc-sub">Aujourd’hui : ' + formatFCFA(duJour) + '</div>' +
@@ -2216,7 +2320,8 @@
       '<div class="etat-tabs">' + tabs + '</div>' +
       navHtml +
       '<div class="partager-canvas-wrap" style="position:relative;">' +
-        '<canvas id="telecharger-canvas" width="1080" height="1350" style="filter:blur(6px);"></canvas>' +
+        '<canvas id="telecharger-canvas" width="1080" height="1350"></canvas>' +
+        '<canvas id="telecharger-canvas-blur" width="1080" height="1350" class="tc-blur-layer"></canvas>' +
         '<div class="partager-overlay-abo">Abonnez-vous pour plus de fonctionnalités</div>' +
       '</div>' +
       '<div class="btn-row">' +
@@ -2235,8 +2340,8 @@
     var range = rangeForPeriode(periode, ref);
     var recette = recetteCoiffure(range);
     var charges = chargesCommunesTotal(range);
-    var soldeNet = recette - charges;
     var epargne = epargnePeriode(range);
+    var soldeNet = recette - epargne - charges; // même formule que « Mon état » (Sprint 7)
     var periodeLabel = periode === "jour" ? formatDateFr(todayStr()) :
       periode === "semaine" ? (formatDateFr(range.start) + " – " + formatDateFr(range.end)) :
       (moisLabelFor(ref).charAt(0).toUpperCase() + moisLabelFor(ref).slice(1));
@@ -2284,6 +2389,15 @@
     ctx.fillStyle = "#6b7280";
     ctx.font = "400 22px -apple-system,Helvetica,Arial,sans-serif";
     ctx.fillText("Document informatif, non certifié.", W/2, H-60);
+
+    // Copie du rendu vers le calque flouté (teaser) : le canvas visible reste
+    // net, le calque flouté-masqué par-dessus donne l'effet progressif —
+    // aucune incidence sur le fichier exporté (canvasVersBlob lit toujours
+    // #telecharger-canvas, jamais ce calque).
+    var blurCanvas = byId("telecharger-canvas-blur");
+    if(blurCanvas && blurCanvas.getContext){
+      blurCanvas.getContext("2d").drawImage(canvas, 0, 0);
+    }
   }
 
   function canvasVersBlob(callback){
@@ -2458,6 +2572,27 @@
       case "fermer-apropos": ui.overlay = "reglages"; render(); return;
 
       case "ouvrir-objectif": ui.overlay = "objectif"; render(); return;
+
+      case "choisir-modele-objectif": {
+        ui.objDraft = ui.objDraft || { step:"modele", modeleId:null, mode:"auto", pourcentage:"10", montant:"", nom:"" };
+        ui.objDraft.modeleId = el.getAttribute("data-val");
+        render();
+        return;
+      }
+      case "continuer-objectif-modele": {
+        var d0 = ui.objDraft;
+        if(!d0 || !d0.modeleId) return;
+        var m0 = findObjectifModele(d0.modeleId);
+        d0.step = "form";
+        if(m0 && !d0.nom) d0.nom = m0.nom;
+        render();
+        return;
+      }
+      case "revenir-objectif-modele": {
+        if(ui.objDraft) ui.objDraft.step = "modele";
+        render();
+        return;
+      }
 
       case "choisir-mode-objectif": {
         ui.objDraft = ui.objDraft || { mode:"auto", pourcentage:"10", montant:"", nom:"Épargne" };
