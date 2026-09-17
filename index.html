@@ -16,7 +16,7 @@
     --card-2:#20262f;
     --border:#2a303c;
     --text:#eef1f6;
-    --text-dim:#9aa3b2;
+    --text-dim:#b7bfcc;
     --accent:#f5a623;
     --accent-dark:#c9840f;
     --green:#34b37e;
@@ -219,7 +219,7 @@
     display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border);
     border-radius:14px; padding:13px 14px; margin-bottom:10px;
   }
-  .profil-row.soon{opacity:.55;}
+  .profil-row.soon{opacity:1;}
   .profil-row .pr-emoji{font-size:22px; width:30px; text-align:center; flex:none;}
   .profil-row .pr-text{flex:1;}
   .profil-row .pr-title{font-size:14.5px; font-weight:700; display:flex; align-items:center; gap:8px;}
@@ -252,11 +252,16 @@
     margin-top:12px; background:rgba(255,107,94,.12); border:1px solid rgba(255,107,94,.35);
     border-radius:12px; padding:9px 12px; font-size:12.5px; color:var(--red); font-weight:600; line-height:1.4;
   }
+  .solde-mini-stats{display:flex; margin-top:16px; padding-top:14px; border-top:1px solid var(--border);}
+  .solde-mini-stats .sms-col{flex:1; text-align:center;}
+  .solde-mini-stats .sms-label{font-size:11.5px; color:var(--text-dim);}
+  .solde-mini-stats .sms-val{font-size:15px; font-weight:800; margin-top:4px;}
+  .solde-mini-stats .sms-val.neg{color:var(--red);}
   .dash-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px;}
-  .dash-block{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px 10px; text-align:center; appearance:none; -webkit-appearance:none; font:inherit;}
-  .dash-block .db-emoji{font-size:20px;}
-  .dash-block .db-label{font-size:11px; color:var(--text-dim); margin-top:4px; font-weight:700;}
-  .dash-block .db-amount{font-size:16.5px; font-weight:800; margin-top:4px;}
+  .dash-block{background:var(--card); border:1px solid var(--border); border-radius:18px; padding:26px 12px; text-align:center; appearance:none; -webkit-appearance:none; font:inherit;}
+  .dash-block .db-emoji{font-size:34px;}
+  .dash-block .db-label{font-size:12px; color:var(--text-dim); margin-top:6px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;}
+  .dash-block .db-amount{font-size:24px; font-weight:800; margin-top:10px;}
   .dash-block.charges .db-amount{color:var(--red);}
   .dash-block.info{border-style:dashed;}
   .dash-block.info .db-amount{color:var(--text-dim);}
@@ -334,15 +339,25 @@
   .objectif-card .oc-actions .btn{font-size:12.5px; padding:10px;}
   .objectif-slot-vide{
     background:var(--card-2); border:1.5px dashed var(--border); border-radius:16px; padding:16px;
-    margin-bottom:12px; text-align:center; opacity:.6;
+    margin-bottom:12px; text-align:center; opacity:.85;
   }
   .objectif-slot-vide .osv-emoji{font-size:22px; margin-bottom:6px;}
   .objectif-slot-vide .osv-titre{font-size:13.5px; font-weight:700;}
   .objectif-slot-vide .osv-desc{font-size:11.5px; color:var(--text-dim); margin-top:4px; line-height:1.4;}
+  .objectif-slot-vide .osv-badge{
+    display:inline-block; margin-top:8px; font-size:11.5px; font-weight:800; color:var(--accent);
+    background:rgba(245,166,35,.14); border:1px solid rgba(245,166,35,.4); border-radius:999px; padding:5px 12px;
+  }
 
   /* ---------- F10 : Télécharger ---------- */
-  .partager-canvas-wrap{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:10px; margin-bottom:16px;}
+  .partager-canvas-wrap{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:10px; margin-bottom:16px; overflow:hidden;}
   .partager-canvas-wrap canvas{width:100%; height:auto; display:block; border-radius:10px;}
+  .partager-overlay-abo{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    background:rgba(17,20,26,.75); border:1px solid rgba(245,166,35,.5); color:var(--accent);
+    font-size:14px; font-weight:800; text-align:center; padding:12px 20px; border-radius:14px;
+    max-width:80%; line-height:1.4;
+  }
 
   /* ---------- Autres charges (rubriques) ---------- */
   .rub-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
@@ -709,7 +724,8 @@
     telechargerMoisRef: null,
     reglagesMsg: "",
     backupMsg: "",
-    modalReturnTo: null
+    modalReturnTo: null,
+    abonnementToggles: {}
   };
 
   var TAB_DEFS = [
@@ -1143,13 +1159,43 @@
     return Object.keys(set).sort();
   }
 
+  // Observations terrain : ne jamais permettre de remonter, dans « Mon état »,
+  // « Mes habitudes » ou « Télécharger », au-delà de la semaine ou du mois où
+  // la toute première donnée (prestation ou charge) a été enregistrée — pour
+  // éviter un défilement infini vers des périodes vides.
+  function earliestActivityWeekStart(){
+    var dates = allActivityDates();
+    if(!dates.length) return getWeekRange(new Date()).start;
+    return getWeekRange(dateFromStr(dates[0])).start;
+  }
+  function earliestActivityMonthStart(){
+    var dates = allActivityDates();
+    if(!dates.length) return getMonthRange(new Date()).start;
+    return getMonthRange(dateFromStr(dates[0])).start;
+  }
+
   // Cahier des charges Sprint 5A, section 5 : l'épargne est un pourcentage de
   // la Main d'œuvre (recette brute) — plus du solde net comme sur Trépor/Salon
   // F — donc simplement proportionnelle et additive sur une période, sans avoir
   // besoin de raisonner jour par jour.
+  // Amendement (observations terrain) : le mode « Manuel » devient, comme sur
+  // Trépor, un montant fixe visé chaque jour où au moins une prestation a été
+  // enregistrée — jamais un pourcentage libre. Le mode « Auto » reste un
+  // pourcentage de la Main d'œuvre, mais limité aux trois scénarios (10/20/30 %).
+  function joursActifsDansPeriode(range){
+    var set = {};
+    state.prestationsCoiffure.forEach(function(p){
+      if(inRange(p.date, range)) set[p.date] = 1;
+    });
+    return Object.keys(set).length;
+  }
   function epargnePeriode(range){
     if(!state.objectifEpargne) return 0;
-    return recetteCoiffure(range) * state.objectifEpargne.pourcentage / 100;
+    var o = state.objectifEpargne;
+    if(o.type === "manuel"){
+      return joursActifsDansPeriode(range) * (o.montant || 0);
+    }
+    return recetteCoiffure(range) * (o.pourcentage || 0) / 100;
   }
   function epargneJour(dateStr){ return epargnePeriode({ start:dateStr, end:dateStr }); }
 
@@ -1174,16 +1220,16 @@
 
     var blocks =
       '<button type="button" class="dash-block" style="color:var(--text);" data-action="voir-jour-mainoeuvre">' +
-        '<div class="db-emoji">💇</div><div class="db-label">Main d’œuvre</div><div class="db-amount">' + formatFCFA(mainOeuvre) + '</div>' +
+        '<div class="db-emoji">💇</div><div class="db-amount">' + formatFCFA(mainOeuvre) + '</div><div class="db-label">Main d’œuvre</div>' +
       '</button>' +
       '<button type="button" class="dash-block info" style="color:var(--text);" data-action="voir-jour-champ" data-champ="transport">' +
-        '<div class="db-emoji">🚗</div><div class="db-label">Transport (non compté)</div><div class="db-amount">' + formatFCFA(transport) + '</div>' +
+        '<div class="db-emoji">🚗</div><div class="db-amount">' + formatFCFA(transport) + '</div><div class="db-label">Transport</div>' +
       '</button>' +
       '<button type="button" class="dash-block info" style="color:var(--text);" data-action="voir-jour-champ" data-champ="meche">' +
-        '<div class="db-emoji">🧶</div><div class="db-label">Mèche (non comptée)</div><div class="db-amount">' + formatFCFA(meche) + '</div>' +
+        '<div class="db-emoji">🧶</div><div class="db-amount">' + formatFCFA(meche) + '</div><div class="db-label">Mèche</div>' +
       '</button>' +
       '<button type="button" class="dash-block" style="color:var(--text);" data-action="ouvrir-objectif">' +
-        '<div class="db-emoji">💰</div><div class="db-label">Épargne</div><div class="db-amount">' + (state.objectifEpargne ? formatFCFA(epargne) : "Aucun") + '</div>' +
+        '<div class="db-emoji">💰</div><div class="db-amount">' + (state.objectifEpargne ? formatFCFA(epargne) : "Aucun") + '</div><div class="db-label">Épargne</div>' +
       '</button>';
 
     return (
@@ -1211,7 +1257,6 @@
       return (
         '<button type="button" class="caisse-zone" style="text-align:left; background:none; border:none; padding:0; width:100%; display:block;" data-action="voir-charges-jour">' +
           '<div class="cz-header cz-header-muted">🧾 Charges communes du salon</div>' +
-          '<div class="hint tight">Aucune charge commune enregistrée pour l’instant — touchez ici pour en ajouter une (loyer, publicité…).</div>' +
         '</button>'
       );
     }
@@ -1606,6 +1651,8 @@
       var nouveau = dateKey(d);
       var refAujourdhui = getWeekRange(new Date()).start;
       if(nouveau > refAujourdhui) nouveau = refAujourdhui;
+      var refPlusAncienne = earliestActivityWeekStart();
+      if(nouveau < refPlusAncienne) nouveau = refPlusAncienne;
       ui.etatSemaineRef = nouveau;
     } else if(refName === "mois"){
       var d2 = dateFromStr(ui.etatMoisRef);
@@ -1614,6 +1661,8 @@
       var nouveau2 = dateKey(d2);
       var refAujourdhuiM = getMonthRange(new Date()).start;
       if(nouveau2 > refAujourdhuiM) nouveau2 = refAujourdhuiM;
+      var refPlusAncienM = earliestActivityMonthStart();
+      if(nouveau2 < refPlusAncienM) nouveau2 = refPlusAncienM;
       ui.etatMoisRef = nouveau2;
     }
   }
@@ -1625,9 +1674,10 @@
     var range = getWeekRange(dateFromStr(ui.etatSemaineRef));
     var label = formatDateFr(range.start) + " – " + formatDateFr(range.end);
     var estActuelle = ui.etatSemaineRef >= getWeekRange(new Date()).start;
+    var estPlusAncienne = ui.etatSemaineRef <= earliestActivityWeekStart();
     return (
       '<div class="etat-nav">' +
-        '<button type="button" class="en-btn" data-action="etat-nav" data-sens="-1" data-periode="semaine">‹</button>' +
+        '<button type="button" class="en-btn" data-action="etat-nav" data-sens="-1" data-periode="semaine"' + (estPlusAncienne?" disabled":"") + '>‹</button>' +
         '<div class="en-label">' + esc(label) + '</div>' +
         '<button type="button" class="en-btn" data-action="etat-nav" data-sens="1" data-periode="semaine"' + (estActuelle?" disabled":"") + '>›</button>' +
       '</div>'
@@ -1637,9 +1687,10 @@
     var ref = dateFromStr(ui.etatMoisRef);
     var label = moisLabelFor(ref).charAt(0).toUpperCase() + moisLabelFor(ref).slice(1);
     var estActuelle = ui.etatMoisRef >= getMonthRange(new Date()).start;
+    var estPlusAncien = ui.etatMoisRef <= earliestActivityMonthStart();
     return (
       '<div class="etat-nav">' +
-        '<button type="button" class="en-btn" data-action="etat-nav" data-sens="-1" data-periode="mois">‹</button>' +
+        '<button type="button" class="en-btn" data-action="etat-nav" data-sens="-1" data-periode="mois"' + (estPlusAncien?" disabled":"") + '>‹</button>' +
         '<div class="en-label">' + esc(label) + '</div>' +
         '<button type="button" class="en-btn" data-action="etat-nav" data-sens="1" data-periode="mois"' + (estActuelle?" disabled":"") + '>›</button>' +
       '</div>'
@@ -1704,6 +1755,20 @@
 
   // Bloc commun : solde net → liste des prestations (de la journée) → Main
   // d'œuvre et Épargne — ordre imposé par le cahier des charges, section 6.
+  // Réorganisation (observations terrain, façon MonDjai/Trépor) : Main
+  // d'œuvre, Charges et Épargne apparaissent désormais en mini-rangée DANS la
+  // carte solde elle-même, juste sous le gros chiffre — avant la liste des
+  // prestations — plutôt qu'en bloc séparé après la liste.
+  function renderMiniStatsRow(recette, charges, eparg){
+    return (
+      '<div class="solde-mini-stats">' +
+        '<div class="sms-col"><div class="sms-label">Main d’œuvre</div><div class="sms-val">' + formatFCFA(recette) + '</div></div>' +
+        '<div class="sms-col"><div class="sms-label">Charges</div><div class="sms-val">' + formatFCFA(charges) + '</div></div>' +
+        '<div class="sms-col"><div class="sms-label">Épargne</div><div class="sms-val">' + (state.objectifEpargne ? formatFCFA(eparg) : "Aucun") + '</div></div>' +
+      '</div>'
+    );
+  }
+
   function renderBlocEtatJour(dateStr){
     var range = { start: dateStr, end: dateStr };
     var recette = recetteCoiffure(range);
@@ -1715,17 +1780,12 @@
       '<div class="dash-solde" style="margin-bottom:16px;">' +
         '<div class="ds-label">Solde net</div>' +
         '<div class="ds-amount' + (solde<0?" neg":"") + '">' + formatFCFA(solde) + '</div>' +
-        (charges > 0 ? '<div class="hint tight">Après ' + formatFCFA(charges) + ' de charges communes.</div>' : '') +
+        renderMiniStatsRow(recette, charges, eparg) +
       '</div>'
     );
     var listeHtml = '<div class="section-title" style="margin-top:2px;">Prestations de la journée</div>' +
       renderListePrestationsRange(range, "💇", "Aucune prestation ce jour-là", "Les prestations de cette journée apparaîtront ici.");
-    var totauxHtml =
-      '<div class="etat-stats" style="margin-top:14px;">' +
-        '<div class="etat-stat-row"><div class="er-label">💇 Main d’œuvre</div><div class="er-val">' + formatFCFA(recette) + '</div></div>' +
-        '<div class="etat-stat-row"><div class="er-label">💰 Épargne</div><div class="er-val">' + (state.objectifEpargne ? formatFCFA(eparg) : "Aucun objectif") + '</div></div>' +
-      '</div>';
-    return titre + soldeCard + listeHtml + totauxHtml;
+    return titre + soldeCard + listeHtml;
   }
 
   function renderBlocEtatPeriode(range){
@@ -1737,19 +1797,10 @@
       '<div class="dash-solde" style="margin-bottom:16px;">' +
         '<div class="ds-label">Solde net</div>' +
         '<div class="ds-amount' + (solde<0?" neg":"") + '">' + formatFCFA(solde) + '</div>' +
-        (charges > 0 ? '<div class="hint tight">Après ' + formatFCFA(charges) + ' de charges communes.</div>' : '') +
+        renderMiniStatsRow(recette, charges, eparg) +
       '</div>'
     );
     return { soldeCard: soldeCard, recette: recette, eparg: eparg };
-  }
-
-  function renderTotauxHtml(recette, eparg){
-    return (
-      '<div class="etat-stats" style="margin-top:14px;">' +
-        '<div class="etat-stat-row"><div class="er-label">💇 Main d’œuvre</div><div class="er-val">' + formatFCFA(recette) + '</div></div>' +
-        '<div class="etat-stat-row"><div class="er-label">💰 Épargne</div><div class="er-val">' + (state.objectifEpargne ? formatFCFA(eparg) : "Aucun objectif") + '</div></div>' +
-      '</div>'
-    );
   }
 
   function renderMonEtat(){
@@ -1771,8 +1822,7 @@
         var b = renderBlocEtatPeriode(wr);
         body = renderEtatSemaineNav() + b.soldeCard +
           '<div class="section-title">Prestations de la semaine</div>' +
-          renderEtatListeJours(wr, "semaine") +
-          renderTotauxHtml(b.recette, b.eparg);
+          renderEtatListeJours(wr, "semaine");
       }
     } else {
       if(ui.etatSelJour){
@@ -1784,15 +1834,13 @@
           '<div class="hint tight" style="margin-bottom:10px; font-weight:700; color:var(--text);">' + esc(formatDateFr(wr2.start) + " – " + formatDateFr(wr2.end)) + '</div>' +
           b2.soldeCard +
           '<div class="section-title">Prestations de la semaine</div>' +
-          renderEtatListeJours(wr2, "mois") +
-          renderTotauxHtml(b2.recette, b2.eparg);
+          renderEtatListeJours(wr2, "mois");
       } else {
         var mr = getMonthRange(dateFromStr(ui.etatMoisRef));
         var b3 = renderBlocEtatPeriode(mr);
         body = renderEtatMoisNav() + b3.soldeCard +
           '<div class="section-title">Prestations du mois</div>' +
-          renderEtatListeSemaines(mr) +
-          renderTotauxHtml(b3.recette, b3.eparg);
+          renderEtatListeSemaines(mr);
       }
     }
 
@@ -1816,6 +1864,8 @@
       var nouveau = dateKey(d);
       var refAujourdhui = getWeekRange(new Date()).start;
       if(nouveau > refAujourdhui) nouveau = refAujourdhui;
+      var refPlusAncienne = earliestActivityWeekStart();
+      if(nouveau < refPlusAncienne) nouveau = refPlusAncienne;
       ui.habitudesSemaineRef = nouveau;
     } else if(periode === "mois"){
       var d2 = dateFromStr(ui.habitudesMoisRef);
@@ -1824,6 +1874,8 @@
       var nouveau2 = dateKey(d2);
       var refAujourdhuiM = getMonthRange(new Date()).start;
       if(nouveau2 > refAujourdhuiM) nouveau2 = refAujourdhuiM;
+      var refPlusAncienM = earliestActivityMonthStart();
+      if(nouveau2 < refPlusAncienM) nouveau2 = refPlusAncienM;
       ui.habitudesMoisRef = nouveau2;
     }
   }
@@ -1889,9 +1941,11 @@
       var label = periode === "semaine" ? (formatDateFr(range.start) + " – " + formatDateFr(range.end)) : (moisLabelFor(ref).charAt(0).toUpperCase() + moisLabelFor(ref).slice(1));
       var refAujourdhui = periode === "semaine" ? getWeekRange(new Date()).start : getMonthRange(new Date()).start;
       var estPeriodeActuelle = (periode === "semaine" ? ui.habitudesSemaineRef : ui.habitudesMoisRef) >= refAujourdhui;
+      var refPlusAncienneH = periode === "semaine" ? earliestActivityWeekStart() : earliestActivityMonthStart();
+      var estPeriodePlusAncienne = (periode === "semaine" ? ui.habitudesSemaineRef : ui.habitudesMoisRef) <= refPlusAncienneH;
       navHtml = (
         '<div class="etat-nav">' +
-          '<button type="button" class="en-btn" data-action="habitudes-nav" data-sens="-1" data-periode="' + periode + '">‹</button>' +
+          '<button type="button" class="en-btn" data-action="habitudes-nav" data-sens="-1" data-periode="' + periode + '"' + (estPeriodePlusAncienne?" disabled":"") + '>‹</button>' +
           '<div class="en-label">' + esc(label) + '</div>' +
           '<button type="button" class="en-btn" data-action="habitudes-nav" data-sens="1" data-periode="' + periode + '"' + (estPeriodeActuelle?" disabled":"") + '>›</button>' +
         '</div>'
@@ -1936,7 +1990,7 @@
         '<div class="objectif-slot-vide">' +
           '<div class="osv-emoji">🔒</div>' +
           '<div class="osv-titre">Emplacement supplémentaire</div>' +
-          '<div class="osv-desc">Sera disponible avec la fusion des applications Coiffure, Pédicure/Manicure et Revente de mèches, prévue plus tard.</div>' +
+          '<div class="osv-badge">Abonnez-vous pour plus de fonctionnalités</div>' +
         '</div>'
       );
     };
@@ -1944,20 +1998,32 @@
   }
 
   function renderObjectifCreation(){
-    var d = ui.objDraft = ui.objDraft || { mode:"auto", pourcentage:"10", nom:"Épargne" };
+    var d = ui.objDraft = ui.objDraft || { mode:"auto", pourcentage:"10", montant:"", nom:"Épargne" };
+    var scenarios = [
+      { val:"10", label:"Tranquille" },
+      { val:"20", label:"Équilibré" },
+      { val:"30", label:"Ambitieux" }
+    ];
+    var scenariosHtml = scenarios.map(function(s){
+      var active = String(d.pourcentage) === s.val;
+      return '<button type="button" class="radio-opt' + (active?" active":"") + '" data-action="choisir-pourcentage-objectif" data-val="' + s.val + '">' + s.val + ' %<br><span style="font-weight:600; font-size:11px;">' + esc(s.label) + '</span></button>';
+    }).join("");
     return (
-      '<div class="hint" style="margin-bottom:10px;">Comment voulez-vous épargner ? Un pourcentage de votre Main d’œuvre est mis de côté à chaque prestation.</div>' +
+      '<div class="hint" style="margin-bottom:10px;">Comment voulez-vous épargner ? Automatique : un pourcentage de votre Main d’œuvre à chaque prestation. Manuel : un montant fixe visé chaque jour où vous travaillez.</div>' +
       '<div class="radio-row" style="margin-bottom:14px;">' +
-        '<button type="button" class="radio-opt' + (d.mode==="auto"?" active":"") + '" data-action="choisir-mode-objectif" data-val="auto">Auto (10 %)</button>' +
-        '<button type="button" class="radio-opt' + (d.mode==="manuel"?" active":"") + '" data-action="choisir-mode-objectif" data-val="manuel">Manuel</button>' +
+        '<button type="button" class="radio-opt' + (d.mode==="auto"?" active":"") + '" data-action="choisir-mode-objectif" data-val="auto">Auto (%)</button>' +
+        '<button type="button" class="radio-opt' + (d.mode==="manuel"?" active":"") + '" data-action="choisir-mode-objectif" data-val="manuel">Manuel (montant)</button>' +
       '</div>' +
       (d.mode === "manuel" ?
-        '<div class="field"><div class="label">Pourcentage de la Main d’œuvre <span class="req">*</span></div>' +
-          '<input type="number" inputmode="decimal" min="1" max="100" step="1" class="input" id="f-objPourcentage" value="' + esc(d.pourcentage||"") + '" data-action-change="capture-obj-pourcentage">' +
-          fieldErrObj("pourcentage") +
+        '<div class="field"><div class="label">Montant souhaité par jour (FCFA) <span class="req">*</span></div>' +
+          '<input type="number" inputmode="numeric" min="1" step="1" class="input" id="f-objMontant" value="' + esc(d.montant||"") + '" data-action-change="capture-obj-montant">' +
+          '<div class="field-note">Mis de côté chaque jour où au moins une prestation est enregistrée, quel que soit le montant de la Main d’œuvre.</div>' +
+          fieldErrObj("montant") +
         '</div>'
         :
-        '<div class="hint tight" style="margin-bottom:16px;">10 % de la Main d’œuvre de chaque prestation, calculé automatiquement.</div>'
+        '<div class="field"><div class="label">Pourcentage de la Main d’œuvre <span class="req">*</span></div>' +
+          '<div class="radio-row">' + scenariosHtml + '</div>' +
+        '</div>'
       ) +
       '<div class="field"><div class="label">Nom</div>' +
         '<input type="text" class="input" id="f-objNom" value="' + esc(d.nom||"Épargne") + '" data-action-change="capture-obj-nom">' +
@@ -1974,17 +2040,25 @@
     var d = ui.objDraft;
     if(!d) return;
     d.erreurs = {};
-    var pourcentage = d.mode === "manuel" ? toNum(d.pourcentage) : 10;
-    if(d.mode === "manuel" && !(pourcentage > 0)){
-      d.erreurs.pourcentage = "Indiquez un pourcentage supérieur à 0.";
-      render();
-      return;
-    }
     var nom = (d.nom||"").trim() || "Épargne";
-    state.objectifEpargne = {
-      id: uid("obj"), nom: nom, type: d.mode === "manuel" ? "manuel" : "auto",
-      pourcentage: pourcentage, dateCreation: todayStr()
-    };
+    if(d.mode === "manuel"){
+      var montant = toNum(d.montant);
+      if(!(montant > 0)){
+        d.erreurs.montant = "Indiquez un montant supérieur à 0.";
+        render();
+        return;
+      }
+      state.objectifEpargne = {
+        id: uid("obj"), nom: nom, type: "manuel",
+        montant: montant, dateCreation: todayStr()
+      };
+    } else {
+      var pourcentage = toNum(d.pourcentage) || 10;
+      state.objectifEpargne = {
+        id: uid("obj"), nom: nom, type: "auto",
+        pourcentage: pourcentage, dateCreation: todayStr()
+      };
+    }
     saveState();
     ui.objDraft = null;
     render();
@@ -1992,9 +2066,11 @@
 
   function renderObjectifCarteActive(){
     var o = state.objectifEpargne;
-    var cumule = recetteCoiffure({ start:o.dateCreation, end: todayStr() }) * o.pourcentage/100;
+    var cumule = epargnePeriode({ start:o.dateCreation, end: todayStr() });
     var duJour = epargneJour(todayStr());
-    var sousTexte = (o.type === "auto" ? "Automatique" : "Manuel") + " · " + o.pourcentage + " % de la Main d’œuvre";
+    var sousTexte = o.type === "manuel"
+      ? "Manuel · " + formatFCFA(o.montant||0) + " par jour d’activité"
+      : "Automatique · " + o.pourcentage + " % de la Main d’œuvre";
     return (
       '<div class="objectif-card">' +
         '<div class="oc-head"><div class="oc-emoji">💰</div><div class="oc-nom">' + esc(o.nom) + '</div></div>' +
@@ -2013,19 +2089,32 @@
     var o = state.objectifEpargne;
     if(!o) return "";
     if(ui.draft.__objModif !== o.id){
-      ui.draft = { __objModif:o.id, nom:o.nom, mode:o.type, pourcentage:o.pourcentage };
+      ui.draft = { __objModif:o.id, nom:o.nom, mode:o.type, pourcentage:o.pourcentage||10, montant:o.montant||"" };
     }
     var d = ui.draft;
+    var scenarios = [
+      { val:"10", label:"Tranquille" },
+      { val:"20", label:"Équilibré" },
+      { val:"30", label:"Ambitieux" }
+    ];
+    var scenariosHtml = scenarios.map(function(s){
+      var active = String(d.pourcentage) === s.val;
+      return '<button type="button" class="radio-opt' + (active?" active":"") + '" data-action="modif-pourcentage-objectif" data-val="' + s.val + '">' + s.val + ' %<br><span style="font-weight:600; font-size:11px;">' + esc(s.label) + '</span></button>';
+    }).join("");
     return (
       '<div class="radio-row" style="margin-bottom:14px;">' +
-        '<button type="button" class="radio-opt' + (d.mode==="auto"?" active":"") + '" data-action="modif-mode-objectif" data-val="auto">Auto (10 %)</button>' +
-        '<button type="button" class="radio-opt' + (d.mode==="manuel"?" active":"") + '" data-action="modif-mode-objectif" data-val="manuel">Manuel</button>' +
+        '<button type="button" class="radio-opt' + (d.mode==="auto"?" active":"") + '" data-action="modif-mode-objectif" data-val="auto">Auto (%)</button>' +
+        '<button type="button" class="radio-opt' + (d.mode==="manuel"?" active":"") + '" data-action="modif-mode-objectif" data-val="manuel">Manuel (montant)</button>' +
       '</div>' +
       (d.mode === "manuel" ?
-        '<div class="field"><div class="label">Pourcentage de la Main d’œuvre</div>' +
-          '<input type="number" inputmode="decimal" min="1" max="100" step="1" class="input" id="f-modifPourcentage" value="' + esc(d.pourcentage||"") + '" data-action-change="capture-modif-objectif">' +
+        '<div class="field"><div class="label">Montant souhaité par jour (FCFA)</div>' +
+          '<input type="number" inputmode="numeric" min="1" step="1" class="input" id="f-modifMontant" value="' + esc(d.montant||"") + '" data-action-change="capture-modif-objectif">' +
         '</div>'
-        : '') +
+        :
+        '<div class="field"><div class="label">Pourcentage de la Main d’œuvre</div>' +
+          '<div class="radio-row">' + scenariosHtml + '</div>' +
+        '</div>'
+      ) +
       '<div class="field"><div class="label">Nom</div>' +
         '<input type="text" class="input" id="f-modifNom" value="' + esc(d.nom||"") + '" data-action-change="capture-modif-objectif">' +
       '</div>' +
@@ -2042,10 +2131,11 @@
     var mode = d.mode === "manuel" ? "manuel" : "auto";
     o.type = mode;
     if(mode === "manuel"){
-      var pct = toNum(d.pourcentage);
-      if(pct > 0) o.pourcentage = pct;
+      var montant = toNum(d.montant);
+      if(montant > 0) o.montant = montant;
     } else {
-      o.pourcentage = 10;
+      var pct = toNum(d.pourcentage);
+      o.pourcentage = (pct === 10 || pct === 20 || pct === 30) ? pct : 10;
     }
     saveState();
     closeModal();
@@ -2076,6 +2166,8 @@
       var nouveau = dateKey(d);
       var refAujourdhui = getWeekRange(new Date()).start;
       if(nouveau > refAujourdhui) nouveau = refAujourdhui;
+      var refPlusAncienne = earliestActivityWeekStart();
+      if(nouveau < refPlusAncienne) nouveau = refPlusAncienne;
       ui.telechargerSemaineRef = nouveau;
     } else if(periode === "mois"){
       var d2 = dateFromStr(ui.telechargerMoisRef);
@@ -2084,6 +2176,8 @@
       var nouveau2 = dateKey(d2);
       var refAujourdhuiM = getMonthRange(new Date()).start;
       if(nouveau2 > refAujourdhuiM) nouveau2 = refAujourdhuiM;
+      var refPlusAncienM = earliestActivityMonthStart();
+      if(nouveau2 < refPlusAncienM) nouveau2 = refPlusAncienM;
       ui.telechargerMoisRef = nouveau2;
     }
   }
@@ -2104,9 +2198,11 @@
       var label = periode === "semaine" ? (formatDateFr(range.start) + " – " + formatDateFr(range.end)) : (moisLabelFor(ref).charAt(0).toUpperCase() + moisLabelFor(ref).slice(1));
       var refAujourdhui = periode === "semaine" ? getWeekRange(new Date()).start : getMonthRange(new Date()).start;
       var estPeriodeActuelle = (periode === "semaine" ? ui.telechargerSemaineRef : ui.telechargerMoisRef) >= refAujourdhui;
+      var refPlusAncienneT = periode === "semaine" ? earliestActivityWeekStart() : earliestActivityMonthStart();
+      var estPeriodePlusAncienneT = (periode === "semaine" ? ui.telechargerSemaineRef : ui.telechargerMoisRef) <= refPlusAncienneT;
       navHtml = (
         '<div class="etat-nav">' +
-          '<button type="button" class="en-btn" data-action="telecharger-nav" data-sens="-1" data-periode="' + periode + '">‹</button>' +
+          '<button type="button" class="en-btn" data-action="telecharger-nav" data-sens="-1" data-periode="' + periode + '"' + (estPeriodePlusAncienneT?" disabled":"") + '>‹</button>' +
           '<div class="en-label">' + esc(label) + '</div>' +
           '<button type="button" class="en-btn" data-action="telecharger-nav" data-sens="1" data-periode="' + periode + '"' + (estPeriodeActuelle?" disabled":"") + '>›</button>' +
         '</div>'
@@ -2119,7 +2215,10 @@
       '<div class="section-title">Télécharger</div>' +
       '<div class="etat-tabs">' + tabs + '</div>' +
       navHtml +
-      '<div class="partager-canvas-wrap"><canvas id="telecharger-canvas" width="1080" height="1350"></canvas></div>' +
+      '<div class="partager-canvas-wrap" style="position:relative;">' +
+        '<canvas id="telecharger-canvas" width="1080" height="1350" style="filter:blur(6px);"></canvas>' +
+        '<div class="partager-overlay-abo">Abonnez-vous pour plus de fonctionnalités</div>' +
+      '</div>' +
       '<div class="btn-row">' +
         '<button type="button" class="btn btn-secondary" data-action="telecharger-telecharger">⬇️ Télécharger l’image</button>' +
         '<button type="button" class="btn btn-primary" data-action="telecharger-partager">Partager</button>' +
@@ -2243,17 +2342,20 @@
 
     var bientotHtml =
       '<div class="reglages-section">' +
-        '<div class="rs-title">Bientôt disponible</div>' +
+        '<div class="rs-title">Disponible par abonnement premium</div>' +
         '<div class="profil-row soon">' +
           '<div class="pr-emoji">💅</div>' +
-          '<div class="pr-text"><div class="pr-title">Pédicure / Manicure <span class="badge-soon">Bientôt</span></div>' +
+          '<div class="pr-text"><div class="pr-title">Pédicure / Manicure</div>' +
             '<div class="pr-desc">Arrivera en application indépendante, avec une fusion prévue plus tard avec Coiffure.</div></div>' +
+          '<button type="button" class="switch' + (ui.abonnementToggles.pedicure?" on":"") + '" data-action="toggle-abonnement-premium" data-id="pedicure"><span class="knob"></span></button>' +
         '</div>' +
         '<div class="profil-row soon">' +
           '<div class="pr-emoji">🛍️</div>' +
-          '<div class="pr-text"><div class="pr-title">Revente de mèches <span class="badge-soon">Bientôt</span></div>' +
+          '<div class="pr-text"><div class="pr-title">Revente de mèches</div>' +
             '<div class="pr-desc">Arrivera en application indépendante, avec une fusion prévue plus tard avec Coiffure.</div></div>' +
+          '<button type="button" class="switch' + (ui.abonnementToggles.revente?" on":"") + '" data-action="toggle-abonnement-premium" data-id="revente"><span class="knob"></span></button>' +
         '</div>' +
+        (ui.reglagesMsg ? '<div class="hint tight" style="margin-top:8px;">' + esc(ui.reglagesMsg) + '</div>' : '') +
       '</div>';
 
     return (
@@ -2358,9 +2460,15 @@
       case "ouvrir-objectif": ui.overlay = "objectif"; render(); return;
 
       case "choisir-mode-objectif": {
-        ui.objDraft = ui.objDraft || { mode:"auto", pourcentage:"10", nom:"Épargne" };
+        ui.objDraft = ui.objDraft || { mode:"auto", pourcentage:"10", montant:"", nom:"Épargne" };
         ui.objDraft.mode = el.getAttribute("data-val");
         ui.objDraft.erreurs = {};
+        render();
+        return;
+      }
+      case "choisir-pourcentage-objectif": {
+        ui.objDraft = ui.objDraft || { mode:"auto", pourcentage:"10", montant:"", nom:"Épargne" };
+        ui.objDraft.pourcentage = el.getAttribute("data-val");
         render();
         return;
       }
@@ -2375,6 +2483,11 @@
       }
       case "modif-mode-objectif": {
         ui.draft.mode = el.getAttribute("data-val");
+        render();
+        return;
+      }
+      case "modif-pourcentage-objectif": {
+        ui.draft.pourcentage = el.getAttribute("data-val");
         render();
         return;
       }
@@ -2436,6 +2549,13 @@
           ui.pinSetupStep = "premier"; ui.pinSetupPremier = ""; ui.pinSetupInput = ""; ui.pinSetupErreur = false;
           openModal("pin-setup");
         }
+        return;
+      }
+      case "toggle-abonnement-premium": {
+        var idAbo = el.getAttribute("data-id");
+        ui.abonnementToggles[idAbo] = !ui.abonnementToggles[idAbo];
+        ui.reglagesMsg = "Disponible par abonnement premium — activation à venir.";
+        render();
         return;
       }
       case "changer-pin": {
@@ -2643,10 +2763,12 @@
       }
       case "capture-code-acces": ui.codeAccesInput = el.value; ui.codeAccesErreur = ""; return;
       case "capture-obj-pourcentage": ui.objDraft.pourcentage = el.value; return;
+      case "capture-obj-montant": ui.objDraft.montant = el.value; return;
       case "capture-obj-nom": ui.objDraft.nom = el.value; return;
       case "capture-modif-objectif": {
         if(el.id === "f-modifNom") ui.draft.nom = el.value;
         if(el.id === "f-modifPourcentage") ui.draft.pourcentage = el.value;
+        if(el.id === "f-modifMontant") ui.draft.montant = el.value;
         return;
       }
       case "capture-autre-charge": captureDraft(["f-montantAutreCharge"]); return;
