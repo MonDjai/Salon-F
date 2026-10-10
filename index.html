@@ -424,6 +424,83 @@
   .rub-manage-row .rm-emoji{font-size:18px; width:26px; text-align:center; flex:none;}
   .rub-manage-row .rm-nom{flex:1; font-size:13.5px; font-weight:600;}
   .rub-manage-row .rm-del{background:none; border:none; color:var(--text-dim); font-size:15px; padding:4px;}
+
+  /* ---------- Sprint 8A : mode Salon ---------- */
+  /* Espace sous le contenu d'Aujourd'hui (mode Salon uniquement, plus long
+     qu'en mode À domicile) pour que le bouton flottant « + » ne recouvre
+     jamais la dernière carte une fois la page défilée jusqu'en bas. */
+  .main.with-tabbar.salon-fab-space{padding-bottom:calc(170px + var(--safe-bottom));}
+  .dash-solde.as-btn{display:block; width:100%; appearance:none; -webkit-appearance:none; font:inherit; color:var(--text);}
+  .ds-badge{display:inline-block; margin-left:6px; font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px;
+    text-transform:uppercase; letter-spacing:.03em; vertical-align:middle;}
+  .ds-badge.provisoire{background:rgba(245,166,35,.14); color:var(--accent);}
+  .ds-badge.definitif{background:rgba(52,179,126,.15); color:var(--green);}
+  .ds-sub{font-size:12px; color:var(--text-dim); margin-top:6px;}
+
+  .jauge-card{display:block; width:100%; text-align:left; background:var(--card); border:1px solid var(--border);
+    border-radius:16px; padding:14px; margin-bottom:12px; appearance:none; -webkit-appearance:none; font:inherit; color:var(--text);}
+  .jauge-head{font-size:11.5px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em;}
+  .jauge-row{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:6px;}
+  .jauge-amount{font-size:20px; font-weight:800;}
+  .jauge-pct{font-size:13px; font-weight:800; color:var(--accent); white-space:nowrap;}
+  .jauge-pct.ok{color:var(--green);}
+  .jauge-bar{height:10px; background:var(--card-2); border:1px solid var(--border); border-radius:999px; overflow:hidden; margin-top:10px;}
+  .jauge-fill{height:100%; background:var(--accent); border-radius:999px;}
+  .jauge-fill.ok{background:var(--green);}
+  .jauge-foot{font-size:12px; color:var(--text-dim); margin-top:8px; line-height:1.4;}
+  .jauge-link{font-size:12px; font-weight:700; color:var(--accent); margin-top:8px;}
+
+  .dash-block.fonds.neg .db-amount{color:var(--red);}
+  .db-mini{font-size:10.5px; color:var(--red); font-weight:700; margin-top:4px;}
+
+  .alerte-douce{background:rgba(245,166,35,.08); border:1px solid rgba(245,166,35,.35); border-radius:12px;
+    padding:10px 12px; font-size:12.5px; color:var(--text); line-height:1.45; margin:10px 0;}
+
+  .reprise-banner{display:flex; align-items:center; gap:10px; width:100%; text-align:left; margin-bottom:12px;
+    background:rgba(245,166,35,.08); border:1.5px dashed rgba(245,166,35,.55); border-radius:14px; padding:12px 14px;
+    appearance:none; -webkit-appearance:none; font:inherit; color:var(--text);}
+  .reprise-banner .rb-emoji{font-size:19px; flex:none;}
+  .reprise-banner .rb-text{flex:1; min-width:0; font-size:13px; font-weight:700; line-height:1.35;}
+  .reprise-banner .rb-chev{color:var(--accent); font-weight:800; flex:none;}
+  .reprise-row{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px; margin-bottom:10px;}
+  .reprise-row .rr-head{display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:700;}
+  .reprise-row .rr-nom{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .reprise-row .rr-prev{font-size:11.5px; color:var(--text-dim); font-weight:600; white-space:nowrap;}
+  .reprise-row .rr-actions{display:flex; gap:8px; margin-top:10px;}
+  .reprise-row .rr-actions .input{flex:1; min-width:0; padding:10px 11px; font-size:14px;}
+  .reprise-row .rr-actions .btn{width:auto; padding:10px 12px; font-size:12.5px; flex:none;}
+
+  .credit-bilan{margin-top:8px;}
+  .credit-bilan .cb-line{display:flex; justify-content:space-between; gap:8px; font-size:12.5px; color:var(--text-dim);}
+  .credit-bilan .cb-line b{color:var(--text);}
+  .credit-bilan .jauge-bar{height:8px; margin-top:8px;}
+  .credit-row{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:13px 14px; margin-bottom:10px;}
+  .credit-row .cr-top{display:flex; align-items:center; gap:10px;}
+  .credit-row .cr-ico{font-size:20px; flex:none;}
+  .credit-row .cr-txt{flex:1; min-width:0;}
+  .credit-row .cr-nom{font-size:14px; font-weight:700;}
+  .credit-row .cr-sub{font-size:11.5px; color:var(--text-dim); margin-top:2px;}
+  .credit-row .cr-edit{width:auto; padding:8px 12px; font-size:12px; flex:none;}
+
+  .chaine-row{display:flex; justify-content:space-between; gap:10px; padding:9px 2px; font-size:13.5px; border-bottom:1px solid var(--border);}
+  .chaine-row:last-child{border-bottom:none;}
+  .chaine-row .ch-k{color:var(--text-dim);}
+  .chaine-row .ch-v{font-weight:700; white-space:nowrap;}
+  .chaine-row.total{font-size:14.5px;}
+  .chaine-row.total .ch-k{color:var(--text); font-weight:800;}
+  .chaine-row.total .ch-v{font-weight:800;}
+  .chaine-box{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:4px 12px; margin-bottom:14px;}
+  /* ---------- Sprint 8B ---------- */
+  .vue-tabs{display:flex; gap:4px; margin-bottom:10px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:4px;}
+  .vue-tab{flex:1; border:none; background:transparent; color:var(--text-dim); border-radius:10px; padding:9px 4px; font-size:13px; font-weight:800;}
+  .vue-tab.active{background:var(--accent); color:#1b1200;}
+  .pct-total{display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:11px 14px; margin:4px 0 8px;}
+  .pct-total .pt-label{font-size:12.5px; color:var(--text-dim); line-height:1.4;}
+  .pct-total .pt-val{font-size:16px; font-weight:800; color:var(--green); white-space:nowrap;}
+  .pct-total .pt-val.over{color:var(--red);}
+  .tag-fonds{display:inline-block; font-size:10px; font-weight:800; padding:1px 7px; border-radius:999px; margin-left:4px;
+    background:rgba(79,209,197,.12); color:var(--turquoise); vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -458,6 +535,44 @@
   //  - Comme au Sprint 5A : aucun appel réseau n'est introduit par ces
   //    changements ; tout le calcul (code du mois, bornes calendaires) reste
   //    entièrement local.
+  //
+  // Sprint 8A (amendement n°1 « Mode Salon », socle financier) :
+  //  - Réglage « Je travaille : à domicile / en salon » (config.modeTravail,
+  //    défaut "domicile"). En mode À domicile, rien ne change par rapport au
+  //    Sprint 7bis : mêmes écrans, mêmes calculs, mêmes rubriques.
+  //  - Mode Salon : rubriques CIE / SODECI séparées, Mairie, BURIDA, Produits
+  //    coiffure, Produits onglerie, Remboursement de crédit (ajoutées à la
+  //    liste au premier passage en mode Salon, jamais avant).
+  //  - Charges mensuelles : chaque charge est rattachée à un mois concerné
+  //    (autresCharges[].moisConcerne "AAAA-MM", repli sur le mois de la date
+  //    pour les charges plus anciennes) et déduite du résultat net de ce mois,
+  //    jamais au jour le jour. Reprise des montants du mois précédent, à
+  //    confirmer ou modifier. Jauge « à couvrir » pendant le mois.
+  //  - Fonds de renouvellement des produits (montant fixe par mois ou % des
+  //    recettes du mois), versionné par mois pour ne jamais réécrire un mois
+  //    passé ; les achats de produits sont payés par le fonds (jamais comptés
+  //    deux fois). Solde = prévisions cumulées − achats, alerte douce si < 0.
+  //  - Remboursement de crédit : type de prêteur, montant total facultatif,
+  //    bilan remboursé / reste dû depuis la première saisie.
+  //  - Résultat net du mois = Recettes − Charges du mois − Fonds du mois.
+  //
+  // Sprint 8B (amendement n°1, suite — points 2 et 4 validés par Hamadou) :
+  //  - Rémunération de la propriétaire et liste de salariés : montant fixe ou
+  //    % du résultat net du mois (clause convenue), versionnés par mois
+  //    (une clause modifiée ne réécrit jamais un mois terminé).
+  //  - Épargne mensuelle (fixe ou %) sur le même résultat net, en mode Salon
+  //    (config.epargneMensuelle, versionnée) ; épargne inchangée en mode À
+  //    domicile. Garde-fou : le total des pourcentages (propriétaire +
+  //    salariés + épargne) ne peut pas dépasser 100 % du résultat net.
+  //  - Répartition : Résultat net → propriétaire → salariés → épargne
+  //    = Reste (trésorerie du salon). Résultat net négatif : parts en %
+  //    à zéro, montants fixes maintenus avec alerte douce.
+  //  - Menu « Activité » (Coiffure / Onglerie) en mode Salon, formulaire
+  //    allégé pour l'onglerie (activité, montant, date) ; vues Mon état
+  //    Coiffure, Onglerie et Salon.
+  //  - Télécharger en mode Salon : recettes par activité et résultat net,
+  //    sans aucune rémunération ; flou réellement calculé sur les pixels
+  //    exportés (mécanisme du Sprint 7bis, inchangé).
 
   // Sprint 7 : icône Mèche — perruque fournie par Hamadou (coupe courte à
   // frange), détourée fond transparent, encodée en base64 pour rester
@@ -527,6 +642,47 @@
     });
   }
 
+  // Sprint 8A, amendement n°1 section 3 : rubriques propres au mode Salon.
+  // `portee` : "salon" (n'apparaît qu'en mode Salon), "domicile" (n'apparaît
+  // qu'en mode À domicile) ou "tous". `type` : "commune" (charge du mois),
+  // "produits_coiffure" / "produits_onglerie" (payés par le fonds de
+  // renouvellement) ou "credit" (remboursement, avec bilan). Les rubriques du
+  // Sprint 7bis n'ont ni `portee` ni `type` en state : ils sont déduits par
+  // porteeRubrique()/typeDeRubrique() sans jamais réécrire ces rubriques.
+  var RUBRIQUES_SALON_DEFAUT = [
+    { id:"cie", nom:"Électricité (CIE)", emoji:"⚡", actif:true, type:"commune" },
+    { id:"sodeci", nom:"Eau (SODECI)", emoji:"🚰", actif:true, type:"commune" },
+    { id:"mairie", nom:"Mairie", emoji:"🏛️", actif:true, type:"commune" },
+    { id:"burida", nom:"Taxe BURIDA", emoji:"🎵", actif:true, type:"commune" },
+    { id:"produits_coiffure", nom:"Produits coiffure", emoji:"🧴", actif:true, type:"produits_coiffure" },
+    { id:"produits_onglerie", nom:"Produits onglerie", emoji:"💅", actif:true, type:"produits_onglerie" },
+    { id:"credit", nom:"Remboursement de crédit", emoji:"🏦", actif:true, type:"credit" }
+  ];
+  // Ordre d'affichage des rubriques en mode Salon (section 3 de l'amendement) ;
+  // les rubriques personnalisées et crédits ajoutés suivent, dans leur ordre
+  // de création.
+  var ORDRE_RUBRIQUES_SALON = ["loyer","cie","sodeci","mairie","burida","produits_coiffure","produits_onglerie","credit","publicite","entretien_salon","decoration","autre"];
+
+  // Ajoute (une seule fois) les rubriques du mode Salon manquantes. Appelée au
+  // passage en mode Salon et, par sécurité, au chargement d'un état déjà en
+  // mode Salon. N'altère jamais une rubrique existante.
+  function assurerRubriquesSalon(config){
+    var list = config.rubriquesCharges;
+    RUBRIQUES_SALON_DEFAUT.forEach(function(r){
+      var existe = list.some(function(x){ return x.id === r.id; });
+      if(!existe) list.push({ id:r.id, nom:r.nom, emoji:r.emoji, actif:r.actif, perso:false, portee:"salon", type:r.type });
+    });
+  }
+  function porteeRubrique(r){
+    if(!r) return "tous";
+    if(r.portee) return r.portee;
+    // « Électricité / eau » (Sprint 7bis) reste la rubrique du mode À
+    // domicile ; en mode Salon, CIE et SODECI la remplacent (deux factures).
+    return r.id === "electricite" ? "domicile" : "tous";
+  }
+  function typeDeRubrique(r){ return (r && r.type) || "commune"; }
+  function estTypeProduits(t){ return t === "produits_coiffure" || t === "produits_onglerie"; }
+
   function defaultState(){
     return {
       version: 1,
@@ -539,12 +695,22 @@
         derniereValidationAcces: null,
         moisAccesValide: null,        // { mois, annee } — dernier mois civil couvert par l'accès (essai ou code mensuel)
         pinActif: false,
-        pinCode: null
+        pinCode: null,
+        // Sprint 8A — mode Salon
+        modeTravail: "domicile",      // "domicile" (défaut, comportement Sprint 7bis) | "salon"
+        fondsRenouvellement: null,    // { mode:'fixe'|'pourcentage', valeur, depuis:'AAAA-MM', historique:[{depuis,mode,valeur}] }
+        credits: [],                  // [{ id, rubriqueId, type:'banque'|'personne', preteur, montantTotal|null, dateDebut, tsDebut }]
+        // Sprint 8B — répartition du résultat net (paramètres versionnés par mois :
+        // { mode:'fixe'|'pourcentage', valeur, depuis:'AAAA-MM', historique:[{depuis,mode,valeur}] })
+        remunerationProprio: null,
+        salaries: [],                 // [{ id, nom, debut:'AAAA-MM', fin:'AAAA-MM'|null, mode, valeur, depuis, historique }]
+        epargneMensuelle: null
       },
       prestationsCoiffure: [],
-      autresCharges: [],
+      autresCharges: [],            // Sprint 8A : + moisConcerne 'AAAA-MM', note, rubriqueType (charges saisies en mode Salon)
       objectifEpargne: null,        // { id, nom, type:'auto'|'manuel', pourcentage, dateCreation }
       objectifsVerrouilles: [],      // objectifs migrés au-delà du 1er (données conservées, jamais affichées en détail)
+      reprisesCharges: {},           // Sprint 8A : { 'AAAA-MM': { rubriqueId: 'confirme'|'ignore' } }
       meta: { creation: todayStr(), derniereSauvegarde: null }
     };
   }
@@ -583,7 +749,37 @@
     migrerObjectifsCoiffure(out, parsed);
     migrerValidationAcces(out);
     migrerAccesCalendaire(out);
+    normaliserModeSalon(out);
     return out;
+  }
+
+  // Sprint 8A : un état antérieur (Sprint ≤7bis) n'a ni mode de travail, ni
+  // fonds, ni crédits, ni reprises — il reçoit les valeurs par défaut (mode À
+  // domicile), sans qu'aucune prestation, charge ou rubrique existante ne soit
+  // modifiée. Les charges sans `moisConcerne` sont rattachées, au moment du
+  // calcul seulement, au mois de leur date (moisDeCharge), jamais réécrites.
+  function normaliserModeSalon(out){
+    if(out.config.modeTravail !== "salon") out.config.modeTravail = "domicile";
+    if(!Array.isArray(out.config.credits)) out.config.credits = [];
+    var f = out.config.fondsRenouvellement;
+    if(f && (typeof f !== "object" || (f.mode !== "fixe" && f.mode !== "pourcentage") || !f.depuis)) out.config.fondsRenouvellement = null;
+    else if(f && !Array.isArray(f.historique)) f.historique = [];
+    if(!out.reprisesCharges || typeof out.reprisesCharges !== "object" || Array.isArray(out.reprisesCharges)) out.reprisesCharges = {};
+    if(out.config.modeTravail === "salon") assurerRubriquesSalon(out.config);
+    // Sprint 8B
+    out.config.remunerationProprio = paramVersionneValide(out.config.remunerationProprio);
+    out.config.epargneMensuelle = paramVersionneValide(out.config.epargneMensuelle);
+    if(!Array.isArray(out.config.salaries)) out.config.salaries = [];
+    out.config.salaries = out.config.salaries.filter(function(s){
+      return s && typeof s === "object" && s.id && paramVersionneValide(s) && s.debut;
+    });
+  }
+  function paramVersionneValide(p){
+    if(!p || typeof p !== "object") return null;
+    if(p.mode !== "fixe" && p.mode !== "pourcentage") return null;
+    if(!p.depuis) return null;
+    if(!Array.isArray(p.historique)) p.historique = [];
+    return p;
   }
 
   // Amendement Sprint 2 (Salon F) : champ "lieu" (domicile/salon). Toute
@@ -779,7 +975,14 @@
     reglagesMsg: "",
     backupMsg: "",
     modalReturnTo: null,
-    abonnementToggles: {}
+    abonnementToggles: {},
+    // Sprint 8A — mode Salon
+    fondsDraft: null,     // { mode, valeur } en cours d'édition dans Réglages
+    fondsMsg: "",
+    modeMsg: "",
+    repriseDraft: {},     // { rubriqueId: montant saisi } dans la fenêtre « Charges du mois »
+    // Sprint 8B
+    etatVue: "salon"      // vue de Mon état en mode Salon : 'salon' | 'coiffure' | 'onglerie'
   };
 
   var TAB_DEFS = [
@@ -1107,7 +1310,7 @@
           '<div class="brand-emoji">💇</div>' +
           '<div class="brand-text">' +
             '<div class="brand-title">MonDjai/Coiffure</div>' +
-            '<div class="brand-sub">Suivi financier de vos prestations</div>' +
+            '<div class="brand-sub">' + (estModeSalon() ? "Suivi financier du salon" : "Suivi financier de vos prestations") + '</div>' +
           '</div>' +
         '</div>' +
         '<div class="header-icons">' +
@@ -1122,7 +1325,22 @@
   // d'épargne, visible sur tous les écrans à côté de ⚙️ Réglages — mêmes
   // informations que la tuile Épargne d'Aujourd'hui (montant du jour /
   // objectif actif), sans passer par la tuile de l'accueil.
+  // Sprint 8B : valeur affichée pour l'épargne en mode Salon (tuile
+  // d'Aujourd'hui et raccourci d'en-tête) — épargne du mois en cours.
+  function valeurEpargneSalon(){
+    if(!state.objectifEpargne) return "Aucun";
+    if(!epargneSalonReglee()) return "À régler";
+    return formatFCFA(epargneMoisSalon());
+  }
+
   function renderEpargneShortcut(){
+    if(estModeSalon()){
+      return (
+        '<button type="button" class="icon-btn epargne-shortcut" data-action="ouvrir-objectif" aria-label="Épargne du mois">' +
+          '<span class="es-emoji">' + esc(epargneEmoji()) + '</span><span class="es-val">' + esc(valeurEpargneSalon()) + '</span>' +
+        '</button>'
+      );
+    }
     var epargne = state.objectifEpargne ? epargneJour(todayStr()) : 0;
     var val = state.objectifEpargne ? formatFCFA(epargne) : "Aucun";
     return (
@@ -1154,7 +1372,8 @@
       default: body = "";
     }
     var fab = ui.tab === "aujourdhui" ? renderFab() : "";
-    return '<div class="main with-tabbar">' + body + '</div>' + fab;
+    var classeSalon = (ui.tab === "aujourdhui" && estModeSalon()) ? " salon-fab-space" : "";
+    return '<div class="main with-tabbar' + classeSalon + '">' + body + '</div>' + fab;
   }
 
   function renderFab(){
@@ -1234,7 +1453,12 @@
   function allActivityDates(){
     var set = {};
     state.prestationsCoiffure.forEach(function(p){ if(p.date) set[p.date] = 1; });
-    state.autresCharges.forEach(function(c){ if(c.date) set[c.date] = 1; });
+    state.autresCharges.forEach(function(c){
+      if(c.date) set[c.date] = 1;
+      // Sprint 8A : une charge saisie pour un mois antérieur (mois concerné)
+      // rend ce mois consultable dans Mon état, même sans autre donnée.
+      if(c.moisConcerne) set[c.moisConcerne + "-01"] = 1;
+    });
     return Object.keys(set).sort();
   }
 
@@ -1306,6 +1530,347 @@
     return (state.objectifEpargne && state.objectifEpargne.emoji) || "💰";
   }
 
+  /* ================= Sprint 8A : calculs mensuels du mode Salon ================= */
+
+  // Chaîne de calcul (amendement n°1, section 7, étapes 1 à 4) :
+  //   Recettes du mois − Charges du mois − Fonds de renouvellement du mois
+  //   = Résultat net du mois.
+  // Les étapes 5 à 8 (rémunérations, épargne mensuelle, reste) arrivent au
+  // Sprint 8B et partiront de ce même résultat net.
+  // En mode À domicile, aucune de ces fonctions n'intervient : les calculs du
+  // Sprint 7bis (par date) restent les seuls utilisés.
+
+  function estModeSalon(){ return state.config.modeTravail === "salon"; }
+
+  // Mois sous forme de clé "AAAA-MM" (même format que autresCharges[].moisConcerne).
+  function moisCleDe(dateStr){ return String(dateStr||"").slice(0,7); }
+  function moisCourantCle(){ return moisCleDe(todayStr()); }
+  function decalerMoisCle(cle, delta){
+    var y = parseInt(cle.slice(0,4),10), m = parseInt(cle.slice(5,7),10) - 1 + delta;
+    var d = new Date(y, m, 1);
+    return d.getFullYear() + "-" + pad2(d.getMonth()+1);
+  }
+  function rangeDuMoisCle(cle){
+    return getMonthRange(new Date(parseInt(cle.slice(0,4),10), parseInt(cle.slice(5,7),10)-1, 1));
+  }
+  function libelleMoisCle(cle){
+    return MOIS_NOMS[parseInt(cle.slice(5,7),10)-1] + " " + cle.slice(0,4);
+  }
+  function libelleMoisCleMaj(cle){ var s = libelleMoisCle(cle); return s.charAt(0).toUpperCase() + s.slice(1); }
+  function nomMoisSeul(cle){ return MOIS_NOMS[parseInt(cle.slice(5,7),10)-1]; }
+  // « d’octobre », « d’avril », « d’août » mais « de septembre ».
+  function deMois(nom){ return /^[aeiouyàâäéèêëîïôöûüh]/i.test(nom) ? "d’" + nom : "de " + nom; }
+
+  // Mois auquel une charge est rattachée : son mois concerné (charges saisies
+  // en mode Salon) ou, à défaut, le mois de sa date de saisie (toutes les
+  // charges antérieures au Sprint 8A) — calculé à la volée, jamais réécrit.
+  function moisDeCharge(c){ return c.moisConcerne || moisCleDe(c.date); }
+  // Type de la charge : celui mémorisé à la saisie (survit à la suppression
+  // d'une rubrique), sinon celui de la rubrique, sinon « charge commune ».
+  function typeDeCharge(c){
+    if(c.rubriqueType) return c.rubriqueType;
+    return typeDeRubrique(findRubriqueCharge(c.rubriqueId));
+  }
+  function chargesDuMois(cle){
+    return state.autresCharges.filter(function(c){ return moisDeCharge(c) === cle; });
+  }
+  function recettesMois(cle){ return recetteCoiffure(rangeDuMoisCle(cle)); }
+
+  // ----- Fonds de renouvellement des produits -----
+  // Versionné par mois : modifier le fonds en octobre ne réécrit jamais la
+  // prévision de septembre (le résultat net d'un mois terminé est définitif).
+  function versionsFonds(){
+    var f = state.config.fondsRenouvellement;
+    if(!f) return [];
+    var v = (f.historique || []).slice();
+    v.push({ depuis: f.depuis, mode: f.mode, valeur: f.valeur });
+    return v.sort(function(a,b){ return a.depuis < b.depuis ? -1 : (a.depuis > b.depuis ? 1 : 0); });
+  }
+  function versionFondsPourMois(cle){
+    var res = null;
+    versionsFonds().forEach(function(v){ if(v.depuis <= cle) res = v; });
+    return res;
+  }
+  function fondsActifPourMois(cle){
+    var v = versionFondsPourMois(cle);
+    return !!(v && Number(v.valeur) > 0);
+  }
+  // Prévision du mois : montant fixe, ou pourcentage des recettes du mois
+  // (arrondi au franc — FCFA sans décimale, et pour que Recettes − Charges −
+  // Fonds affichés tombent toujours juste sur le résultat net affiché).
+  function previsionFondsMois(cle){
+    var v = versionFondsPourMois(cle);
+    if(!v || !(Number(v.valeur) > 0)) return 0;
+    if(v.mode === "pourcentage") return Math.round(recettesMois(cle) * Number(v.valeur) / 100);
+    return Math.round(Number(v.valeur));
+  }
+  function achatsProduitsMois(cle, typeFiltre){
+    return sumBy(chargesDuMois(cle).filter(function(c){
+      var t = typeDeCharge(c);
+      return typeFiltre ? t === typeFiltre : estTypeProduits(t);
+    }), function(c){ return c.montant; });
+  }
+  // Solde du fonds = prévisions cumulées (du premier mois du fonds jusqu'au
+  // mois en cours) − achats de produits payés par le fonds.
+  function soldeFonds(){
+    var v = versionsFonds();
+    if(!v.length) return { configure:false, actif:false, previsions:0, achats:0, solde:0 };
+    var debut = v[0].depuis, fin = moisCourantCle();
+    var previsions = 0;
+    for(var m = debut, garde = 0; m <= fin && garde < 600; m = decalerMoisCle(m, 1), garde++){
+      previsions += previsionFondsMois(m);
+    }
+    var achats = sumBy(state.autresCharges.filter(function(c){
+      var mc = moisDeCharge(c);
+      return mc >= debut && estTypeProduits(typeDeCharge(c)) && fondsActifPourMois(mc);
+    }), function(c){ return c.montant; });
+    return { configure:true, actif: fondsActifPourMois(fin), previsions: previsions, achats: achats, solde: previsions - achats };
+  }
+
+  // ----- Charges du mois -----
+  // Pèsent sur le résultat net : toutes les charges du mois (loyer, CIE,
+  // SODECI, Mairie, BURIDA, remboursements de crédit, autres), sauf les
+  // achats de produits quand un fonds est actif ce mois-là — ils sont alors
+  // payés par le fonds, jamais comptés une seconde fois. Sans fonds actif, un
+  // achat de produits reste une charge ordinaire : une dépense réelle ne
+  // disparaît jamais du résultat.
+  function chargesComptees(cle){
+    var actif = fondsActifPourMois(cle);
+    return chargesDuMois(cle).filter(function(c){ return !(actif && estTypeProduits(typeDeCharge(c))); });
+  }
+  function chargesMoisTotal(cle){ return sumBy(chargesComptees(cle), function(c){ return c.montant; }); }
+
+  // Résultat net du mois — provisoire pendant le mois, définitif ensuite.
+  function resultatNetMois(cle){
+    var recettes = recettesMois(cle);
+    var charges = chargesMoisTotal(cle);
+    var fonds = previsionFondsMois(cle);
+    return {
+      mois: cle, recettes: recettes, charges: charges, fonds: fonds,
+      resultatNet: recettes - charges - fonds,
+      provisoire: cle >= moisCourantCle()
+    };
+  }
+
+  // Jauge « Charges et fonds du mois à couvrir » : simple repère, rien n'est
+  // déduit. Pourcentage arrondi à l'inférieur pour ne jamais afficher 100 %
+  // tant que les recettes ne couvrent pas réellement tout.
+  function jaugeMois(cle){
+    var r = resultatNetMois(cle);
+    var aCouvrir = r.charges + r.fonds;
+    var pct = aCouvrir > 0 ? Math.min(100, Math.floor(r.recettes / aCouvrir * 100)) : 0;
+    return { aCouvrir: aCouvrir, recettes: r.recettes, pct: pct, couvert: aCouvrir > 0 && r.recettes >= aCouvrir, reste: Math.max(0, aCouvrir - r.recettes) };
+  }
+
+  // ----- Remboursement de crédit -----
+  function findCredit(rubriqueId){
+    var list = state.config.credits || [];
+    for(var i=0;i<list.length;i++) if(list[i].rubriqueId === rubriqueId) return list[i];
+    return null;
+  }
+  // Remboursé = remboursements saisis depuis la première saisie (point de
+  // départ du crédit) ; Reste dû = montant total − remboursé, si un montant
+  // total a été indiqué.
+  function bilanCredit(credit){
+    var rembourse = sumBy(state.autresCharges.filter(function(c){
+      if(c.rubriqueId !== credit.rubriqueId) return false;
+      if(c.ts && credit.tsDebut) return c.ts >= credit.tsDebut;
+      return (c.date || "") >= (credit.dateDebut || "");
+    }), function(c){ return c.montant; });
+    var total = Number(credit.montantTotal) > 0 ? Number(credit.montantTotal) : null;
+    return {
+      rembourse: rembourse,
+      total: total,
+      resteDu: total !== null ? Math.max(0, total - rembourse) : null,
+      pct: total !== null ? Math.min(100, Math.floor(rembourse / total * 100)) : null,
+      solde: total !== null && rembourse >= total
+    };
+  }
+
+  // ----- Rubriques selon le mode -----
+  function rubriquesPourMode(seulementActives){
+    var salon = estModeSalon();
+    var source = state.config.rubriquesCharges;
+    var list = source.filter(function(r){
+      var p = porteeRubrique(r);
+      if(salon ? p === "domicile" : p === "salon") return false;
+      return seulementActives ? !!r.actif : true;
+    });
+    if(!salon) return list;
+    var pos = {};
+    source.forEach(function(r, i){ pos[r.id] = i; });
+    var rangCredit = ORDRE_RUBRIQUES_SALON.indexOf("credit");
+    function rang(r){
+      var i = ORDRE_RUBRIQUES_SALON.indexOf(r.id);
+      if(i !== -1) return i;
+      if(typeDeRubrique(r) === "credit") return rangCredit + 0.001 * (pos[r.id] + 1);
+      return 100 + pos[r.id];
+    }
+    return list.slice().sort(function(a,b){ return rang(a) - rang(b); });
+  }
+
+  // ----- Reprise des charges du mois précédent -----
+  // À l'ouverture d'un nouveau mois (mode Salon), chaque rubrique payée le
+  // mois précédent est proposée avec le même montant, à confirmer ou
+  // modifier (la CIE et la SODECI varient) — jamais créée automatiquement.
+  // Exclus : achats de produits (ponctuels, payés par le fonds), rubriques
+  // supprimées, désactivées ou propres au mode À domicile, rubriques déjà
+  // saisies ce mois-ci, propositions déjà confirmées ou ignorées.
+  function reprisesEnAttente(cle){
+    cle = cle || moisCourantCle();
+    var prec = decalerMoisCle(cle, -1);
+    var traitees = (state.reprisesCharges && state.reprisesCharges[cle]) || {};
+    var dejaSaisies = {};
+    chargesDuMois(cle).forEach(function(c){ dejaSaisies[c.rubriqueId] = 1; });
+    var parRub = {}, ids = [];
+    chargesDuMois(prec).forEach(function(c){
+      if(c.rubriqueSupprimee) return;
+      var r = findRubriqueCharge(c.rubriqueId);
+      if(!r || !r.actif || porteeRubrique(r) === "domicile") return;
+      if(estTypeProduits(typeDeCharge(c))) return;
+      if(dejaSaisies[c.rubriqueId] || traitees[c.rubriqueId]) return;
+      if(!(c.rubriqueId in parRub)){ parRub[c.rubriqueId] = 0; ids.push(c.rubriqueId); }
+      parRub[c.rubriqueId] += Number(c.montant) || 0;
+    });
+    var ordre = rubriquesPourMode(false).map(function(r){ return r.id; });
+    ids.sort(function(a,b){ return ordre.indexOf(a) - ordre.indexOf(b); });
+    return ids.map(function(id){
+      return { rubrique: findRubriqueCharge(id), montant: parRub[id], moisPrecedent: prec, mois: cle };
+    });
+  }
+
+  /* ================= Sprint 8B : activité, rémunérations, épargne mensuelle ================= */
+
+  // Activité d'une prestation : toute prestation sans champ `activite`
+  // (antérieure au Sprint 8B, ou saisie en mode À domicile) est « coiffure ».
+  function activiteDe(p){ return p.activite === "onglerie" ? "onglerie" : "coiffure"; }
+  function recettesActivite(range, act){
+    return sumBy(filterRange(state.prestationsCoiffure, range).filter(function(p){ return activiteDe(p) === act; }), function(p){ return p.mainOeuvre; });
+  }
+
+  // ----- Paramètres versionnés par mois (rémunérations, épargne mensuelle) -----
+  // Même principe que le fonds de renouvellement : { mode, valeur, depuis,
+  // historique[] }. Une modification s'applique au mois en cours ; les mois
+  // terminés gardent la clause qui était la leur.
+  function versionPourMois(param, cle){
+    if(!param || !param.depuis) return null;
+    var v = (param.historique || []).slice();
+    v.push({ depuis: param.depuis, mode: param.mode, valeur: param.valeur });
+    v.sort(function(a,b){ return a.depuis < b.depuis ? -1 : (a.depuis > b.depuis ? 1 : 0); });
+    var res = null;
+    v.forEach(function(x){ if(x.depuis <= cle) res = x; });
+    return res;
+  }
+  function majParamVersionne(param, mode, valeur, cle){
+    if(!param) return { mode: mode, valeur: valeur, depuis: cle, historique: [] };
+    if(param.depuis === cle){ param.mode = mode; param.valeur = valeur; return param; }
+    if(param.depuis < cle){
+      param.historique = (param.historique || []).concat([{ depuis: param.depuis, mode: param.mode, valeur: param.valeur }]);
+    } else {
+      // Horloge du téléphone revenue en arrière : on remplace simplement.
+      param.historique = (param.historique || []).filter(function(h){ return h.depuis < cle; });
+    }
+    param.depuis = cle; param.mode = mode; param.valeur = valeur;
+    return param;
+  }
+  function versionActive(v){ return !!(v && Number(v.valeur) > 0); }
+
+  // Salariés présents un mois donné : depuis leur mois d'arrivée (`debut`),
+  // jusqu'à leur dernier mois (`fin`) s'ils ont été retirés.
+  function salariesActifs(cle){
+    return (state.config.salaries || []).filter(function(s){
+      return s.debut <= cle && (!s.fin || cle <= s.fin);
+    });
+  }
+
+  // Garde-fou (amendement, section 7 — point 2 validé) : tous les
+  // pourcentages portent sur le même résultat net ; leur total ne doit pas
+  // dépasser 100 %. `remplace` permet de tester une valeur avant de
+  // l'enregistrer : { cible:'proprio'|'epargne'|'salarie', id, nouveau, mode, valeur }.
+  function pctDe(v){ return (v && v.mode === "pourcentage") ? (Number(v.valeur) || 0) : 0; }
+  function totalPourcentages(cle, remplace){
+    var r = remplace || {};
+    var cfg = state.config;
+    var det = { proprio: 0, salaries: 0, epargne: 0 };
+    det.proprio = pctDe(r.cible === "proprio" ? r : versionPourMois(cfg.remunerationProprio, cle));
+    salariesActifs(cle).forEach(function(s){
+      det.salaries += pctDe((r.cible === "salarie" && r.id === s.id) ? r : versionPourMois(s, cle));
+    });
+    if(r.cible === "salarie" && r.nouveau) det.salaries += pctDe(r);
+    det.epargne = pctDe(r.cible === "epargne" ? r : versionPourMois(cfg.epargneMensuelle, cle));
+    det.total = Math.round((det.proprio + det.salaries + det.epargne) * 100) / 100;
+    return det;
+  }
+  function formatPct(v){
+    var n = Math.round((Number(v) || 0) * 10) / 10;
+    return String(n).replace(".", ",") + " %";
+  }
+  function libelleClause(v){
+    if(!versionActive(v)) return "Non réglée";
+    return v.mode === "pourcentage" ? (formatPct(v.valeur) + " du résultat net") : (formatFCFA(v.valeur) + " par mois");
+  }
+  // Message du garde-fou si la valeur testée ferait dépasser 100 %.
+  function erreurGardeFou(cle, remplace){
+    if(remplace.mode !== "pourcentage") return "";
+    var det = totalPourcentages(cle, remplace);
+    if(det.total <= 100) return "";
+    var sansCible = det.total - pctDe(remplace);
+    return "Le total des pourcentages passerait à " + formatPct(det.total) + " du résultat net (100 % au maximum). Il reste " + formatPct(Math.max(0, 100 - sansCible)) + " disponibles.";
+  }
+
+  // Répartition du résultat net du mois (amendement, section 7, étapes 4 à 8) :
+  // Résultat net → propriétaire → chaque salarié → épargne = Reste.
+  // Résultat net négatif : parts en pourcentage à zéro ; montants fixes
+  // maintenus, avec une alerte douce (jamais bloquante).
+  function repartitionMois(cle){
+    var r = resultatNetMois(cle);
+    var rn = r.resultatNet;
+    var base = Math.max(0, rn);
+    function part(v){
+      if(!versionActive(v)) return 0;
+      return v.mode === "pourcentage" ? Math.round(base * Number(v.valeur) / 100) : Math.round(Number(v.valeur));
+    }
+    function ligne(v){ return versionActive(v) ? { mode: v.mode, valeur: Number(v.valeur), montant: part(v) } : null; }
+    var proprio = ligne(versionPourMois(state.config.remunerationProprio, cle));
+    var salaries = salariesActifs(cle).map(function(s){
+      var l = ligne(versionPourMois(s, cle)) || { mode: null, valeur: 0, montant: 0 };
+      l.id = s.id; l.nom = s.nom;
+      return l;
+    });
+    var epargne = ligne(versionPourMois(state.config.epargneMensuelle, cle));
+    var totalRemunerations = (proprio ? proprio.montant : 0) + sumBy(salaries, function(s){ return s.montant; });
+    var montantEpargne = epargne ? epargne.montant : 0;
+    var reste = rn - totalRemunerations - montantEpargne;
+    var lignes = [proprio, epargne].concat(salaries).filter(Boolean);
+    var fixes = sumBy(lignes.filter(function(l){ return l.mode === "fixe"; }), function(l){ return l.montant; });
+    var aDesPct = lignes.some(function(l){ return l.mode === "pourcentage" && l.valeur > 0; });
+    var pct = totalPourcentages(cle);
+    var alertes = [];
+    if(rn < 0 && aDesPct) alertes.push("Résultat net négatif : les parts en pourcentage valent zéro ce mois-ci.");
+    if(rn < 0 && fixes > 0) alertes.push("Les montants fixes (" + formatFCFA(fixes) + ") restent dus : le reste du salon est négatif.");
+    else if(rn >= 0 && fixes > 0 && reste < 0) alertes.push("Les montants fixes dépassent le résultat net : le reste du salon est négatif de " + formatFCFA(Math.abs(reste)) + ".");
+    if(pct.total > 100) alertes.push("Le total des pourcentages dépasse 100 % (" + formatPct(pct.total) + ").");
+    return {
+      mois: cle, resultat: r, resultatNet: rn,
+      proprio: proprio, salaries: salaries, epargne: epargne,
+      totalRemunerations: totalRemunerations, montantEpargne: montantEpargne,
+      reste: reste, totalPct: pct.total, alertes: alertes
+    };
+  }
+
+  // Épargne mensuelle (mode Salon) : réglée ou non pour le mois en cours,
+  // montant du mois, cumul depuis la première version.
+  function epargneSalonReglee(){ return versionActive(versionPourMois(state.config.epargneMensuelle, moisCourantCle())); }
+  function epargneMoisSalon(cle){ return repartitionMois(cle || moisCourantCle()).montantEpargne; }
+  function cumulEpargneSalon(){
+    var p = state.config.epargneMensuelle;
+    if(!p) return 0;
+    var v = (p.historique || []).map(function(h){ return h.depuis; }).concat([p.depuis]).sort();
+    var total = 0, fin = moisCourantCle();
+    for(var m = v[0], garde = 0; m <= fin && garde < 600; m = decalerMoisCle(m, 1), garde++) total += epargneMoisSalon(m);
+    return total;
+  }
+
   function emptyState(emoji, titre, desc){
     return '<div class="empty-state"><div class="es-emoji">' + emoji + '</div>' +
       '<div class="es-title">' + esc(titre) + '</div>' +
@@ -1315,6 +1880,7 @@
   /* ================= Écran « Aujourd’hui » (repensé, profil unique) ================= */
 
   function renderAujourdhui(){
+    if(estModeSalon()) return renderAujourdhuiSalon();
     var today = todayStr();
     var range = { start: today, end: today };
     var mainOeuvre = recetteCoiffure(range);
@@ -1378,6 +1944,219 @@
     );
   }
 
+  /* ================= Sprint 8A : écran « Aujourd’hui » en mode Salon ================= */
+
+  // Amendement n°1, section 9 (point 1 validé par le prompt du Sprint 8A) :
+  // en mode Salon, « Disponible aujourd’hui » n’est plus calculé — charges et
+  // fonds se règlent au mois. À la place : Recette du jour (total salon),
+  // jauge des charges et du fonds du mois, solde du fonds de renouvellement.
+  // Transport, Mèche et Épargne restent tels quels (informatifs / objectif
+  // inchangé jusqu’au Sprint 8B).
+  function renderAujourdhuiSalon(){
+    var today = todayStr();
+    var cle = moisCourantCle();
+    var range = { start: today, end: today };
+    var recetteJour = recetteCoiffure(range);
+    var nbPrest = filterRange(state.prestationsCoiffure, range).length;
+    var transport = transportPeriode(range);
+    var meche = mechePeriode(range);
+    var sf = soldeFonds();
+    var reprises = reprisesEnAttente(cle);
+    // Sprint 8B : détail Coiffure / Onglerie de la recette du jour.
+    var recetteOnglerie = recettesActivite(range, "onglerie");
+    var detailActivites = recetteOnglerie > 0
+      ? (" · coiffure " + formatFCFA(recettesActivite(range, "coiffure")) + " · onglerie " + formatFCFA(recetteOnglerie))
+      : " · total salon";
+
+    var recetteCard =
+      '<button type="button" class="dash-solde as-btn" data-action="voir-jour-mainoeuvre">' +
+        '<div class="ds-label">Recette du jour</div>' +
+        '<div class="ds-amount">' + formatFCFA(recetteJour) + '</div>' +
+        '<div class="ds-sub">' + (nbPrest ? (nbPrest + (nbPrest > 1 ? " prestations" : " prestation") + detailActivites) : "Aucune prestation enregistrée aujourd’hui") + '</div>' +
+      '</button>';
+
+    var repriseBanner = reprises.length ? (
+      '<button type="button" class="reprise-banner" data-action="voir-charges-mois">' +
+        '<span class="rb-emoji">🔁</span>' +
+        '<span class="rb-text">' + reprises.length + (reprises.length > 1 ? " charges" : " charge") + ' ' + esc(deMois(nomMoisSeul(reprises[0].moisPrecedent))) + ' à reprendre pour ' + esc(nomMoisSeul(cle)) + '</span>' +
+        '<span class="rb-chev">›</span>' +
+      '</button>'
+    ) : '';
+
+    var fondsTile;
+    if(!sf.configure){
+      fondsTile =
+        '<button type="button" class="dash-block info" style="color:var(--text);" data-action="voir-fonds">' +
+          '<div class="db-emoji">🧴</div><div class="db-amount" style="font-size:17px;">Non réglé</div><div class="db-label">Fonds produits</div>' +
+        '</button>';
+    } else {
+      var neg = sf.solde < 0;
+      fondsTile =
+        '<button type="button" class="dash-block fonds' + (neg ? " neg" : "") + '" style="color:var(--text);" data-action="voir-fonds">' +
+          '<div class="db-emoji">🧴</div><div class="db-amount">' + formatFCFA(sf.solde) + '</div>' +
+          '<div class="db-label">Fonds produits</div>' +
+          (neg ? '<div class="db-mini">À découvert</div>' : '') +
+        '</button>';
+    }
+
+    var blocks =
+      fondsTile +
+      '<button type="button" class="dash-block info" style="color:var(--text);" data-action="voir-jour-champ" data-champ="transport">' +
+        '<div class="db-emoji">🚗</div><div class="db-amount">' + formatFCFA(transport) + '</div><div class="db-label">Transport</div>' +
+      '</button>' +
+      '<button type="button" class="dash-block info" style="color:var(--text);" data-action="voir-jour-champ" data-champ="meche">' +
+        '<div class="db-emoji"><img class="meche-icon-img" src="' + MECHE_ICON_DATA + '" alt="Mèche" width="40" height="40"></div><div class="db-amount">' + formatFCFA(meche) + '</div><div class="db-label">Mèche</div>' +
+      '</button>' +
+      '<button type="button" class="dash-block" style="color:var(--text);" data-action="ouvrir-objectif">' +
+        '<div class="db-emoji">' + esc(epargneEmoji()) + '</div><div class="db-amount"' + (state.objectifEpargne && !epargneSalonReglee() ? ' style="font-size:17px;"' : '') + '>' + esc(valeurEpargneSalon()) + '</div><div class="db-label">Épargne du mois</div>' +
+      '</button>';
+
+    return (
+      '<div class="section-title">Aujourd’hui · ' + formatDateFr(today) + '</div>' +
+      recetteCard +
+      repriseBanner +
+      renderJaugeCard(cle, true) +
+      '<div class="dash-grid">' + blocks + '</div>' +
+      (sf.configure && sf.solde < 0 ? renderAlerteFonds(sf) : '')
+    );
+  }
+
+  // Jauge « Charges et fonds du mois à couvrir » (amendement, section 4).
+  function renderJaugeCard(cle, cliquable){
+    var j = jaugeMois(cle);
+    var corps;
+    if(j.aCouvrir <= 0){
+      corps =
+        '<div class="jauge-row"><div class="jauge-amount">0 F</div></div>' +
+        '<div class="jauge-foot">Aucune charge ni fonds prévu pour ' + esc(nomMoisSeul(cle)) + ' pour l’instant.</div>';
+    } else {
+      var ok = j.couvert;
+      corps =
+        '<div class="jauge-row"><div class="jauge-amount">' + formatFCFA(j.aCouvrir) + '</div>' +
+          '<div class="jauge-pct' + (ok ? " ok" : "") + '">couvert à ' + j.pct + ' %</div></div>' +
+        '<div class="jauge-bar"><div class="jauge-fill' + (ok ? " ok" : "") + '" style="width:' + j.pct + '%"></div></div>' +
+        '<div class="jauge-foot">Recettes du mois : ' + formatFCFA(j.recettes) +
+          (ok ? ' — charges et fonds couverts.' : ' · encore ' + formatFCFA(j.reste) + ' à couvrir.') + '</div>';
+    }
+    var head = '<div class="jauge-head">Charges et fonds du mois à couvrir</div>';
+    if(cliquable){
+      return '<button type="button" class="jauge-card" data-action="voir-charges-mois">' + head + corps +
+        '<div class="jauge-link">Voir et ajouter les charges du mois ›</div></button>';
+    }
+    return '<div class="jauge-card">' + head + corps + '</div>';
+  }
+
+  function renderAlerteFonds(sf){
+    return '<div class="alerte-douce">🧴 Le fonds produits est à découvert de ' + formatFCFA(Math.abs(sf.solde)) +
+      ' : les achats ont dépassé la prévision. Rien n’est bloqué — vous pouvez ajuster la prévision dans Réglages.</div>';
+  }
+
+  function libelleTypeCredit(t){ return t === "personne" ? "Personne (apport)" : "Banque"; }
+  function sousTitreCredit(credit){
+    var s = libelleTypeCredit(credit.type) + (credit.preteur ? " · " + credit.preteur : "");
+    return s + " · depuis le " + formatDateFr(credit.dateDebut);
+  }
+  // Bilan léger (amendement, section 5) : Remboursé X · Reste dû Y · barre ;
+  // sans montant total saisi, seul « Remboursé à ce jour » apparaît.
+  function renderBilanCreditHtml(credit){
+    var b = bilanCredit(credit);
+    if(b.total === null){
+      return '<div class="credit-bilan"><div class="cb-line"><span>Remboursé à ce jour</span><b>' + formatFCFA(b.rembourse) + '</b></div></div>';
+    }
+    return (
+      '<div class="credit-bilan">' +
+        '<div class="cb-line"><span>Remboursé <b>' + formatFCFA(b.rembourse) + '</b></span>' +
+          (b.solde ? '<b style="color:var(--green);">Soldé ✓</b>' : '<span>Reste dû <b>' + formatFCFA(b.resteDu) + '</b></span>') +
+        '</div>' +
+        '<div class="jauge-bar"><div class="jauge-fill ok" style="width:' + b.pct + '%"></div></div>' +
+      '</div>'
+    );
+  }
+
+  // Fenêtre « Fonds de renouvellement » (tuile Fonds produits d’Aujourd’hui).
+  function renderFondsDetailModal(){
+    var cle = moisCourantCle();
+    var sf = soldeFonds();
+    if(!sf.configure){
+      return (
+        '<div class="hint" style="margin-bottom:14px;">Aucun fonds de renouvellement réglé. Prévoyez chaque mois un montant fixe ou un pourcentage des recettes : il est déduit du résultat net, et vos achats de produits sont payés par ce fonds au lieu d’être comptés deux fois.</div>' +
+        '<button type="button" class="btn btn-primary" data-action="ouvrir-reglages-fonds">Régler le fonds</button>'
+      );
+    }
+    var v = versionFondsPourMois(cle);
+    var actif = fondsActifPourMois(cle);
+    var modeTxt = !actif ? "fonds arrêté" : (v.mode === "pourcentage" ? (v.valeur + " % des recettes") : "montant fixe");
+    var rows =
+      drow("Prévision " + deMois(nomMoisSeul(cle)), formatFCFA(previsionFondsMois(cle)) + ' <span style="color:var(--text-dim); font-weight:600;">(' + esc(modeTxt) + ')</span>') +
+      drow("Achats produits coiffure ce mois", formatFCFA(achatsProduitsMois(cle, "produits_coiffure"))) +
+      drow("Achats produits onglerie ce mois", formatFCFA(achatsProduitsMois(cle, "produits_onglerie"))) +
+      drow("Prévisions cumulées", formatFCFA(sf.previsions)) +
+      drow("Achats payés par le fonds", formatFCFA(sf.achats)) +
+      drow("Solde du fonds", '<span style="color:' + (sf.solde < 0 ? "var(--red)" : "var(--green)") + ';">' + formatFCFA(sf.solde) + '</span>');
+    return (
+      '<div>' + rows + '</div>' +
+      (!actif ? '<div class="alerte-douce">Fonds arrêté : ce mois-ci, les achats de produits comptent comme des charges du mois.</div>' : '') +
+      (sf.solde < 0 ? renderAlerteFonds(sf) : '') +
+      '<div class="btn-row">' +
+        '<button type="button" class="btn btn-secondary" data-action="ouvrir-reglages-fonds">Régler le fonds</button>' +
+        '<button type="button" class="btn btn-primary" data-action="add-achat-produits">+ Achat de produits</button>' +
+      '</div>'
+    );
+  }
+
+  // Fenêtre « Charges du mois » (mode Salon) : reprise du mois précédent,
+  // jauge, charges saisies pour le mois en cours, ajout.
+  function renderChargesMoisModal(){
+    var cle = moisCourantCle();
+    var reprises = reprisesEnAttente(cle);
+    var html = "";
+    if(reprises.length){
+      var prec = reprises[0].moisPrecedent;
+      html +=
+        '<div class="reglages-section" style="margin-bottom:16px;">' +
+          '<div class="rs-title">À reprendre ' + esc(deMois(nomMoisSeul(prec))) + '</div>' +
+          '<div class="hint tight" style="margin-bottom:10px;">Même montant que le mois dernier : confirmez, modifiez (CIE et SODECI varient) ou ignorez.</div>' +
+          reprises.map(function(p){
+            var id = p.rubrique.id;
+            var val = (ui.repriseDraft[id] !== undefined) ? ui.repriseDraft[id] : String(p.montant);
+            return (
+              '<div class="reprise-row">' +
+                '<div class="rr-head"><span>' + esc(p.rubrique.emoji || "📝") + '</span><span class="rr-nom">' + esc(p.rubrique.nom) + '</span>' +
+                  '<span class="rr-prev">' + esc(nomMoisSeul(prec)) + ' : ' + formatFCFA(p.montant) + '</span></div>' +
+                '<div class="rr-actions">' +
+                  '<input type="number" inputmode="numeric" min="0" step="1" class="input" id="f-reprise-' + esc(id) + '" value="' + esc(val) + '" data-action-change="capture-reprise" data-id="' + esc(id) + '" aria-label="Montant pour ' + esc(nomMoisSeul(cle)) + '">' +
+                  '<button type="button" class="btn btn-primary" data-action="reprise-confirmer" data-id="' + esc(id) + '">Confirmer</button>' +
+                  '<button type="button" class="btn btn-secondary" data-action="reprise-ignorer" data-id="' + esc(id) + '">Ignorer</button>' +
+                '</div>' +
+                fieldErr("reprise-" + id) +
+              '</div>'
+            );
+          }).join("") +
+          (reprises.length > 1 ? '<button type="button" class="btn btn-secondary" data-action="reprise-tout-confirmer">✓ Tout confirmer</button>' : '') +
+        '</div>';
+    }
+    html += renderJaugeCard(cle, false);
+    var actifFonds = fondsActifPourMois(cle);
+    var items = chargesDuMois(cle).slice().sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
+    html += '<div class="reglages-section"><div class="rs-title">Charges saisies pour ' + esc(nomMoisSeul(cle)) + '</div>' +
+      (items.length ? items.map(function(c){
+        var produitsFonds = actifFonds && estTypeProduits(typeDeCharge(c));
+        var sub = "Saisie le " + formatDateFr(c.date) + (c.note ? " · " + c.note : "");
+        return (
+          '<button type="button" class="entry-card" style="width:100%; margin-bottom:8px;" data-action="voir-charge-mois" data-id="' + esc(c.id) + '">' +
+            '<div class="entry-ico">' + esc(c.rubriqueEmoji || "📝") + '</div>' +
+            '<div class="entry-main"><div class="entry-title">' + esc(c.rubriqueNom) + (produitsFonds ? '<span class="tag-fonds">fonds</span>' : '') + '</div>' +
+              '<div class="entry-sub">' + esc(sub) + '</div></div>' +
+            '<div class="entry-amount">' + formatFCFA(c.montant) + '</div>' +
+          '</button>'
+        );
+      }).join("") : '<div class="hint tight">Aucune charge saisie pour ' + esc(nomMoisSeul(cle)) + ' pour l’instant.</div>') +
+      '<button type="button" class="btn btn-secondary" style="margin-top:8px;" data-action="add-autre-charge">+ Ajouter une charge</button>' +
+      '<div class="hint tight" style="margin-top:10px;">Les charges sont déduites du résultat net du mois, jamais au jour le jour. Les achats de produits marqués « fonds » sont payés par le fonds de renouvellement.</div>' +
+    '</div>';
+    return html;
+  }
+
   /* ================= Formulaire F5 : Prestations coiffure ================= */
 
   function optionsFor(name, selectedId){
@@ -1409,13 +2188,66 @@
     );
   }
 
+  // Sprint 8B (amendement, section 8) : en mode Salon, menu « Activité »
+  // en tête du formulaire. Onglerie = activité, montant et date, rien d'autre.
+  function activiteBrouillon(){ return (estModeSalon() && ui.draft["f-activite"] === "onglerie") ? "onglerie" : "coiffure"; }
+  function renderChampActivite(act){
+    return (
+      '<div class="field"><div class="label">Activité <span class="req">*</span></div>' +
+        '<div class="radio-row">' +
+          '<button type="button" class="radio-opt' + (act==="coiffure"?" active":"") + '" data-action="set-activite" data-val="coiffure">💇 Coiffure</button>' +
+          '<button type="button" class="radio-opt' + (act==="onglerie"?" active":"") + '" data-action="set-activite" data-val="onglerie">💅 Onglerie</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+  function renderFormOnglerie(){
+    var d = ui.draft;
+    return (
+      '<div>' +
+        renderChampActivite("onglerie") +
+        '<div class="field"><div class="label">Montant (FCFA) <span class="req">*</span></div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-montantOnglerie" value="' + esc(d["f-montantOnglerie"]||"") + '" data-action-change="capture-coiffure">' +
+          fieldErr("montantOnglerie") +
+        '</div>' +
+        '<div class="field"><div class="label">Date <span class="req">*</span></div>' +
+          '<input type="date" class="input" id="f-date" max="' + todayStr() + '" value="' + esc(d["f-date"] || todayStr()) + '" data-action-change="capture-coiffure">' +
+          fieldErr("date") +
+        '</div>' +
+        '<button type="button" class="btn btn-primary" data-action="enregistrer-coiffure">Enregistrer</button>' +
+      '</div>'
+    );
+  }
+  function enregistrerOnglerie(){
+    captureDraft(COIFFURE_FIELDS);
+    var d = ui.draft;
+    var errors = {};
+    var date = d["f-date"] || todayStr();
+    var montant = toNum(d["f-montantOnglerie"]);
+    if(!date) errors.date = "Choisissez une date.";
+    if(!(montant > 0) || !d["f-montantOnglerie"]) errors.montantOnglerie = "Indiquez le montant de la prestation.";
+    if(Object.keys(errors).length){ ui.errors = errors; render(); return; }
+    state.prestationsCoiffure.push({
+      id: uid("ongl"), date: date, activite: "onglerie", lieu: "salon",
+      typeClienteId: null, typeClienteNom: null, quartierId: null, quartierNom: null,
+      typesCoiffureIds: [], typesCoiffureNoms: [],
+      mainOeuvre: montant, coutMeches: 0, transport: 0, ts: Date.now()
+    });
+    saveState();
+    closeModal();
+  }
+
   function renderFormCoiffure(){
+    if(activiteBrouillon() === "onglerie") return renderFormOnglerie();
     var d = ui.draft;
     var clienteSel = d["f-clienteSel"] || "";
     var quartierSel = d["f-quartierSel"] || "";
     var typesSel = d.typesCoiffureSel || [];
     var showNouveauType = !!d.showNouveauTypeCoiffure;
-    var lieu = d["f-lieu"] || "domicile";
+    // Sprint 8A : en mode Salon, la prestation est par défaut « En salon » ;
+    // « À domicile » reste possible (quartier, transport — amendement,
+    // section 2). En mode À domicile, défaut inchangé.
+    var lieu = d["f-lieu"] || lieuParDefaut();
     var chips = state.config.typesCoiffure.map(function(t){
       var active = typesSel.indexOf(t.id) !== -1;
       return '<button type="button" class="chip' + (active?" active":"") + '" data-action="toggle-coiffure-type" data-id="' + t.id + '">' + esc(t.nom) + '</button>';
@@ -1424,6 +2256,7 @@
 
     return (
       '<div>' +
+        (estModeSalon() ? renderChampActivite("coiffure") : '') +
         '<div class="field"><div class="label">Date de la prestation <span class="req">*</span></div>' +
           '<input type="date" class="input" id="f-date" max="' + todayStr() + '" value="' + esc(d["f-date"] || todayStr()) + '" data-action-change="capture-coiffure">' +
           fieldErr("date") +
@@ -1447,7 +2280,7 @@
         '</div>' +
         '<div class="field"><div class="label">Main d’œuvre gardée (FCFA) <span class="req">*</span></div>' +
           '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-mainOeuvre" value="' + esc(d["f-mainOeuvre"]||"") + '" data-action-change="capture-coiffure">' +
-          '<div class="field-note">Ce que vous gardez réellement pour vous.</div>' +
+          '<div class="field-note">' + (estModeSalon() ? "Recette du salon pour cette prestation (hors mèche et transport)." : "Ce que vous gardez réellement pour vous.") + '</div>' +
           fieldErr("mainOeuvre") +
         '</div>' +
         '<div class="field"><div class="label">Coût des mèches (FCFA)</div>' +
@@ -1464,14 +2297,17 @@
     );
   }
 
-  var COIFFURE_FIELDS = ["f-date","f-clienteSel","f-clienteNouveauNom","f-quartierSel","f-quartierNouveauNom","f-nouveauTypeCoiffure","f-mainOeuvre","f-coutMeches","f-transport"];
+  function lieuParDefaut(){ return estModeSalon() ? "salon" : "domicile"; }
+
+  var COIFFURE_FIELDS = ["f-date","f-clienteSel","f-clienteNouveauNom","f-quartierSel","f-quartierNouveauNom","f-nouveauTypeCoiffure","f-mainOeuvre","f-coutMeches","f-transport","f-montantOnglerie"];
 
   function enregistrerCoiffure(){
+    if(activiteBrouillon() === "onglerie"){ enregistrerOnglerie(); return; }
     captureDraft(COIFFURE_FIELDS);
     var d = ui.draft;
     var errors = {};
     var date = d["f-date"] || todayStr();
-    var lieu = (d["f-lieu"] === "salon") ? "salon" : "domicile";
+    var lieu = ((d["f-lieu"] || lieuParDefaut()) === "salon") ? "salon" : "domicile";
     var clienteSel = d["f-clienteSel"];
     var clienteNouveauNom = (d["f-clienteNouveauNom"]||"").trim();
     var quartierSel = d["f-quartierSel"];
@@ -1492,20 +2328,39 @@
     var typesIds = d.typesCoiffureSel || [];
     var typesNoms = typesIds.map(function(id){ var it = findById("typesCoiffure", id); return it ? it.nom : null; }).filter(Boolean);
 
-    state.prestationsCoiffure.push({
+    var prestation = {
       id: uid("coif"), date: date, lieu: lieu,
       typeClienteId: cliente ? cliente.id : null, typeClienteNom: cliente ? cliente.nom : clienteNouveauNom,
       quartierId: quartier ? quartier.id : null, quartierNom: lieu === "domicile" ? (quartier ? quartier.nom : quartierNouveauNom) : null,
       typesCoiffureIds: typesIds, typesCoiffureNoms: typesNoms,
       mainOeuvre: mainOeuvre, coutMeches: coutMeches, transport: transport, ts: Date.now()
-    });
+    };
+    // Sprint 8B : activité explicite pour les prestations saisies en mode
+    // Salon (en mode À domicile, enregistrement strictement identique au 7bis).
+    if(estModeSalon()) prestation.activite = "coiffure";
+    state.prestationsCoiffure.push(prestation);
     saveState();
     closeModal();
   }
 
   /* ================= Listes / détails de prestations ================= */
 
+  // Sprint 8B : carte d'une prestation d'onglerie (montant et date seulement).
+  function renderCarteOnglerie(p, action, avecDate){
+    return (
+      '<button type="button" class="entry-card" data-action="' + action + '" data-id="' + p.id + '">' +
+        '<div class="entry-ico">💅</div>' +
+        '<div class="entry-main">' +
+          '<div class="entry-title">Onglerie</div>' +
+          '<div class="entry-sub">' + (avecDate ? formatDateFr(p.date) + ' · ' : '') + 'Prestation d’onglerie</div>' +
+        '</div>' +
+        '<div class="entry-amount">' + formatFCFA(p.mainOeuvre) + '</div>' +
+      '</button>'
+    );
+  }
+
   function renderCarteCoiffure(p){
+    if(activiteDe(p) === "onglerie") return renderCarteOnglerie(p, "voir-coiffure", true);
     var types = (p.typesCoiffureNoms||[]).join(", ") || "Type non précisé";
     var lieuTxt = p.lieu === "salon" ? "💈 En salon" : esc(p.quartierNom);
     return (
@@ -1520,8 +2375,11 @@
     );
   }
 
-  function renderListePrestationsRange(range, videEmoji, videTitre, videDesc){
+  // Sprint 8B : `activite` facultatif — filtre la liste (vues Coiffure /
+  // Onglerie de Mon état). Sans filtre, comportement inchangé.
+  function renderListePrestationsRange(range, videEmoji, videTitre, videDesc, activite){
     var items = sortByDateDesc(filterRange(state.prestationsCoiffure, range));
+    if(activite) items = items.filter(function(p){ return activiteDe(p) === activite; });
     if(!items.length) return emptyState(videEmoji, videTitre, videDesc);
     return '<div class="entry-list">' + items.map(renderCarteCoiffure).join("") + '</div>';
   }
@@ -1548,6 +2406,9 @@
   function renderDetailCoiffure(){
     var p = state.prestationsCoiffure.filter(function(x){ return x.id === ui.modal.id; })[0];
     if(!p) return "";
+    if(activiteDe(p) === "onglerie"){
+      return detailShell(drow("Date", formatDateFr(p.date)) + drow("Activité", "💅 Onglerie") + drow("Montant", formatFCFA(p.mainOeuvre)), "coiffure", p.id);
+    }
     var rows =
       drow("Date", formatDateFr(p.date)) +
       drow("Type de cliente", esc(p.typeClienteNom)) +
@@ -1568,7 +2429,16 @@
     if(!items.length){
       return emptyState("💇", "Aucune prestation aujourd’hui", "Les prestations enregistrées aujourd’hui apparaîtront ici.");
     }
-    return '<div class="entry-list">' + items.map(function(p){
+    // Sprint 8B : en mode Salon, détail Coiffure / Onglerie de la recette du jour.
+    var tete = "";
+    if(estModeSalon()){
+      var rj = { start: today, end: today };
+      tete =
+        '<div class="etat-stat-row" style="margin-bottom:8px;"><div class="er-label">💇 Coiffure</div><div class="er-val">' + formatFCFA(recettesActivite(rj, "coiffure")) + '</div></div>' +
+        '<div class="etat-stat-row" style="margin-bottom:14px;"><div class="er-label">💅 Onglerie</div><div class="er-val">' + formatFCFA(recettesActivite(rj, "onglerie")) + '</div></div>';
+    }
+    return tete + '<div class="entry-list">' + items.map(function(p){
+      if(activiteDe(p) === "onglerie") return renderCarteOnglerie(p, "voir-coiffure-du-jour", false);
       var types = (p.typesCoiffureNoms||[]).join(", ") || "Type non précisé";
       var lieuTxt = p.lieu === "salon" ? "💈 En salon" : esc(p.quartierNom);
       return (
@@ -1617,8 +2487,11 @@
 
   /* ================= Autres charges (rubriques, F11) ================= */
 
+  // Sprint 8A : rubriques actives du mode en cours. En mode À domicile, la
+  // liste est exactement celle du Sprint 7bis (les rubriques « salon » n'y
+  // apparaissent jamais) ; en mode Salon, ordre de l'amendement, section 3.
   function rubriquesActives(){
-    return state.config.rubriquesCharges.filter(function(r){ return r.actif; });
+    return rubriquesPourMode(true);
   }
   function findRubriqueCharge(id){
     var list = state.config.rubriquesCharges;
@@ -1647,6 +2520,7 @@
   }
 
   function renderFormAutreCharge(){
+    if(estModeSalon()) return renderFormChargeSalon();
     var d = ui.draft;
     var rubSel = d["f-rubrique"] || "";
     var rubs = rubriquesActives();
@@ -1672,10 +2546,152 @@
       '</div>'
     );
   }
+  // Sprint 8A : formulaire de charge du mode Salon — rubrique, (crédit :
+  // prêteur à la première saisie, sinon bilan), montant, mois concerné, note
+  // libre (détail des produits : shampoing, gel, vernis…).
+  var CHARGE_FIELDS = ["f-montantAutreCharge","f-moisConcerne","f-noteCharge","f-creditPreteur","f-creditTotal"];
+
+  function optionsMoisConcerne(cle){
+    // Mois précédent (facture arrivée en retard), mois en cours (défaut), mois suivant (paiement d'avance).
+    return [decalerMoisCle(cle, -1), cle, decalerMoisCle(cle, 1)];
+  }
+
+  function renderChampsPremierCredit(d){
+    var t = d["f-creditType"] || "";
+    return (
+      '<div class="alerte-douce" style="margin-top:0;">Premier remboursement de ce crédit : précisez le prêteur. Le montant total est facultatif.</div>' +
+      '<div class="field"><div class="label">Type de prêteur <span class="req">*</span></div>' +
+        '<div class="radio-row">' +
+          '<button type="button" class="radio-opt' + (t==="banque"?" active":"") + '" data-action="set-credit-type" data-val="banque">🏦 Banque</button>' +
+          '<button type="button" class="radio-opt' + (t==="personne"?" active":"") + '" data-action="set-credit-type" data-val="personne">🤝 Personne (apport)</button>' +
+        '</div>' +
+        fieldErr("creditType") +
+      '</div>' +
+      '<div class="field"><div class="label">Nom du prêteur (facultatif)</div>' +
+        '<input type="text" class="input" id="f-creditPreteur" placeholder="Ex. COOPEC, Mme Koné" value="' + esc(d["f-creditPreteur"]||"") + '" data-action-change="capture-autre-charge">' +
+      '</div>' +
+      '<div class="field"><div class="label">Montant total (facultatif)</div>' +
+        '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-creditTotal" placeholder="Total à rembourser, ou reste dû aujourd’hui" value="' + esc(d["f-creditTotal"]||"") + '" data-action-change="capture-autre-charge">' +
+        '<div class="field-note">Saisi une seule fois. La date d’aujourd’hui sert de point de départ du bilan remboursé / reste dû.</div>' +
+      '</div>'
+    );
+  }
+
+  function renderFormChargeSalon(){
+    var d = ui.draft;
+    var cle = moisCourantCle();
+    var rubSel = d["f-rubrique"] || "";
+    var rub = rubSel ? findRubriqueCharge(rubSel) : null;
+    var type = rub ? typeDeRubrique(rub) : null;
+    var moisSel = d["f-moisConcerne"] || cle;
+    var tiles = rubriquesActives().map(function(r){
+      return (
+        '<button type="button" class="rub-tile' + (rubSel===r.id?" selected":"") + '" data-action="set-rubrique-charge" data-id="' + r.id + '">' +
+          '<div class="rub-icon">' + esc(r.emoji||"📝") + '</div>' +
+          '<div class="rub-nom">' + esc(r.nom) + '</div>' +
+        '</button>'
+      );
+    }).join("");
+
+    var blocCredit = "";
+    if(rub && type === "credit"){
+      var credit = findCredit(rub.id);
+      blocCredit = credit
+        ? '<div class="field"><div class="credit-row" style="margin-bottom:0;"><div class="cr-sub">' + esc(sousTitreCredit(credit)) + '</div>' + renderBilanCreditHtml(credit) + '</div></div>'
+        : renderChampsPremierCredit(d);
+    }
+
+    var noteMontant = "";
+    if(rub && estTypeProduits(type)){
+      if(fondsActifPourMois(moisSel)){
+        var sf = soldeFonds();
+        noteMontant = '<div class="field-note">Payé par le fonds de renouvellement (solde actuel : ' + formatFCFA(sf.solde) + ') — jamais compté deux fois dans les charges.</div>';
+      } else {
+        noteMontant = '<div class="field-note">Aucun fonds de renouvellement actif pour ce mois : cet achat compte comme une charge du mois.</div>';
+      }
+    } else if(rub && type === "credit"){
+      noteMontant = '<div class="field-note">Le remboursement compte dans le résultat net du mois concerné.</div>';
+    }
+
+    var optionsMois = optionsMoisConcerne(cle).map(function(m){
+      return '<option value="' + m + '"' + (m===moisSel?" selected":"") + '>' + esc(libelleMoisCleMaj(m)) + (m===cle ? " (mois en cours)" : "") + '</option>';
+    }).join("");
+
+    var placeholderNote = (rub && estTypeProduits(type)) ? "Ex. shampoing, gel, mousse, vernis…" : "Ex. facture n°, période…";
+
+    return (
+      '<div>' +
+        '<div class="field"><div class="label">Rubrique <span class="req">*</span></div>' +
+          '<div class="rub-grid">' + tiles + '</div>' +
+          fieldErr("rubrique") +
+        '</div>' +
+        blocCredit +
+        '<div class="field"><div class="label">Montant (FCFA) <span class="req">*</span></div>' +
+          '<input type="number" inputmode="numeric" step="1" min="0" class="input" id="f-montantAutreCharge" value="' + esc(d["f-montantAutreCharge"]||"") + '" data-action-change="capture-autre-charge">' +
+          noteMontant +
+          fieldErr("montant") +
+        '</div>' +
+        '<div class="field"><div class="label">Mois concerné <span class="req">*</span></div>' +
+          '<select class="select" id="f-moisConcerne" data-action-change="mois-concerne-change">' + optionsMois + '</select>' +
+          '<div class="field-note">La charge est déduite du résultat net de ce mois-là, quelle que soit la date de paiement.</div>' +
+        '</div>' +
+        '<div class="field"><div class="label">Note (facultatif)</div>' +
+          '<input type="text" class="input" id="f-noteCharge" placeholder="' + esc(placeholderNote) + '" value="' + esc(d["f-noteCharge"]||"") + '" data-action-change="capture-autre-charge">' +
+        '</div>' +
+        '<button type="button" class="btn btn-primary" data-action="enregistrer-autre-charge">Enregistrer</button>' +
+      '</div>'
+    );
+  }
+
+  function enregistrerChargeSalon(){
+    captureDraft(CHARGE_FIELDS);
+    var d = ui.draft;
+    var errors = {};
+    var cle = moisCourantCle();
+    var rubrique = d["f-rubrique"] ? findRubriqueCharge(d["f-rubrique"]) : null;
+    var montant = toNum(d["f-montantAutreCharge"]);
+    var mois = d["f-moisConcerne"] || cle;
+    if(optionsMoisConcerne(cle).indexOf(mois) === -1) mois = cle;
+    if(!rubrique) errors.rubrique = "Choisissez une rubrique.";
+    if(!(montant > 0) || d["f-montantAutreCharge"]==="") errors.montant = "Indiquez un montant supérieur à 0.";
+    var type = typeDeRubrique(rubrique);
+    var nouveauCredit = !!(rubrique && type === "credit" && !findCredit(rubrique.id));
+    if(nouveauCredit && d["f-creditType"] !== "banque" && d["f-creditType"] !== "personne"){
+      errors.creditType = "Précisez le type de prêteur.";
+    }
+    if(Object.keys(errors).length){ ui.errors = errors; render(); return; }
+
+    var maintenant = Date.now();
+    if(nouveauCredit){
+      var total = toNum(d["f-creditTotal"]);
+      state.config.credits.push({
+        id: uid("cred"), rubriqueId: rubrique.id, type: d["f-creditType"],
+        preteur: String(d["f-creditPreteur"]||"").trim(),
+        montantTotal: total > 0 ? Math.round(total) : null,
+        dateDebut: todayStr(), tsDebut: maintenant
+      });
+    }
+    var charge = {
+      id: uid("acharge"), date: todayStr(), moisConcerne: mois,
+      rubriqueId: rubrique.id, rubriqueNom: rubrique.nom, rubriqueEmoji: rubrique.emoji, rubriqueType: type,
+      montant: montant, ts: maintenant
+    };
+    var note = String(d["f-noteCharge"]||"").trim();
+    if(note) charge.note = note;
+    state.autresCharges.push(charge);
+    saveState();
+    closeModal();
+  }
+
   function renderDetailAutreCharge(){
     var c = state.autresCharges.filter(function(x){ return x.id === ui.modal.id; })[0];
     if(!c) return "";
     var rows = drow("Date", formatDateFr(c.date)) + drow("Rubrique", esc(c.rubriqueEmoji||"") + " " + esc(c.rubriqueNom)) + drow("Montant", formatFCFA(c.montant));
+    // Sprint 8A : champs propres aux charges saisies en mode Salon (absents
+    // des charges antérieures, dont l'affichage reste donc identique).
+    if(c.moisConcerne) rows += drow("Mois concerné", esc(libelleMoisCleMaj(c.moisConcerne)));
+    if(c.note) rows += drow("Note", esc(c.note));
+    if(estModeSalon() && estTypeProduits(typeDeCharge(c)) && fondsActifPourMois(moisDeCharge(c))) rows += drow("Payé par", "Fonds de renouvellement");
     return detailShell(rows, "autre-charge", c.id);
   }
   function renderConfirmSuppressionRubrique(){
@@ -1691,6 +2707,7 @@
     );
   }
   function enregistrerAutreCharge(){
+    if(estModeSalon()){ enregistrerChargeSalon(); return; }
     captureDraft(["f-montantAutreCharge"]);
     var d = ui.draft;
     var errors = {};
@@ -1716,9 +2733,9 @@
     var body = "";
     var title = "";
     switch(m.type){
-      case "add-coiffure": title = "Nouvelle prestation coiffure"; body = renderFormCoiffure(); break;
+      case "add-coiffure": title = estModeSalon() ? "Nouvelle prestation" : "Nouvelle prestation coiffure"; body = renderFormCoiffure(); break;
       case "detail-coiffure": title = "Détail de la prestation"; body = renderDetailCoiffure(); break;
-      case "jour-mainoeuvre": title = "Prestations d’aujourd’hui"; body = renderJourMainOeuvreModal(); break;
+      case "jour-mainoeuvre": title = estModeSalon() ? "Recette du jour" : "Prestations d’aujourd’hui"; body = renderJourMainOeuvreModal(); break;
       case "jour-champ": title = (m.champ==="transport"?"Transport":"Mèche") + " du jour"; body = renderJourChampModal(m.champ); break;
       case "detail-charges-jour": title = "Charges communes"; body = renderDetailChargesJour(); break;
       case "add-autre-charge": title = "Nouvelle charge"; body = renderFormAutreCharge(); break;
@@ -1728,6 +2745,11 @@
       case "confirmer-suppression-objectif": title = "Supprimer l’objectif"; body = renderConfirmSuppressionObjectif(); break;
       case "pin-setup": title = "Code PIN"; body = renderPinSetupModal(); break;
       case "pin-oublie": title = "Code oublié ?"; body = renderPinOublieModal(); break;
+      // Sprint 8A — mode Salon
+      case "charges-mois": title = "Charges " + deMois(libelleMoisCle(moisCourantCle())); body = renderChargesMoisModal(); break;
+      case "fonds-detail": title = "Fonds de renouvellement"; body = renderFondsDetailModal(); break;
+      case "credit-config": title = m.nouveau ? "Nouveau crédit" : "Crédit"; body = renderCreditConfigModal(); break;
+      case "remu-config": title = m.cible === "proprio" ? "Ma rémunération" : (m.nouveau ? "Nouveau salarié" : "Salarié"); body = renderRemuConfigModal(); break;
       default: body = "";
     }
     return (
@@ -1822,7 +2844,7 @@
       if(ds > today){
         return '<div class="etat-stat-row" style="opacity:.4;"><div class="er-label">' + esc(label) + '</div><div class="er-val">—</div></div>';
       }
-      var solde = soldeNetPeriode({ start:ds, end:ds });
+      var solde = valeurListePeriode({ start:ds, end:ds });
       return (
         '<button type="button" class="entry-card" style="width:100%; text-align:left;" data-action="etat-select-jour" data-date="' + ds + '" data-from="' + from + '">' +
           '<div class="entry-main"><div class="entry-title">' + esc(label) + '</div></div>' +
@@ -1850,7 +2872,7 @@
       if(range.start > today){
         return '<div class="etat-stat-row" style="opacity:.4;"><div class="er-label">' + esc(label) + '</div><div class="er-val">—</div></div>';
       }
-      var solde = soldeNetPeriode(range);
+      var solde = valeurListePeriode(range);
       return (
         '<button type="button" class="entry-card" style="width:100%; text-align:left;" data-action="etat-select-semaine" data-week-start="' + ws + '">' +
           '<div class="entry-main"><div class="entry-title">' + esc(label) + '</div></div>' +
@@ -1911,7 +2933,250 @@
     return { soldeCard: soldeCard, recette: recette, eparg: eparg };
   }
 
+  // Sprint 8B : vue de Mon état en mode Salon — "salon" (consolidée, par
+  // défaut), "coiffure" ou "onglerie" (amendement, section 8).
+  function vueEtat(){ return (ui.etatVue === "coiffure" || ui.etatVue === "onglerie") ? ui.etatVue : "salon"; }
+  function recettesVue(range){
+    var v = vueEtat();
+    return v === "salon" ? recetteCoiffure(range) : recettesActivite(range, v);
+  }
+  function aDeLOnglerie(){ return state.prestationsCoiffure.some(function(p){ return activiteDe(p) === "onglerie"; }); }
+  function lblVue(base){
+    var v = vueEtat();
+    return v === "salon" ? base : base + " — " + v;
+  }
+
+  // Montant affiché dans les listes de jours / semaines de Mon état : solde net
+  // (Sprint 7, inchangé) en mode À domicile ; recettes (de la vue choisie) en
+  // mode Salon, où les charges et le fonds ne se déduisent qu'au mois.
+  function valeurListePeriode(range){
+    return estModeSalon() ? recettesVue(range) : soldeNetPeriode(range);
+  }
+
+  /* ----- Sprints 8A/8B : Mon état en mode Salon ----- */
+
+  function renderCarteRecettes(range, label){
+    var v = vueEtat();
+    var recette = recettesVue(range);
+    var items = filterRange(state.prestationsCoiffure, range);
+    if(v !== "salon") items = items.filter(function(p){ return activiteDe(p) === v; });
+    var nb = items.length;
+    var detail = (v === "salon" && aDeLOnglerie())
+      ? " · coiffure " + formatFCFA(recettesActivite(range, "coiffure")) + " · onglerie " + formatFCFA(recettesActivite(range, "onglerie"))
+      : "";
+    var suite = v === "salon" ? " · charges et fonds se déduisent au mois (onglet Mois)" : " · produits et marge : onglet Mois";
+    return (
+      '<div class="dash-solde" style="margin-bottom:16px;">' +
+        '<div class="ds-label">' + esc(lblVue(label)) + '</div>' +
+        '<div class="ds-amount">' + formatFCFA(recette) + '</div>' +
+        '<div class="ds-sub">' + nb + (nb > 1 ? " prestations" : " prestation") + esc(detail) + esc(suite) + '</div>' +
+      '</div>'
+    );
+  }
+  function renderBlocEtatJourSalon(dateStr){
+    var range = { start: dateStr, end: dateStr };
+    var v = vueEtat();
+    var titre = '<div class="hint tight" style="margin-bottom:10px; font-weight:700; color:var(--text);">' + esc(formatDateFr(dateStr)) + '</div>';
+    return titre + renderCarteRecettes(range, "Recette du jour") +
+      '<div class="section-title" style="margin-top:2px;">Prestations de la journée</div>' +
+      renderListePrestationsRange(range, v === "onglerie" ? "💅" : "💇", "Aucune prestation ce jour-là", "Les prestations de cette journée apparaîtront ici.", v === "salon" ? null : v);
+  }
+
+  function badgeMois(provisoire){
+    return provisoire ? '<span class="ds-badge provisoire">Provisoire</span>' : '<span class="ds-badge definitif">Définitif</span>';
+  }
+
+  // Vues Coiffure / Onglerie du mois (amendement, section 8) : recettes de
+  // l'activité − produits de l'activité = marge de l'activité. Les charges
+  // communes n'y figurent pas : elles appartiennent au salon.
+  function renderBlocActiviteMois(cle, act){
+    var range = rangeDuMoisCle(cle);
+    var recettes = recettesActivite(range, act);
+    var produits = achatsProduitsMois(cle, "produits_" + act);
+    var marge = recettes - produits;
+    var nb = filterRange(state.prestationsCoiffure, range).filter(function(p){ return activiteDe(p) === act; }).length;
+    var nomAct = act === "onglerie" ? "onglerie" : "coiffure";
+    var carte =
+      '<div class="dash-solde" style="margin-bottom:12px;">' +
+        '<div class="ds-label">Marge ' + nomAct + ' du mois' + badgeMois(cle >= moisCourantCle()) + '</div>' +
+        '<div class="ds-amount' + (marge < 0 ? " neg" : "") + '">' + formatFCFA(marge) + '</div>' +
+        '<div class="solde-mini-stats">' +
+          '<div class="sms-col"><div class="sms-label">Recettes</div><div class="sms-val">' + formatFCFA(recettes) + '</div></div>' +
+          '<div class="sms-col"><div class="sms-label">Produits</div><div class="sms-val">' + formatFCFA(produits) + '</div></div>' +
+          '<div class="sms-col"><div class="sms-label">Prestations</div><div class="sms-val">' + nb + '</div></div>' +
+        '</div>' +
+      '</div>';
+    var chaine =
+      '<div class="chaine-box">' +
+        '<div class="chaine-row"><div class="ch-k">Recettes ' + nomAct + ' du mois</div><div class="ch-v">' + formatFCFA(recettes) + '</div></div>' +
+        '<div class="chaine-row"><div class="ch-k">− Produits ' + nomAct + ' achetés</div><div class="ch-v">' + formatFCFA(produits) + '</div></div>' +
+        '<div class="chaine-row total"><div class="ch-k">= Marge de l’activité</div><div class="ch-v"' + (marge < 0 ? ' style="color:var(--red);"' : '') + '>' + formatFCFA(marge) + '</div></div>' +
+      '</div>';
+    var achats = chargesDuMois(cle).filter(function(c){ return typeDeCharge(c) === "produits_" + act; });
+    var detailAchats = renderBreakdownRows("Produits " + nomAct + " achetés ce mois",
+      achats.map(function(c){ return { label: formatDateFr(c.date) + (c.note ? " · " + c.note : ""), montant: c.montant }; }));
+    return carte + chaine + detailAchats +
+      '<div class="hint" style="margin:-4px 0 16px;">Les charges communes (loyer, CIE, SODECI…) n’apparaissent que dans la vue Salon : elles appartiennent au salon, pas à une activité.</div>';
+  }
+
+  // Ligne courte de clause pour la répartition (« 30 % », « fixe »).
+  function clauseCourte(l){
+    if(!l || !l.mode) return "non réglée";
+    return l.mode === "pourcentage" ? formatPct(l.valeur) : "montant fixe";
+  }
+  // Sprint 8B — répartition du résultat net (amendement, section 7, étapes 4 à 8).
+  function renderRepartitionMois(cle){
+    var rep = repartitionMois(cle);
+    var rn = rep.resultatNet;
+    function ligne(k, v, neg){
+      return '<div class="chaine-row"><div class="ch-k">' + esc(k) + '</div><div class="ch-v"' + (neg ? ' style="color:var(--red);"' : '') + '>' + formatFCFA(v) + '</div></div>';
+    }
+    var rows = ligne("Résultat net du mois", rn, rn < 0);
+    if(rep.proprio) rows += ligne("→ Propriétaire (" + clauseCourte(rep.proprio) + ")", rep.proprio.montant);
+    rep.salaries.forEach(function(sl){ rows += ligne("→ " + sl.nom + " (" + clauseCourte(sl) + ")", sl.montant); });
+    if(rep.epargne) rows += ligne("→ Épargne du mois (" + clauseCourte(rep.epargne) + ")", rep.epargne.montant);
+    rows += '<div class="chaine-row total"><div class="ch-k">= Reste (trésorerie du salon)</div><div class="ch-v"' + (rep.reste < 0 ? ' style="color:var(--red);"' : '') + '>' + formatFCFA(rep.reste) + '</div></div>';
+    var vide = !rep.proprio && !rep.salaries.length && !rep.epargne;
+    return (
+      '<div class="section-title">Répartition du résultat net</div>' +
+      '<div class="chaine-box">' + rows + '</div>' +
+      rep.alertes.map(function(a){ return '<div class="alerte-douce">' + esc(a) + '</div>'; }).join("") +
+      (vide ? '<div class="hint" style="margin:-4px 0 16px;">Réglez votre rémunération et celle de vos salariés dans Réglages, et l’épargne du mois dans Objectif d’épargne.</div>' : '')
+    );
+  }
+
+  // Vue Salon du mois (amendement, sections 7 et 8) : résultat net, chaîne de
+  // calcul, répartition (8B), jauge (mois en cours), charges par rubrique,
+  // fonds, crédits.
+  function renderBlocSalonMois(cle){
+    var r = resultatNetMois(cle);
+    var rn = r.resultatNet;
+    var badge = badgeMois(r.provisoire);
+    var perte = "";
+    if(rn < 0){
+      perte = '<div class="dash-perte">' + (r.provisoire
+        ? "Pour l’instant, les recettes ne couvrent pas encore les charges et le fonds du mois (" + formatFCFA(Math.abs(rn)) + " à rattraper)."
+        : "Mois à perte : " + formatFCFA(Math.abs(rn)) + ". Ça arrive — on note et on avance.") + '</div>';
+    }
+    var v = versionFondsPourMois(cle);
+    var fondsHint = (fondsActifPourMois(cle) && v.mode === "pourcentage") ? " (" + v.valeur + " % des recettes)" : "";
+    var range = rangeDuMoisCle(cle);
+    var detailRecettes = aDeLOnglerie()
+      ? '<div class="chaine-row"><div class="ch-k" style="padding-left:12px;">dont coiffure · onglerie</div><div class="ch-v" style="font-weight:600; color:var(--text-dim);">' +
+          formatFCFA(recettesActivite(range, "coiffure")) + ' · ' + formatFCFA(recettesActivite(range, "onglerie")) + '</div></div>'
+      : '';
+
+    var carte =
+      '<div class="dash-solde" style="margin-bottom:12px;">' +
+        '<div class="ds-label">Résultat net du mois' + badge + '</div>' +
+        '<div class="ds-amount' + (rn < 0 ? " neg" : "") + '">' + formatFCFA(rn) + '</div>' +
+        perte +
+        '<div class="solde-mini-stats">' +
+          '<div class="sms-col"><div class="sms-label">Recettes</div><div class="sms-val">' + formatFCFA(r.recettes) + '</div></div>' +
+          '<div class="sms-col"><div class="sms-label">Charges</div><div class="sms-val">' + formatFCFA(r.charges) + '</div></div>' +
+          '<div class="sms-col"><div class="sms-label">Fonds</div><div class="sms-val">' + formatFCFA(r.fonds) + '</div></div>' +
+        '</div>' +
+      '</div>';
+
+    var chaine =
+      '<div class="chaine-box">' +
+        '<div class="chaine-row"><div class="ch-k">Recettes du mois</div><div class="ch-v">' + formatFCFA(r.recettes) + '</div></div>' +
+        detailRecettes +
+        '<div class="chaine-row"><div class="ch-k">− Charges du mois</div><div class="ch-v">' + formatFCFA(r.charges) + '</div></div>' +
+        '<div class="chaine-row"><div class="ch-k">− Fonds de renouvellement' + esc(fondsHint) + '</div><div class="ch-v">' + formatFCFA(r.fonds) + '</div></div>' +
+        '<div class="chaine-row total"><div class="ch-k">= Résultat net</div><div class="ch-v"' + (rn < 0 ? ' style="color:var(--red);"' : '') + '>' + formatFCFA(rn) + '</div></div>' +
+      '</div>';
+
+    var jauge = (cle === moisCourantCle()) ? renderJaugeCard(cle, true) : "";
+
+    var chargesRub = renderBreakdownRows("Charges du mois — par rubrique",
+      groupSum(chargesComptees(cle), function(c){ return c.rubriqueNom + (c.rubriqueSupprimee ? " (rubrique supprimée)" : ""); }, function(c){ return c.montant; }));
+
+    var fondsBloc = "";
+    var sf = soldeFonds();
+    if(sf.configure){
+      var actif = fondsActifPourMois(cle);
+      var rows =
+        '<div class="eb-row"><div class="eb-nom">Prévision du mois</div><div class="eb-val">' + formatFCFA(r.fonds) + '</div></div>' +
+        (actif ?
+          '<div class="eb-row"><div class="eb-nom">Achats produits coiffure</div><div class="eb-val">' + formatFCFA(achatsProduitsMois(cle, "produits_coiffure")) + '</div></div>' +
+          '<div class="eb-row"><div class="eb-nom">Achats produits onglerie</div><div class="eb-val">' + formatFCFA(achatsProduitsMois(cle, "produits_onglerie")) + '</div></div>'
+          : '<div class="eb-row"><div class="eb-nom">Fonds arrêté ce mois : achats comptés dans les charges</div><div class="eb-val">—</div></div>') +
+        '<div class="eb-row"><div class="eb-nom">Solde du fonds à ce jour</div><div class="eb-val" style="color:' + (sf.solde < 0 ? "var(--red)" : "var(--green)") + ';">' + formatFCFA(sf.solde) + '</div></div>';
+      fondsBloc = '<div class="etat-breakdown"><div class="eb-title">Fonds de renouvellement des produits</div>' + rows + '</div>' +
+        (sf.solde < 0 ? renderAlerteFonds(sf) : "");
+    }
+
+    var creditsBloc = "";
+    var credits = (state.config.credits || []).filter(function(c){ return !!findRubriqueCharge(c.rubriqueId); });
+    if(credits.length){
+      creditsBloc = '<div class="etat-breakdown"><div class="eb-title">Remboursements de crédit</div>' +
+        credits.map(function(c){
+          var rub = findRubriqueCharge(c.rubriqueId);
+          return '<div class="credit-row"><div class="cr-top"><div class="cr-ico">' + esc(rub.emoji || "🏦") + '</div>' +
+            '<div class="cr-txt"><div class="cr-nom">' + esc(rub.nom) + '</div><div class="cr-sub">' + esc(sousTitreCredit(c)) + '</div></div></div>' +
+            renderBilanCreditHtml(c) + '</div>';
+        }).join("") + '</div>';
+    }
+
+    return carte + chaine + renderRepartitionMois(cle) + jauge + chargesRub + fondsBloc + creditsBloc;
+  }
+
+  function renderMonEtatSalon(){
+    ensureEtatRefs();
+    var periode = ui.etatPeriode;
+    var vue = vueEtat();
+    var vues = [["coiffure","💇 Coiffure"],["onglerie","💅 Onglerie"],["salon","💈 Salon"]].map(function(x){
+      return '<button type="button" class="vue-tab' + (vue===x[0]?" active":"") + '" data-action="etat-set-vue" data-val="' + x[0] + '">' + x[1] + '</button>';
+    }).join("");
+    var tabs = ["jour","semaine","mois"].map(function(p){
+      var lbl = { jour:"Jour", semaine:"Semaine", mois:"Mois" }[p];
+      return '<button type="button" class="etat-tab' + (periode===p?" active":"") + '" data-action="etat-set-periode" data-val="' + p + '">' + lbl + '</button>';
+    }).join("");
+
+    var body = "";
+    if(periode === "jour"){
+      body = renderBlocEtatJourSalon(todayStr());
+    } else if(periode === "semaine"){
+      if(ui.etatSelJour){
+        body = renderEtatBack() + renderBlocEtatJourSalon(ui.etatSelJour);
+      } else {
+        var wr = getWeekRange(dateFromStr(ui.etatSemaineRef));
+        body = renderEtatSemaineNav() + renderCarteRecettes(wr, "Recettes de la semaine") +
+          '<div class="section-title">Recettes par jour</div>' +
+          renderEtatListeJours(wr, "semaine");
+      }
+    } else {
+      if(ui.etatSelJour){
+        body = renderEtatBack() + renderBlocEtatJourSalon(ui.etatSelJour);
+      } else if(ui.etatSelSemaine){
+        var wr2 = getWeekRange(dateFromStr(ui.etatSelSemaine));
+        body = renderEtatBack() +
+          '<div class="hint tight" style="margin-bottom:10px; font-weight:700; color:var(--text);">' + esc(formatDateFr(wr2.start) + " – " + formatDateFr(wr2.end)) + '</div>' +
+          renderCarteRecettes(wr2, "Recettes de la semaine") +
+          '<div class="section-title">Recettes par jour</div>' +
+          renderEtatListeJours(wr2, "mois");
+      } else {
+        var mr = getMonthRange(dateFromStr(ui.etatMoisRef));
+        var cleM = moisCleDe(mr.start);
+        body = renderEtatMoisNav() +
+          (vue === "salon" ? renderBlocSalonMois(cleM) : renderBlocActiviteMois(cleM, vue)) +
+          '<div class="section-title">Recettes par semaine</div>' +
+          renderEtatListeSemaines(mr);
+      }
+    }
+
+    return (
+      '<div class="section-title">Mon état · ' + LIBELLES_VUE[vue] + '</div>' +
+      '<div class="vue-tabs">' + vues + '</div>' +
+      '<div class="etat-tabs">' + tabs + '</div>' +
+      body
+    );
+  }
+  var LIBELLES_VUE = { salon:"Salon", coiffure:"Coiffure", onglerie:"Onglerie" };
+
   function renderMonEtat(){
+    if(estModeSalon()) return renderMonEtatSalon();
     ensureEtatRefs();
     var periode = ui.etatPeriode;
     var tabs = ["jour","semaine","mois"].map(function(p){
@@ -2017,8 +3282,20 @@
     }).join("");
     return '<div class="etat-breakdown"><div class="eb-title">' + esc(titre) + '</div>' + body + '</div>';
   }
-  function renderBreakdownsCoiffure(range){
+  // Sprint 8B : ventilation par activité (mode Salon). Les répartitions par
+  // quartier / type de coiffure / type de cliente ne concernent que la
+  // coiffure (l'onglerie n'a pas ce détail) — sans onglerie, résultat
+  // strictement identique au Sprint 7bis.
+  function renderBreakdownActivites(range){
     var items = filterRange(state.prestationsCoiffure, range);
+    if(!items.length) return "";
+    return renderBreakdownRows("Par activité", [
+      { label: "💇 Coiffure", montant: recettesActivite(range, "coiffure") },
+      { label: "💅 Onglerie", montant: recettesActivite(range, "onglerie") }
+    ]);
+  }
+  function renderBreakdownsCoiffure(range){
+    var items = filterRange(state.prestationsCoiffure, range).filter(function(p){ return activiteDe(p) === "coiffure"; });
     if(!items.length) return "";
     var domicile = items.filter(function(p){ return p.lieu === "domicile"; });
     return (
@@ -2063,6 +3340,13 @@
     }
 
     var breakdowns = renderBreakdownsCoiffure(range) + renderBreakdownAutresCharges(range);
+    if(estModeSalon()){
+      // En mode Salon, la vue Mois range les charges par mois concerné.
+      var chargesHtml = periode === "mois"
+        ? renderBreakdownRows("Charges du mois — par rubrique", groupSum(chargesDuMois(moisCleDe(range.start)), function(c){ return c.rubriqueNom + (c.rubriqueSupprimee ? " (rubrique supprimée)" : ""); }, function(c){ return c.montant; }))
+        : renderBreakdownAutresCharges(range);
+      breakdowns = renderBreakdownActivites(range) + renderBreakdownsCoiffure(range) + chargesHtml;
+    }
     if(!breakdowns){
       breakdowns = emptyState("📈","Pas encore d’habitudes à montrer","Vos statistiques par quartier, type de coiffure, type de cliente ou rubrique de charge apparaîtront ici au fil de vos saisies.");
     }
@@ -2078,7 +3362,7 @@
   /* ================= F9 : écran Objectif d'épargne ================= */
 
   function renderObjectifOverlay(){
-    var body = state.objectifEpargne ? renderObjectifCarteActive() : renderObjectifCreation();
+    var body = state.objectifEpargne ? (estModeSalon() ? renderObjectifCarteSalon() : renderObjectifCarteActive()) : renderObjectifCreation();
     return (
       '<div class="onb">' +
         '<div class="onb-head" style="display:flex; align-items:center; justify-content:space-between;">' +
@@ -2143,20 +3427,26 @@
     }).join("");
     return (
       '<button type="button" class="btn btn-secondary" style="margin-bottom:14px;" data-action="revenir-objectif-modele">‹ Changer de modèle</button>' +
-      '<div class="hint" style="margin-bottom:10px;">Comment voulez-vous épargner ? Automatique : un pourcentage de votre Main d’œuvre à chaque prestation. Manuel : un montant fixe visé chaque jour où vous travaillez.</div>' +
+      '<div class="hint" style="margin-bottom:10px;">' + (estModeSalon()
+        ? "Épargne du mois, prise sur le résultat net du salon. Automatique : un pourcentage du résultat net. Manuel : un montant fixe chaque mois."
+        : "Comment voulez-vous épargner ? Automatique : un pourcentage de votre Main d’œuvre à chaque prestation. Manuel : un montant fixe visé chaque jour où vous travaillez.") + '</div>' +
       '<div class="radio-row" style="margin-bottom:14px;">' +
         '<button type="button" class="radio-opt' + (d.mode==="auto"?" active":"") + '" data-action="choisir-mode-objectif" data-val="auto">Auto (%)</button>' +
         '<button type="button" class="radio-opt' + (d.mode==="manuel"?" active":"") + '" data-action="choisir-mode-objectif" data-val="manuel">Manuel (montant)</button>' +
       '</div>' +
       (d.mode === "manuel" ?
-        '<div class="field"><div class="label">Montant souhaité par jour (FCFA) <span class="req">*</span></div>' +
+        '<div class="field"><div class="label">' + (estModeSalon() ? "Montant mis de côté chaque mois (FCFA)" : "Montant souhaité par jour (FCFA)") + ' <span class="req">*</span></div>' +
           '<input type="number" inputmode="numeric" min="1" step="1" class="input" id="f-objMontant" value="' + esc(d.montant||"") + '" data-action-change="capture-obj-montant">' +
-          '<div class="field-note">Mis de côté chaque jour où au moins une prestation est enregistrée, quel que soit le montant de la Main d’œuvre.</div>' +
+          '<div class="field-note">' + (estModeSalon()
+            ? "Déduit du résultat net du mois, avec une alerte douce si le reste du salon devient négatif."
+            : "Mis de côté chaque jour où au moins une prestation est enregistrée, quel que soit le montant de la Main d’œuvre.") + '</div>' +
           fieldErrObj("montant") +
         '</div>'
         :
-        '<div class="field"><div class="label">Pourcentage de la Main d’œuvre <span class="req">*</span></div>' +
+        '<div class="field"><div class="label">' + (estModeSalon() ? "Pourcentage du résultat net du mois" : "Pourcentage de la Main d’œuvre") + ' <span class="req">*</span></div>' +
           '<div class="radio-row">' + scenariosHtml + '</div>' +
+          (estModeSalon() ? renderNotePctDisponible("epargne") : '') +
+          fieldErrObj("pourcentage") +
         '</div>'
       ) +
       '<div class="field"><div class="label">Nom</div>' +
@@ -2174,6 +3464,7 @@
     var d = ui.objDraft;
     if(!d) return;
     d.erreurs = {};
+    if(estModeSalon()){ enregistrerObjectifSalon(d); return; }
     var nom = (d.nom||"").trim() || "Épargne";
     var modele = findObjectifModele(d.modeleId);
     var emoji = modele ? modele.emoji : "💰";
@@ -2206,7 +3497,7 @@
     var duJour = epargneJour(todayStr());
     var sousTexte = o.type === "manuel"
       ? "Manuel · " + formatFCFA(o.montant||0) + " par jour d’activité"
-      : "Automatique · " + o.pourcentage + " % de la Main d’œuvre";
+      : (o.pourcentage ? "Automatique · " + o.pourcentage + " % de la Main d’œuvre" : "Épargne quotidienne à régler (touchez Modifier)");
     return (
       '<div class="objectif-card">' +
         '<div class="oc-head"><div class="oc-emoji">' + esc(epargneEmoji()) + '</div><div class="oc-nom">' + esc(o.nom) + '</div></div>' +
@@ -2224,8 +3515,9 @@
   function renderFormModifierObjectif(){
     var o = state.objectifEpargne;
     if(!o) return "";
+    if(estModeSalon()) return renderFormModifierObjectifSalon();
     if(ui.draft.__objModif !== o.id){
-      ui.draft = { __objModif:o.id, nom:o.nom, mode:o.type, pourcentage:o.pourcentage||10, montant:o.montant||"" };
+      ui.draft = { __objModif:o.id, nom:o.nom, mode:o.type || "auto", pourcentage:o.pourcentage||10, montant:o.montant||"" };
     }
     var d = ui.draft;
     var scenarios = [
@@ -2261,6 +3553,7 @@
   function enregistrerModifObjectif(){
     var o = state.objectifEpargne;
     if(!o) return;
+    if(estModeSalon()){ enregistrerModifObjectifSalon(); return; }
     var d = ui.draft;
     var nom = (d.nom||"").trim();
     if(nom) o.nom = nom;
@@ -2277,11 +3570,146 @@
     closeModal();
   }
 
+  /* ----- Sprint 8B : objectif d'épargne en mode Salon (épargne mensuelle) ----- */
+
+  // Note « déjà réparti / disponible » pour le garde-fou des pourcentages.
+  function renderNotePctDisponible(cible, id, nouveau){
+    var autres = totalPourcentages(moisCourantCle(), { cible: cible, id: id, nouveau: !!nouveau, mode: "fixe", valeur: 0 }).total;
+    return '<div class="field-note">Déjà réparti en pourcentage du résultat net : ' + formatPct(autres) +
+      ' — encore disponible : ' + formatPct(Math.max(0, 100 - autres)) + '.</div>';
+  }
+
+  function enregistrerObjectifSalon(d){
+    var cle = moisCourantCle();
+    var nom = (d.nom||"").trim() || "Épargne";
+    var modele = findObjectifModele(d.modeleId);
+    var emoji = modele ? modele.emoji : "💰";
+    var mode, valeur;
+    if(d.mode === "manuel"){
+      valeur = Math.round(toNum(d.montant));
+      if(!(valeur > 0)){ d.erreurs.montant = "Indiquez un montant supérieur à 0."; render(); return; }
+      mode = "fixe";
+    } else {
+      mode = "pourcentage";
+      valeur = toNum(d.pourcentage) || 10;
+      var err = erreurGardeFou(cle, { cible: "epargne", mode: mode, valeur: valeur });
+      if(err){ d.erreurs.pourcentage = err; render(); return; }
+    }
+    state.objectifEpargne = { id: uid("obj"), nom: nom, emoji: emoji, dateCreation: todayStr() };
+    state.config.epargneMensuelle = majParamVersionne(state.config.epargneMensuelle, mode, valeur, cle);
+    saveState();
+    ui.objDraft = null;
+    render();
+  }
+
+  function renderObjectifCarteSalon(){
+    var o = state.objectifEpargne;
+    var cle = moisCourantCle();
+    var v = versionPourMois(state.config.epargneMensuelle, cle);
+    var corps;
+    if(versionActive(v)){
+      var rep = repartitionMois(cle);
+      var p = state.config.epargneMensuelle;
+      var premier = (p.historique || []).map(function(h){ return h.depuis; }).concat([p.depuis]).sort()[0];
+      corps =
+        '<div class="oc-montant">' + formatFCFA(rep.montantEpargne) + '</div>' +
+        '<div class="oc-sub">Épargne ' + esc(deMois(libelleMoisCle(cle))) + ' (provisoire) · Mensuel · ' + esc(libelleClause(v)) + '</div>' +
+        '<div class="oc-sub">Cumul depuis ' + esc(libelleMoisCle(premier)) + ' : ' + formatFCFA(cumulEpargneSalon()) + '</div>' +
+        (v.mode === "pourcentage" && rep.resultatNet < 0 ? '<div class="oc-sub" style="color:var(--accent);">Résultat net négatif pour l’instant : la part en pourcentage vaut zéro ce mois-ci.</div>' : '');
+    } else {
+      corps =
+        '<div class="oc-montant" style="font-size:18px;">Épargne du mois à régler</div>' +
+        '<div class="oc-sub">En salon, l’épargne se calcule chaque mois sur le résultat net : montant fixe ou pourcentage. Touchez Modifier pour la régler.</div>';
+    }
+    return (
+      '<div class="objectif-card">' +
+        '<div class="oc-head"><div class="oc-emoji">' + esc(epargneEmoji()) + '</div><div class="oc-nom">' + esc(o.nom) + '</div></div>' +
+        corps +
+        '<div class="oc-actions">' +
+          '<button type="button" class="btn btn-secondary" data-action="ouvrir-modifier-objectif">Modifier</button>' +
+          '<button type="button" class="btn btn-danger" data-action="ouvrir-supprimer-objectif">Supprimer</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderFormModifierObjectifSalon(){
+    var o = state.objectifEpargne;
+    var cle = moisCourantCle();
+    if(ui.draft.__objModifSalon !== o.id){
+      var v = versionPourMois(state.config.epargneMensuelle, cle);
+      var mode = "auto", pct = 10, montant = "";
+      if(versionActive(v)){
+        mode = v.mode === "fixe" ? "manuel" : "auto";
+        if(v.mode === "pourcentage") pct = v.valeur; else montant = String(v.valeur);
+      } else if(o.type === "auto" && [10,20,30].indexOf(Number(o.pourcentage)) !== -1){
+        pct = Number(o.pourcentage); // suggestion reprise du réglage À domicile
+      }
+      ui.draft = { __objModifSalon: o.id, nom: o.nom, mode: mode, pourcentage: pct, montant: montant };
+    }
+    var d = ui.draft;
+    var scenarios = [ { val:"10", label:"Tranquille" }, { val:"20", label:"Équilibré" }, { val:"30", label:"Ambitieux" } ];
+    var scenariosHtml = scenarios.map(function(sc){
+      var active = String(d.pourcentage) === sc.val;
+      return '<button type="button" class="radio-opt' + (active?" active":"") + '" data-action="modif-pourcentage-objectif" data-val="' + sc.val + '">' + sc.val + ' %<br><span style="font-weight:600; font-size:11px;">' + esc(sc.label) + '</span></button>';
+    }).join("");
+    return (
+      '<div class="hint" style="margin-bottom:10px;">Épargne du mois, prise sur le résultat net du salon.</div>' +
+      '<div class="radio-row" style="margin-bottom:14px;">' +
+        '<button type="button" class="radio-opt' + (d.mode!=="manuel"?" active":"") + '" data-action="modif-mode-objectif" data-val="auto">Auto (% du résultat net)</button>' +
+        '<button type="button" class="radio-opt' + (d.mode==="manuel"?" active":"") + '" data-action="modif-mode-objectif" data-val="manuel">Manuel (montant / mois)</button>' +
+      '</div>' +
+      (d.mode === "manuel" ?
+        '<div class="field"><div class="label">Montant mis de côté chaque mois (FCFA)</div>' +
+          '<input type="number" inputmode="numeric" min="1" step="1" class="input" id="f-modifMontant" value="' + esc(d.montant||"") + '" data-action-change="capture-modif-objectif">' +
+          fieldErr("montant") +
+        '</div>'
+        :
+        '<div class="field"><div class="label">Pourcentage du résultat net du mois</div>' +
+          '<div class="radio-row">' + scenariosHtml + '</div>' +
+          renderNotePctDisponible("epargne") +
+          fieldErr("pourcentage") +
+        '</div>'
+      ) +
+      '<div class="field"><div class="label">Nom</div>' +
+        '<input type="text" class="input" id="f-modifNom" value="' + esc(d.nom||"") + '" data-action-change="capture-modif-objectif">' +
+      '</div>' +
+      '<div class="field-note" style="margin:-6px 0 12px;">S’applique à partir ' + esc(deMois(libelleMoisCle(cle))) + ' ; les mois terminés ne changent pas.</div>' +
+      '<button type="button" class="btn btn-primary" data-action="enregistrer-modif-objectif">Enregistrer</button>'
+    );
+  }
+
+  function enregistrerModifObjectifSalon(){
+    var o = state.objectifEpargne;
+    var d = ui.draft;
+    var cle = moisCourantCle();
+    var elN = byId("f-modifNom"); if(elN) d.nom = elN.value;
+    var elM = byId("f-modifMontant"); if(elM) d.montant = elM.value;
+    var mode, valeur;
+    if(d.mode === "manuel"){
+      mode = "fixe";
+      valeur = Math.round(toNum(d.montant));
+      if(!(valeur > 0)){ ui.errors = { montant: "Indiquez un montant supérieur à 0." }; render(); return; }
+    } else {
+      mode = "pourcentage";
+      valeur = toNum(d.pourcentage);
+      if([10,20,30].indexOf(valeur) === -1) valeur = 10;
+      var err = erreurGardeFou(cle, { cible: "epargne", mode: mode, valeur: valeur });
+      if(err){ ui.errors = { pourcentage: err }; render(); return; }
+    }
+    var nom = (d.nom||"").trim();
+    if(nom) o.nom = nom;
+    state.config.epargneMensuelle = majParamVersionne(state.config.epargneMensuelle, mode, valeur, cle);
+    saveState();
+    closeModal();
+  }
+
   function renderConfirmSuppressionObjectif(){
     var o = state.objectifEpargne;
     if(!o) return "";
     return (
-      '<div><p style="font-size:13.5px; margin:0 0 14px;">Supprimer l’objectif « ' + esc(o.nom) + ' » ? Ce qui a déjà été mis de côté reste acquis — seul le suivi de cet objectif disparaît.</p>' +
+      '<div><p style="font-size:13.5px; margin:0 0 14px;">Supprimer l’objectif « ' + esc(o.nom) + ' » ? Ce qui a déjà été mis de côté reste acquis — seul le suivi de cet objectif disparaît.' +
+        (estModeSalon() && epargneSalonReglee() ? ' L’épargne du mois s’arrête à partir ' + esc(deMois(libelleMoisCle(moisCourantCle()))) + ' ; les mois terminés ne changent pas.' : '') + '</p>' +
         '<div class="btn-row">' +
           '<button type="button" class="btn btn-secondary" data-action="fermer-modal">Annuler</button>' +
           '<button type="button" class="btn btn-danger" data-action="confirmer-suppr-objectif">Oui, supprimer</button>' +
@@ -2370,6 +3798,7 @@
     var periode = ui.telechargerPeriode;
     var ref = periode === "semaine" ? dateFromStr(ui.telechargerSemaineRef) : periode === "mois" ? dateFromStr(ui.telechargerMoisRef) : new Date();
     var range = rangeForPeriode(periode, ref);
+    if(estModeSalon()){ dessinerCarteTelechargerSalon(canvas, periode, ref, range); return; }
     var recette = recetteCoiffure(range);
     var charges = chargesCommunesTotal(range);
     var epargne = epargnePeriode(range);
@@ -2428,6 +3857,86 @@
     // qui recalcule un vrai flou sur les pixels du bas avant export, pour
     // que le fichier téléchargé/partagé corresponde à ce que montre l'aperçu
     // (bug confirmé au Sprint 6 : l'export laissait fuiter les chiffres réels).
+    var blurCanvas = byId("telecharger-canvas-blur");
+    if(blurCanvas && blurCanvas.getContext){
+      blurCanvas.getContext("2d").drawImage(canvas, 0, 0);
+    }
+  }
+
+  // Sprint 8B (amendement, section 9 — point 4 validé) : image Télécharger
+  // en mode Salon. Recettes par activité et résultat net ; AUCUNE
+  // rémunération (ni individuelle ni totale : l'image se partage, et les
+  // salariés n'ont pas à voir la rémunération des autres). Même mise en page
+  // que l'image du mode À domicile : le haut (titre + grand chiffre) reste
+  // net, la rangée de détail tombe dans la zone réellement floutée à
+  // l'export (construireCanvasExport, inchangée).
+  function dessinerCarteTelechargerSalon(canvas, periode, ref, range){
+    var estMois = periode === "mois";
+    var cle = moisCleDe(range.start);
+    var periodeLabel = periode === "jour" ? formatDateFr(todayStr()) :
+      periode === "semaine" ? (formatDateFr(range.start) + " – " + formatDateFr(range.end)) :
+      (moisLabelFor(ref).charAt(0).toUpperCase() + moisLabelFor(ref).slice(1));
+    var recCoiffure = recettesActivite(range, "coiffure");
+    var recOnglerie = recettesActivite(range, "onglerie");
+    var grandLabel, grandMontant, cols;
+    if(estMois){
+      var r = resultatNetMois(cle);
+      grandLabel = "RÉSULTAT NET DU SALON" + (r.provisoire ? " (PROVISOIRE)" : "");
+      grandMontant = r.resultatNet;
+      cols = [
+        { label:"Recettes coiffure", val: formatFCFA(recCoiffure), color:"#34b37e" },
+        { label:"Recettes onglerie", val: formatFCFA(recOnglerie), color:"#e8788c" },
+        { label:"Charges et fonds", val: formatFCFA(r.charges + r.fonds), color:"#ff6b5e" }
+      ];
+    } else {
+      grandLabel = periode === "jour" ? "RECETTE DU JOUR" : "RECETTES DE LA SEMAINE";
+      grandMontant = recCoiffure + recOnglerie;
+      var nb = filterRange(state.prestationsCoiffure, range).length;
+      cols = [
+        { label:"Coiffure", val: formatFCFA(recCoiffure), color:"#34b37e" },
+        { label:"Onglerie", val: formatFCFA(recOnglerie), color:"#e8788c" },
+        { label:"Prestations", val: String(nb), color:"#f5a623" }
+      ];
+    }
+
+    var ctx = canvas.getContext("2d");
+    var W = canvas.width, H = canvas.height;
+    var grad = ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,"#1b2029"); grad.addColorStop(1,"#11141a");
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#f5a623";
+    ctx.font = "700 40px -apple-system,Helvetica,Arial,sans-serif";
+    ctx.fillText("💈 MonDjai / Coiffure · Salon", W/2, 110);
+    ctx.fillStyle = "#9aa3b2";
+    ctx.font = "500 30px -apple-system,Helvetica,Arial,sans-serif";
+    ctx.fillText(periodeLabel, W/2, 160);
+
+    ctx.fillStyle = "#9aa3b2";
+    ctx.font = "700 26px -apple-system,Helvetica,Arial,sans-serif";
+    ctx.fillText(grandLabel, W/2, 260);
+    ctx.fillStyle = grandMontant < 0 ? "#ff6b5e" : "#eef1f6";
+    ctx.font = "800 96px -apple-system,Helvetica,Arial,sans-serif";
+    ctx.fillText(formatFCFA(grandMontant), W/2, 350);
+
+    var colW = W/3;
+    cols.forEach(function(c, i){
+      var cx = colW*i + colW/2;
+      ctx.fillStyle = "#9aa3b2";
+      ctx.font = "700 24px -apple-system,Helvetica,Arial,sans-serif";
+      ctx.fillText(c.label, cx, 460);
+      ctx.fillStyle = c.color;
+      ctx.font = "800 38px -apple-system,Helvetica,Arial,sans-serif";
+      ctx.fillText(c.val, cx, 510);
+    });
+
+    ctx.strokeStyle = "#2a303c"; ctx.beginPath(); ctx.moveTo(70,570); ctx.lineTo(W-70,570); ctx.stroke();
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#6b7280";
+    ctx.font = "400 22px -apple-system,Helvetica,Arial,sans-serif";
+    ctx.fillText("Document informatif, non certifié.", W/2, H-60);
+
     var blurCanvas = byId("telecharger-canvas-blur");
     if(blurCanvas && blurCanvas.getContext){
       blurCanvas.getContext("2d").drawImage(canvas, 0, 0);
@@ -2544,7 +4053,7 @@
     }catch(e){ callback(null); }
   }
   function nomFichierTelecharger(){
-    return "mondjai-coiffure-" + ui.telechargerPeriode + "-" + todayStr() + ".png";
+    return "mondjai-coiffure-" + (estModeSalon() ? "salon-" : "") + ui.telechargerPeriode + "-" + todayStr() + ".png";
   }
   function telechargerImage(){
     canvasVersBlob(function(blob){
@@ -2571,8 +4080,330 @@
 
   /* ================= Réglages ================= */
 
+  /* ----- Sprint 8A : Réglages du mode Salon ----- */
+
+  function renderReglagesMode(){
+    var salon = estModeSalon();
+    return (
+      '<div class="reglages-section">' +
+        '<div class="rs-title">Je travaille</div>' +
+        '<div class="radio-row">' +
+          '<button type="button" class="radio-opt' + (!salon?" active":"") + '" data-action="set-mode-travail" data-val="domicile">🏠 À domicile</button>' +
+          '<button type="button" class="radio-opt' + (salon?" active":"") + '" data-action="set-mode-travail" data-val="salon">💈 En salon</button>' +
+        '</div>' +
+        '<div class="hint tight" style="margin-top:8px;">' + (salon
+          ? "En salon : charges du mois, fonds de renouvellement des produits et remboursement de crédit. Vous pouvez revenir à « À domicile » à tout moment, sans perte de données."
+          : "À domicile : fonctionnement habituel. « En salon » ajoute les charges du mois, le fonds de renouvellement des produits et le remboursement de crédit — modifiable à tout moment, sans perte de données.") + '</div>' +
+        (ui.modeMsg ? '<div class="hint tight" style="color:var(--green); font-weight:700;">' + esc(ui.modeMsg) + '</div>' : '') +
+      '</div>'
+    );
+  }
+
+  /* ----- Sprint 8B : rémunérations (Réglages) ----- */
+
+  function findSalarie(id){
+    var l = state.config.salaries || [];
+    for(var i=0;i<l.length;i++) if(l[i].id === id) return l[i];
+    return null;
+  }
+
+  function renderReglagesRemunerations(){
+    var cle = moisCourantCle();
+    var vp = versionPourMois(state.config.remunerationProprio, cle);
+    var proprioRow =
+      '<div class="credit-row"><div class="cr-top">' +
+        '<div class="cr-ico">👩🏾‍💼</div>' +
+        '<div class="cr-txt"><div class="cr-nom">Propriétaire (vous)</div><div class="cr-sub">' + esc(libelleClause(vp)) + '</div></div>' +
+        '<button type="button" class="btn btn-secondary cr-edit" data-action="ouvrir-remu" data-cible="proprio">' + (versionActive(vp) ? "Modifier" : "Régler") + '</button>' +
+      '</div></div>';
+    var sal = salariesActifs(cle);
+    var salRows = sal.map(function(sl){
+      var v = versionPourMois(sl, cle);
+      return (
+        '<div class="credit-row"><div class="cr-top">' +
+          '<div class="cr-ico">🧑🏾</div>' +
+          '<div class="cr-txt"><div class="cr-nom">' + esc(sl.nom) + '</div><div class="cr-sub">' + esc(libelleClause(v)) + ' · depuis ' + esc(libelleMoisCle(sl.debut)) + '</div></div>' +
+          '<button type="button" class="btn btn-secondary cr-edit" data-action="ouvrir-remu" data-cible="salarie" data-id="' + esc(sl.id) + '">Modifier</button>' +
+        '</div></div>'
+      );
+    }).join("");
+    var det = totalPourcentages(cle);
+    return (
+      '<div class="reglages-section">' +
+        '<div class="rs-title">Rémunérations</div>' +
+        proprioRow +
+        (salRows || '<div class="hint tight" style="margin:-2px 0 10px;">Aucun salarié : vous travaillez seule au salon.</div>') +
+        '<button type="button" class="btn btn-secondary" data-action="ajouter-salarie">+ Ajouter un salarié</button>' +
+        '<div class="pct-total" style="margin-top:10px;">' +
+          '<div class="pt-label">Total des pourcentages du résultat net<br>vous ' + formatPct(det.proprio) + ' · salariés ' + formatPct(det.salaries) + ' · épargne ' + formatPct(det.epargne) + '</div>' +
+          '<div class="pt-val' + (det.total > 100 ? " over" : "") + '">' + formatPct(det.total) + '</div>' +
+        '</div>' +
+        '<div class="hint tight">Montant fixe ou pourcentage du résultat net du mois, selon la clause convenue. Tous les pourcentages (vous, vos salariés, l’épargne) portent sur le même résultat net : leur total ne peut pas dépasser 100 %. Une modification s’applique à partir du mois en cours.</div>' +
+      '</div>'
+    );
+  }
+
+  var REMU_FIELDS = ["f-remuValeur","f-remuNom"];
+
+  function renderRemuConfigModal(){
+    var m = ui.modal;
+    var cle = moisCourantCle();
+    var sal = (m.cible === "salarie" && m.id) ? findSalarie(m.id) : null;
+    var v = m.cible === "proprio" ? versionPourMois(state.config.remunerationProprio, cle) : (sal ? versionPourMois(sal, cle) : null);
+    if(!ui.draft.__remuInit){
+      ui.draft = {
+        __remuInit: true,
+        mode: (v && v.mode) || "pourcentage",
+        "f-remuValeur": versionActive(v) ? String(v.valeur) : "",
+        "f-remuNom": sal ? sal.nom : ""
+      };
+    }
+    var d = ui.draft;
+    var pct = d.mode !== "fixe";
+    var retrait = "";
+    if(sal){
+      retrait = m.confirmRetrait
+        ? '<div class="confirm-box"><p>Retirer ' + esc(sal.nom) + ' du salon ? ' + esc(sal.nom) + ' ne comptera plus à partir ' + esc(deMois(libelleMoisCle(cle))) + '. Les mois précédents ne changent pas.</p>' +
+            '<div class="btn-row">' +
+              '<button type="button" class="btn btn-secondary" data-action="annuler-retrait-salarie">Annuler</button>' +
+              '<button type="button" class="btn btn-danger" data-action="confirmer-retrait-salarie">Oui, retirer</button>' +
+            '</div></div>'
+        : '<button type="button" class="btn btn-danger" style="margin-top:12px;" data-action="demander-retrait-salarie">Retirer du salon</button>';
+    }
+    return (
+      '<div>' +
+        (m.cible === "salarie"
+          ? '<div class="field"><div class="label">Nom <span class="req">*</span></div>' +
+              '<input type="text" class="input" id="f-remuNom" placeholder="Ex. Awa" value="' + esc(d["f-remuNom"]||"") + '" data-action-change="capture-remu">' +
+              fieldErr("remuNom") +
+            '</div>'
+          : '<div class="hint" style="margin-bottom:12px;">Votre rémunération de propriétaire, prise sur le résultat net du mois. Laissez 0 si vous vous payez sur le reste.</div>') +
+        '<div class="field"><div class="label">Clause convenue <span class="req">*</span></div>' +
+          '<div class="radio-row">' +
+            '<button type="button" class="radio-opt' + (!pct?" active":"") + '" data-action="set-remu-mode" data-val="fixe">Montant fixe / mois</button>' +
+            '<button type="button" class="radio-opt' + (pct?" active":"") + '" data-action="set-remu-mode" data-val="pourcentage">% du résultat net</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="field"><div class="label">' + (pct ? "Pourcentage du résultat net du mois (%)" : "Montant fixe par mois (FCFA)") + ' <span class="req">*</span></div>' +
+          '<input type="number" inputmode="decimal" min="0" step="' + (pct ? "0.5" : "1") + '" class="input" id="f-remuValeur" value="' + esc(d["f-remuValeur"]||"") + '" data-action-change="capture-remu">' +
+          (pct ? renderNotePctDisponible(m.cible === "proprio" ? "proprio" : "salarie", sal ? sal.id : undefined, !sal && m.cible === "salarie")
+               : '<div class="field-note">Dû chaque mois, même si le résultat net est faible — une alerte douce le signale alors.</div>') +
+          fieldErr("remuValeur") +
+        '</div>' +
+        '<div class="field-note" style="margin:-6px 0 12px;">S’applique à partir ' + esc(deMois(libelleMoisCle(cle))) + ' ; les mois terminés ne changent pas.</div>' +
+        '<button type="button" class="btn btn-primary" data-action="enregistrer-remu">Enregistrer</button>' +
+        retrait +
+      '</div>'
+    );
+  }
+
+  function enregistrerRemu(){
+    captureDraft(REMU_FIELDS);
+    var m = ui.modal, d = ui.draft;
+    var cle = moisCourantCle();
+    var errors = {};
+    var mode = d.mode === "fixe" ? "fixe" : "pourcentage";
+    var brut = String(d["f-remuValeur"]||"").trim();
+    var valeur = toNum(brut);
+    var nom = String(d["f-remuNom"]||"").trim();
+    if(m.cible === "salarie"){
+      if(!nom) errors.remuNom = "Indiquez le nom du salarié.";
+      if(!(valeur > 0)) errors.remuValeur = mode === "pourcentage" ? "Indiquez un pourcentage supérieur à 0." : "Indiquez un montant supérieur à 0.";
+    } else if(brut === "" || valeur < 0){
+      errors.remuValeur = "Indiquez un montant ou un pourcentage (0 si vous vous payez sur le reste).";
+    }
+    if(!errors.remuValeur && mode === "pourcentage" && valeur > 100) errors.remuValeur = "Un pourcentage ne peut pas dépasser 100 %.";
+    if(!errors.remuValeur && mode === "pourcentage"){
+      var err = erreurGardeFou(cle, { cible: m.cible, id: m.id, nouveau: !!m.nouveau, mode: mode, valeur: valeur });
+      if(err) errors.remuValeur = err;
+    }
+    if(Object.keys(errors).length){ ui.errors = errors; render(); return; }
+    if(mode === "fixe") valeur = Math.round(valeur);
+    if(m.cible === "proprio"){
+      if(state.config.remunerationProprio || valeur > 0){
+        state.config.remunerationProprio = majParamVersionne(state.config.remunerationProprio, mode, valeur, cle);
+      }
+    } else if(m.nouveau){
+      state.config.salaries.push({ id: uid("sal"), nom: nom, debut: cle, fin: null, mode: mode, valeur: valeur, depuis: cle, historique: [] });
+    } else {
+      var sal = findSalarie(m.id);
+      if(sal){ sal.nom = nom; majParamVersionne(sal, mode, valeur, cle); }
+    }
+    saveState();
+    closeModal();
+  }
+
+  function renderReglagesFonds(){
+    var cle = moisCourantCle();
+    var cur = versionFondsPourMois(cle);
+    if(!ui.fondsDraft){
+      ui.fondsDraft = { mode: cur ? cur.mode : "fixe", valeur: (cur && Number(cur.valeur) > 0) ? String(cur.valeur) : "" };
+    }
+    var d = ui.fondsDraft;
+    var fixe = d.mode !== "pourcentage";
+    var sf = soldeFonds();
+    return (
+      '<div class="reglages-section">' +
+        '<div class="rs-title">Fonds de renouvellement des produits</div>' +
+        '<div class="radio-row" style="margin-bottom:12px;">' +
+          '<button type="button" class="radio-opt' + (fixe?" active":"") + '" data-action="fonds-mode" data-val="fixe">Montant fixe / mois</button>' +
+          '<button type="button" class="radio-opt' + (!fixe?" active":"") + '" data-action="fonds-mode" data-val="pourcentage">% des recettes</button>' +
+        '</div>' +
+        '<div class="field" style="margin-bottom:10px;"><div class="label">' + (fixe ? "Montant prévu chaque mois (FCFA)" : "Pourcentage des recettes du mois (%)") + '</div>' +
+          '<input type="number" inputmode="decimal" min="0" step="' + (fixe ? "1" : "0.5") + '" class="input" id="f-fondsValeur" placeholder="' + (fixe ? "Ex. 60000" : "Ex. 8") + '" value="' + esc(d.valeur||"") + '" data-action-change="capture-fonds">' +
+          (ui.fondsErreur ? '<div class="field-error">' + esc(ui.fondsErreur) + '</div>' : '') +
+        '</div>' +
+        '<button type="button" class="btn btn-secondary" data-action="enregistrer-fonds">Enregistrer le fonds</button>' +
+        (ui.fondsMsg ? '<div class="hint tight" style="color:var(--green); font-weight:700;">' + esc(ui.fondsMsg) + '</div>' : '') +
+        (sf.configure ? '<div class="etat-stat-row" style="margin-top:10px;"><div class="er-label">Solde du fonds</div><div class="er-val' + (sf.solde < 0 ? " neg" : "") + '">' + formatFCFA(sf.solde) + '</div></div>' : '') +
+        (sf.configure && sf.solde < 0 ? renderAlerteFonds(sf) : '') +
+        '<div class="hint tight" style="margin-top:8px;">Prévu chaque mois et déduit du résultat net. Les achats saisis en « Produits coiffure » ou « Produits onglerie » sont payés par ce fonds, jamais comptés deux fois. Une modification s’applique à partir du mois en cours ; les mois terminés ne changent pas. Mettre 0 arrête le fonds.</div>' +
+      '</div>'
+    );
+  }
+
+  function renderReglagesCredits(){
+    var rubs = rubriquesPourMode(false).filter(function(r){ return typeDeRubrique(r) === "credit"; });
+    var rows = rubs.map(function(r){
+      var credit = findCredit(r.id);
+      return (
+        '<div class="credit-row">' +
+          '<div class="cr-top">' +
+            '<div class="cr-ico">' + esc(r.emoji || "🏦") + '</div>' +
+            '<div class="cr-txt"><div class="cr-nom">' + esc(r.nom) + '</div>' +
+              '<div class="cr-sub">' + esc(credit ? sousTitreCredit(credit) : "Pas encore paramétré — se règle aussi au premier remboursement.") + '</div></div>' +
+            '<button type="button" class="btn btn-secondary cr-edit" data-action="ouvrir-credit" data-id="' + esc(r.id) + '">' + (credit ? "Modifier" : "Paramétrer") + '</button>' +
+          '</div>' +
+          (credit ? renderBilanCreditHtml(credit) : '') +
+        '</div>'
+      );
+    }).join("");
+    return (
+      '<div class="reglages-section">' +
+        '<div class="rs-title">Remboursements de crédit</div>' +
+        rows +
+        '<button type="button" class="btn btn-secondary" data-action="ajouter-credit">+ Ajouter un crédit</button>' +
+        '<div class="hint tight" style="margin-top:8px;">L’argent reçu (prêt bancaire ou apport d’une personne) n’est pas une recette et ne se saisit pas : seuls les remboursements se saisissent, comme une charge du mois.</div>' +
+      '</div>'
+    );
+  }
+
+  function renderCreditConfigModal(){
+    var m = ui.modal;
+    var rub = m.rubriqueId ? findRubriqueCharge(m.rubriqueId) : null;
+    var credit = rub ? findCredit(rub.id) : null;
+    if(!ui.draft.__creditInit){
+      ui.draft = {
+        __creditInit: true,
+        "f-creditType": credit ? credit.type : "",
+        "f-creditPreteur": credit ? (credit.preteur || "") : "",
+        "f-creditTotal": (credit && credit.montantTotal) ? String(credit.montantTotal) : "",
+        "f-creditNom": ""
+      };
+    }
+    var d = ui.draft;
+    var t = d["f-creditType"];
+    var noteTotal = credit
+      ? "Total à rembourser, ou reste dû au " + formatDateFr(credit.dateDebut) + " (point de départ du bilan)."
+      : "Total à rembourser, ou reste dû aujourd’hui. La date d’aujourd’hui sert de point de départ du bilan.";
+    return (
+      '<div>' +
+        (m.nouveau ?
+          '<div class="field"><div class="label">Nom du crédit (facultatif)</div>' +
+            '<input type="text" class="input" id="f-creditNom" placeholder="Ex. Crédit banque, Apport Mme X" value="' + esc(d["f-creditNom"]||"") + '" data-action-change="capture-credit">' +
+          '</div>' : '') +
+        '<div class="field"><div class="label">Type de prêteur <span class="req">*</span></div>' +
+          '<div class="radio-row">' +
+            '<button type="button" class="radio-opt' + (t==="banque"?" active":"") + '" data-action="set-credit-type" data-val="banque">🏦 Banque</button>' +
+            '<button type="button" class="radio-opt' + (t==="personne"?" active":"") + '" data-action="set-credit-type" data-val="personne">🤝 Personne (apport)</button>' +
+          '</div>' +
+          fieldErr("creditType") +
+        '</div>' +
+        '<div class="field"><div class="label">Nom du prêteur (facultatif)</div>' +
+          '<input type="text" class="input" id="f-creditPreteur" placeholder="Ex. COOPEC, Mme Koné" value="' + esc(d["f-creditPreteur"]||"") + '" data-action-change="capture-credit">' +
+        '</div>' +
+        '<div class="field"><div class="label">Montant total (facultatif)</div>' +
+          '<input type="number" inputmode="numeric" min="0" step="1" class="input" id="f-creditTotal" value="' + esc(d["f-creditTotal"]||"") + '" data-action-change="capture-credit">' +
+          '<div class="field-note">' + esc(noteTotal) + '</div>' +
+        '</div>' +
+        '<button type="button" class="btn btn-primary" data-action="enregistrer-credit">Enregistrer</button>' +
+      '</div>'
+    );
+  }
+
+  var CREDIT_FIELDS = ["f-creditNom","f-creditPreteur","f-creditTotal"];
+
+  function enregistrerCredit(){
+    captureDraft(CREDIT_FIELDS);
+    var m = ui.modal, d = ui.draft;
+    var type = d["f-creditType"];
+    if(type !== "banque" && type !== "personne"){
+      ui.errors = { creditType: "Précisez le type de prêteur." };
+      render();
+      return;
+    }
+    var preteur = String(d["f-creditPreteur"]||"").trim();
+    var total = toNum(d["f-creditTotal"]);
+    var montantTotal = total > 0 ? Math.round(total) : null;
+    if(m.nouveau){
+      var nom = String(d["f-creditNom"]||"").trim() ||
+        (type === "banque" ? "Crédit " + (preteur || "banque") : "Apport " + (preteur || "d’une personne"));
+      var rub = { id: uid("rub"), nom: nom, emoji: type === "banque" ? "🏦" : "🤝", actif: true, perso: true, portee: "salon", type: "credit" };
+      state.config.rubriquesCharges.push(rub);
+      state.config.credits.push({ id: uid("cred"), rubriqueId: rub.id, type: type, preteur: preteur, montantTotal: montantTotal, dateDebut: todayStr(), tsDebut: Date.now() });
+    } else {
+      var credit = findCredit(m.rubriqueId);
+      if(credit){
+        credit.type = type; credit.preteur = preteur; credit.montantTotal = montantTotal;
+      } else {
+        state.config.credits.push({ id: uid("cred"), rubriqueId: m.rubriqueId, type: type, preteur: preteur, montantTotal: montantTotal, dateDebut: todayStr(), tsDebut: Date.now() });
+      }
+    }
+    saveState();
+    closeModal();
+  }
+
+  function enregistrerFonds(){
+    var el = byId("f-fondsValeur");
+    if(el) ui.fondsDraft.valeur = el.value;
+    var d = ui.fondsDraft;
+    var mode = d.mode === "pourcentage" ? "pourcentage" : "fixe";
+    var brut = String(d.valeur === undefined || d.valeur === null ? "" : d.valeur).trim();
+    var valeur = toNum(brut);
+    ui.fondsMsg = "";
+    if(brut === "" || valeur < 0 || (mode === "pourcentage" && valeur > 100)){
+      ui.fondsErreur = mode === "pourcentage" ? "Indiquez un pourcentage entre 0 et 100 (0 arrête le fonds)." : "Indiquez un montant (0 arrête le fonds).";
+      render();
+      return;
+    }
+    if(mode === "fixe") valeur = Math.round(valeur);
+    var cle = moisCourantCle();
+    var f = state.config.fondsRenouvellement;
+    if(!f){
+      if(valeur === 0){ ui.fondsErreur = ""; ui.fondsMsg = "Aucun fonds enregistré (montant à 0)."; render(); return; }
+      state.config.fondsRenouvellement = { mode: mode, valeur: valeur, depuis: cle, historique: [] };
+    } else if(f.depuis === cle){
+      f.mode = mode; f.valeur = valeur;
+    } else if(f.depuis < cle){
+      // Le réglage précédent reste valable pour les mois passés (résultats
+      // nets définitifs inchangés) ; le nouveau s'applique dès ce mois-ci.
+      f.historique = (f.historique || []).concat([{ depuis: f.depuis, mode: f.mode, valeur: f.valeur }]);
+      f.depuis = cle; f.mode = mode; f.valeur = valeur;
+    } else {
+      // Horloge du téléphone revenue en arrière : on remplace simplement.
+      f.historique = (f.historique || []).filter(function(h){ return h.depuis < cle; });
+      f.depuis = cle; f.mode = mode; f.valeur = valeur;
+    }
+    saveState();
+    ui.fondsErreur = "";
+    ui.fondsDraft = { mode: mode, valeur: valeur > 0 ? String(valeur) : "" };
+    ui.fondsMsg = valeur > 0 ? ("Fonds enregistré à partir de " + libelleMoisCle(cle) + ".") : ("Fonds arrêté à partir de " + libelleMoisCle(cle) + ".");
+    render();
+  }
+
   function renderReglages(){
-    var rubList = state.config.rubriquesCharges;
+    var salon = estModeSalon();
+    var rubList = rubriquesPourMode(false);
     var rubRows = rubList.map(function(r){
       return (
         '<div class="rub-manage-row">' +
@@ -2610,14 +4441,18 @@
           '<div class="onb-title" style="margin:0;">Réglages</div>' +
           '<button type="button" class="icon-btn" data-action="fermer-overlay">✕</button>' +
         '</div>' +
+        renderReglagesMode() +
+        (salon ? renderReglagesRemunerations() + renderReglagesFonds() + renderReglagesCredits() : '') +
         '<div class="reglages-section">' +
-          '<div class="rs-title">Charges communes du salon</div>' +
+          '<div class="rs-title">' + (salon ? "Rubriques de charges du salon" : "Charges communes du salon") + '</div>' +
           rubRows +
           '<div class="inline-new">' +
             '<input type="text" class="input" id="f-nouvelleRubrique" placeholder="Nouvelle rubrique" value="' + esc(ui.draft["f-nouvelleRubrique"]||"") + '" data-autofocus data-action-change="capture-nouvelle-rubrique">' +
             '<button type="button" class="btn btn-secondary" data-action="ajouter-rubrique-charge">Ajouter</button>' +
           '</div>' +
-          '<div class="hint tight">Servent pour les charges communes ajoutées depuis la carte « Charges communes du salon » (loyer, publicité…). Supprimer une rubrique personnalisée ne touche pas aux charges déjà enregistrées.</div>' +
+          '<div class="hint tight">' + (salon
+            ? "Servent pour les charges du mois (loyer, CIE, SODECI, Mairie, BURIDA, produits, remboursements…). Supprimer une rubrique personnalisée ne touche pas aux charges déjà enregistrées."
+            : "Servent pour les charges communes ajoutées depuis la carte « Charges communes du salon » (loyer, publicité…). Supprimer une rubrique personnalisée ne touche pas aux charges déjà enregistrées.") + '</div>' +
         '</div>' +
         bientotHtml +
         '<div class="reglages-section">' +
@@ -2659,9 +4494,57 @@
         '<div class="about-line">Première application d’une famille à trois : Pédicure/Manicure et Revente de mèches arriveront plus tard en applications indépendantes, avec une fusion prévue par la suite.</div>' +
         '<div class="about-line">Le code PIN est un verrou de confort, pas un chiffrement fort — à ne jamais présenter comme une sécurité absolue.</div>' +
         '<div class="about-line">L’accès se renouvelle chaque mois par un code communiqué séparément — sans connexion internet, tout est calculé sur ce téléphone. Vos données ne sont jamais supprimées pendant qu’un renouvellement est en attente.</div>' +
-        '<div class="about-line">Version : Sprint 5B — accès mensuel calendaire et choix du dossier de sauvegarde.</div>' +
+        '<div class="about-line">En salon, les charges (loyer, CIE, SODECI, Mairie, BURIDA, remboursements de crédit…) et le fonds de renouvellement des produits se déduisent du résultat net du mois, jamais au jour le jour.</div>' +
+        '<div class="about-line">En salon, le résultat net du mois se répartit entre votre rémunération, celle de vos salariés et l’épargne ; ce qui reste est la trésorerie du salon.</div>' +
+        '<div class="about-line">Version : Sprint 8B — mode Salon : rémunérations, épargne mensuelle, onglerie.</div>' +
       '</div>'
     );
+  }
+
+  /* ================= Sprint 8A : actions du mode Salon ================= */
+
+  function reinitialiserMessagesSalon(){
+    ui.modeMsg = ""; ui.fondsMsg = ""; ui.fondsErreur = ""; ui.fondsDraft = null;
+  }
+  function marquerReprise(cle, rubriqueId, statut){
+    if(!state.reprisesCharges || typeof state.reprisesCharges !== "object") state.reprisesCharges = {};
+    if(!state.reprisesCharges[cle]) state.reprisesCharges[cle] = {};
+    state.reprisesCharges[cle][rubriqueId] = statut;
+  }
+  // Lit toutes les saisies visibles de la fenêtre de reprise (le clic sur
+  // « Confirmer » peut arriver avant l'événement change du champ).
+  function lireSaisiesReprise(){
+    var out = {};
+    var champs = document.querySelectorAll('[data-action-change="capture-reprise"]');
+    for(var i=0;i<champs.length;i++){
+      var id = champs[i].getAttribute("data-id");
+      out[id] = champs[i].value;
+      ui.repriseDraft[id] = champs[i].value;
+    }
+    return out;
+  }
+  // Confirme une proposition de reprise : crée la charge du mois en cours
+  // avec le montant affiché (modifiable), rattachée à ce mois.
+  function confirmerReprise(rubriqueId, cle, saisies){
+    var p = reprisesEnAttente(cle).filter(function(x){ return x.rubrique.id === rubriqueId; })[0];
+    if(!p) return true;
+    var brut = (saisies && saisies[rubriqueId] !== undefined) ? saisies[rubriqueId]
+      : (ui.repriseDraft[rubriqueId] !== undefined ? ui.repriseDraft[rubriqueId] : String(p.montant));
+    var montant = toNum(brut);
+    if(!ui.errors) ui.errors = {};
+    if(String(brut).trim() === "" || !(montant > 0)){
+      ui.errors["reprise-" + rubriqueId] = "Indiquez un montant supérieur à 0, ou ignorez cette charge.";
+      return false;
+    }
+    state.autresCharges.push({
+      id: uid("acharge"), date: todayStr(), moisConcerne: cle,
+      rubriqueId: p.rubrique.id, rubriqueNom: p.rubrique.nom, rubriqueEmoji: p.rubrique.emoji, rubriqueType: typeDeRubrique(p.rubrique),
+      montant: montant, reprise: true, ts: Date.now()
+    });
+    marquerReprise(cle, rubriqueId, "confirme");
+    delete ui.repriseDraft[rubriqueId];
+    delete ui.errors["reprise-" + rubriqueId];
+    return true;
   }
 
   /* ================= Actions ================= */
@@ -2698,7 +4581,114 @@
     if(action === "fermer-modal"){ closeModal(); return; }
 
     switch(action){
-      case "ouvrir-reglages": ui.overlay = "reglages"; ui.reglagesMsg = ""; render(); return;
+      case "ouvrir-reglages": ui.overlay = "reglages"; ui.reglagesMsg = ""; reinitialiserMessagesSalon(); render(); return;
+
+      // ----- Sprint 8A : mode Salon -----
+      case "set-mode-travail": {
+        var modeVoulu = el.getAttribute("data-val") === "salon" ? "salon" : "domicile";
+        if(state.config.modeTravail !== modeVoulu){
+          state.config.modeTravail = modeVoulu;
+          if(modeVoulu === "salon") assurerRubriquesSalon(state.config);
+          saveState();
+          ui.etatPeriode = modeVoulu === "salon" ? "mois" : "jour";
+          ui.etatSelJour = null; ui.etatSelSemaine = null; ui.etatVue = "salon";
+          ui.fondsDraft = null; ui.fondsMsg = ""; ui.fondsErreur = "";
+          ui.modeMsg = modeVoulu === "salon" ? "Mode Salon activé. Vos données restent intactes." : "Mode À domicile activé. Vos données restent intactes.";
+        }
+        render();
+        return;
+      }
+      case "fonds-mode": {
+        var champF = byId("f-fondsValeur");
+        if(champF && ui.fondsDraft) ui.fondsDraft.valeur = champF.value;
+        var nouveauMode = el.getAttribute("data-val") === "pourcentage" ? "pourcentage" : "fixe";
+        if(ui.fondsDraft && ui.fondsDraft.mode !== nouveauMode){ ui.fondsDraft.mode = nouveauMode; ui.fondsDraft.valeur = ""; }
+        ui.fondsErreur = ""; ui.fondsMsg = "";
+        render();
+        return;
+      }
+      case "enregistrer-fonds": enregistrerFonds(); return;
+      // ----- Sprint 8B : rémunérations -----
+      case "ouvrir-remu": openModal("remu-config", { cible: el.getAttribute("data-cible"), id: el.getAttribute("data-id") || null }); return;
+      case "ajouter-salarie": openModal("remu-config", { cible: "salarie", nouveau: true }); return;
+      case "set-remu-mode": {
+        captureDraft(REMU_FIELDS);
+        var modeRemu = el.getAttribute("data-val") === "fixe" ? "fixe" : "pourcentage";
+        if(ui.draft.mode !== modeRemu){ ui.draft.mode = modeRemu; ui.draft["f-remuValeur"] = ""; }
+        ui.errors = {};
+        render();
+        return;
+      }
+      case "enregistrer-remu": enregistrerRemu(); return;
+      case "demander-retrait-salarie": captureDraft(REMU_FIELDS); ui.modal.confirmRetrait = true; render(); return;
+      case "annuler-retrait-salarie": ui.modal.confirmRetrait = false; render(); return;
+      case "confirmer-retrait-salarie": {
+        var salR = findSalarie(ui.modal.id);
+        var cleR2 = moisCourantCle();
+        if(salR){
+          // Arrivé(e) ce mois-ci : aucun mois terminé à préserver, on retire
+          // simplement. Sinon : dernier mois compté = mois précédent.
+          if(salR.debut >= cleR2) state.config.salaries = state.config.salaries.filter(function(x){ return x.id !== salR.id; });
+          else salR.fin = decalerMoisCle(cleR2, -1);
+          saveState();
+        }
+        closeModal();
+        return;
+      }
+      case "ouvrir-credit": openModal("credit-config", { rubriqueId: el.getAttribute("data-id") }); return;
+      case "ajouter-credit": openModal("credit-config", { nouveau: true }); return;
+      case "set-credit-type": {
+        captureDraft(CHARGE_FIELDS.concat(CREDIT_FIELDS));
+        ui.draft["f-creditType"] = el.getAttribute("data-val");
+        if(ui.errors) delete ui.errors.creditType;
+        render();
+        return;
+      }
+      case "enregistrer-credit": enregistrerCredit(); return;
+      case "voir-charges-mois": ui.repriseDraft = {}; openModal("charges-mois"); return;
+      case "voir-charge-mois": {
+        ui.modalReturnTo = { type: "charges-mois" };
+        openModal("detail-autre-charge", { id: el.getAttribute("data-id") });
+        return;
+      }
+      case "voir-fonds": openModal("fonds-detail"); return;
+      case "ouvrir-reglages-fonds": {
+        ui.modal = null; ui.modalReturnTo = null; ui.draft = {}; ui.errors = {};
+        ui.overlay = "reglages"; ui.reglagesMsg = ""; reinitialiserMessagesSalon();
+        render();
+        return;
+      }
+      case "add-achat-produits": {
+        ui.modalReturnTo = { type: "fonds-detail" };
+        openModal("add-autre-charge");
+        var rubProd = findRubriqueCharge("produits_coiffure");
+        if(rubProd && rubProd.actif){ ui.draft["f-rubrique"] = "produits_coiffure"; render(); }
+        return;
+      }
+      case "reprise-confirmer": {
+        confirmerReprise(el.getAttribute("data-id"), moisCourantCle(), lireSaisiesReprise());
+        saveState();
+        render();
+        return;
+      }
+      case "reprise-ignorer": {
+        var idIgn = el.getAttribute("data-id");
+        lireSaisiesReprise();
+        marquerReprise(moisCourantCle(), idIgn, "ignore");
+        delete ui.repriseDraft[idIgn];
+        if(ui.errors) delete ui.errors["reprise-" + idIgn];
+        saveState();
+        render();
+        return;
+      }
+      case "reprise-tout-confirmer": {
+        var cleR = moisCourantCle();
+        var saisies = lireSaisiesReprise();
+        reprisesEnAttente(cleR).forEach(function(p){ confirmerReprise(p.rubrique.id, cleR, saisies); });
+        saveState();
+        render();
+        return;
+      }
       case "fermer-overlay": ui.overlay = null; ui.objDraft = null; render(); return;
       case "ouvrir-apropos": ui.overlay = "apropos"; render(); return;
       case "fermer-apropos": ui.overlay = "reglages"; render(); return;
@@ -2743,6 +4733,10 @@
       case "ouvrir-modifier-objectif": ui.draft = {}; openModal("modifier-objectif"); return;
       case "ouvrir-supprimer-objectif": openModal("confirmer-suppression-objectif"); return;
       case "confirmer-suppr-objectif": {
+        // Sprint 8B : l'épargne mensuelle (mode Salon) s'arrête à partir du
+        // mois en cours ; les mois terminés gardent leur épargne.
+        var vEp = versionPourMois(state.config.epargneMensuelle, moisCourantCle());
+        if(versionActive(vEp)) state.config.epargneMensuelle = majParamVersionne(state.config.epargneMensuelle, vEp.mode, 0, moisCourantCle());
         state.objectifEpargne = null;
         saveState();
         closeModal();
@@ -2874,6 +4868,13 @@
 
       case "go-tab": ui.tab = el.getAttribute("data-tab"); render(); return;
 
+      case "etat-set-vue": {
+        var vueVoulue = el.getAttribute("data-val");
+        ui.etatVue = (vueVoulue === "coiffure" || vueVoulue === "onglerie") ? vueVoulue : "salon";
+        ui.etatSelSemaine = null; ui.etatSelJour = null;
+        render();
+        return;
+      }
       case "etat-set-periode": {
         ensureEtatRefs();
         ui.etatPeriode = el.getAttribute("data-val");
@@ -2928,7 +4929,7 @@
 
       case "voir-charges-jour": openModal("detail-charges-jour"); return;
       case "add-autre-charge": {
-        ui.modalReturnTo = { type: "detail-charges-jour" };
+        ui.modalReturnTo = { type: estModeSalon() ? "charges-mois" : "detail-charges-jour" };
         openModal("add-autre-charge");
         return;
       }
@@ -2938,7 +4939,7 @@
         return;
       }
       case "set-rubrique-charge": {
-        captureDraft(["f-montantAutreCharge"]);
+        captureDraft(CHARGE_FIELDS);
         ui.draft["f-rubrique"] = el.getAttribute("data-id");
         render();
         return;
@@ -2960,6 +4961,13 @@
       }
 
       case "cliente-change": captureDraft(COIFFURE_FIELDS); render(); return;
+      case "set-activite": {
+        captureDraft(COIFFURE_FIELDS);
+        ui.draft["f-activite"] = el.getAttribute("data-val") === "onglerie" ? "onglerie" : "coiffure";
+        ui.errors = {};
+        render();
+        return;
+      }
       case "set-lieu-coiffure": {
         captureDraft(COIFFURE_FIELDS);
         ui.draft["f-lieu"] = el.getAttribute("data-val");
@@ -3000,7 +5008,7 @@
       }
 
       case "capture-coiffure": captureDraft(COIFFURE_FIELDS); return;
-      case "capture-autre-charge": captureDraft(["f-montantAutreCharge"]); return;
+      case "capture-autre-charge": captureDraft(CHARGE_FIELDS); return;
       case "enregistrer-coiffure": enregistrerCoiffure(); return;
       case "enregistrer-autre-charge": enregistrerAutreCharge(); return;
     }
@@ -3038,7 +5046,12 @@
         if(el.id === "f-modifMontant") ui.draft.montant = el.value;
         return;
       }
-      case "capture-autre-charge": captureDraft(["f-montantAutreCharge"]); return;
+      case "capture-autre-charge": captureDraft(CHARGE_FIELDS); return;
+      case "mois-concerne-change": captureDraft(CHARGE_FIELDS); render(); return;
+      case "capture-fonds": if(ui.fondsDraft) ui.fondsDraft.valeur = el.value; return;
+      case "capture-credit": captureDraft(CREDIT_FIELDS); return;
+      case "capture-remu": captureDraft(REMU_FIELDS); return;
+      case "capture-reprise": ui.repriseDraft[el.getAttribute("data-id")] = el.value; return;
       case "capture-nouvelle-rubrique": ui.draft["f-nouvelleRubrique"] = el.value; return;
       case "importer-json": case "importer-json-lock": {
         var file = el.files && el.files[0];
@@ -3047,6 +5060,7 @@
           if(ok){
             ui.locked = !!(state.config.pinActif && state.config.pinCode);
             if(!ui.locked){ ui.modal = null; ui.overlay = null; }
+            if(estModeSalon()){ ui.etatPeriode = "mois"; ui.etatSelJour = null; ui.etatSelSemaine = null; }
           }
           render();
         });
@@ -3062,6 +5076,8 @@
 
   state = loadState();
   ui.locked = !!(state.config.pinActif && state.config.pinCode);
+  // Sprint 8A : en mode Salon, le mois est la vue principale du résultat net.
+  if(estModeSalon()) ui.etatPeriode = "mois";
   render();
 
   if("serviceWorker" in navigator){
@@ -3082,7 +5098,23 @@
     compareMoisAnnee: compareMoisAnnee,
     parseDateStr: parseDateStr,
     normaliserEtatImporte: normaliserEtatImporte,
-    defaultState: defaultState
+    defaultState: defaultState,
+    // Sprint 8A — exposés pour les tests de calcul
+    resultatNetMois: resultatNetMois,
+    jaugeMois: jaugeMois,
+    soldeFonds: soldeFonds,
+    previsionFondsMois: previsionFondsMois,
+    bilanCredit: bilanCredit,
+    findCredit: findCredit,
+    reprisesEnAttente: reprisesEnAttente,
+    moisDeCharge: moisDeCharge,
+    estModeSalon: estModeSalon,
+    // Sprint 8B
+    repartitionMois: repartitionMois,
+    totalPourcentages: totalPourcentages,
+    recettesActivite: recettesActivite,
+    cumulEpargneSalon: cumulEpargneSalon,
+    rangeDuMoisCle: rangeDuMoisCle
   };
 })();
 </script>
