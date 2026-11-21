@@ -1,6 +1,7 @@
-// MonDjai/Coiffure — service worker (Sprint 9C ; mécanisme de mise en cache du
+// MonDjai/Coiffure — service worker (Sprint 9D ; mécanisme de mise en cache du
 // Sprint 8C, repris à l'identique de MonDjai/Revente, Sprint Revente-E : au 9C,
-// le numéro de version change et les notifications s'ajoutent à la fin).
+// les notifications se sont ajoutées à la fin ; au 9D, le numéro change et le
+// toucher d'une notification ne vise plus une appli rangée dans un sous-dossier).
 // Les appels au serveur MonDjai (autre domaine, méthode POST) ne passent
 // jamais par ce cache : seules les requêtes GET de cette adresse sont servies.
 //
@@ -10,7 +11,7 @@
 // ║  Les téléphones se mettent à jour seuls à l'ouverture suivante,       ║
 // ║  sans installation ni désinstallation, sans toucher aux données.      ║
 // ╚══════════════════════════════════════════════════════════════════════╝
-var VERSION_CACHE = "16";
+var VERSION_CACHE = "17";
 
 // Tous les caches de cette application commencent par ce préfixe. Seuls
 // ceux-là sont supprimés lors d'une mise à jour : jamais les caches d'une
@@ -170,7 +171,9 @@ self.addEventListener("notificationclick", function (event) {
   event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (fenetres) {
     for (var i = 0; i < fenetres.length; i++) {
       var f = fenetres[i];
-      if (new URL(f.url).pathname.indexOf(dossier.pathname) === 0 && "focus" in f) {
+      var reste = new URL(f.url).pathname.slice(dossier.pathname.length);
+      // Seulement une fenêtre de CE dossier (pas d'une appli rangée dans un sous-dossier, ex. …/meches-essai/).
+      if (new URL(f.url).pathname.indexOf(dossier.pathname) === 0 && reste.indexOf("/") === -1 && "focus" in f) {
         f.postMessage({ mondjai: "notification", ecran: ecran });
         return f.focus();
       }

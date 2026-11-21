@@ -27,6 +27,9 @@
       // Écran de départ sans bandeau (code PIN) ? Une nouvelle installation
       // ouvre l'inscription (Sprint 9A), qui a le bandeau MonDjai.
       porte = !!(c && c.codeAccesOk && c.pinActif);
+      // Sprint 9D : le code PIN du compte (créé dans Coiffure ou dans Mèches).
+      var k = JSON.parse(localStorage.getItem("mondjai_compte_v1") || "null");
+      if(c && c.codeAccesOk && k && k.pin) porte = true;
     }catch(e){}
     var html = document.documentElement;
     html.setAttribute("data-theme", t);
@@ -1088,6 +1091,11 @@
   /* Petits écrans (360×640) : à domicile, le « + » descend au niveau de celui
      du salon, pour ne plus toucher la case Épargne (aucune hauteur changée). */
   @media (max-height:700px){ body:not(.maj-visible) .fab:not(.fab-salon){bottom:calc(var(--tabbar-h, 70px) + 6px);} }
+  /* ===== Sprint 9D : bouton de l'autre appli, « Ajouter Mèches » ===== */
+  .icon-btn.lien-appli{text-decoration:none; position:relative;}
+  .icon-btn.lien-appli::after{content:""; position:absolute; left:-4px; top:-4px; right:-4px; bottom:-4px;}   /* zone de toucher 44 px (le bouton reste à 38 px, comme 📤) */
+  @media (max-width:380px){ .header.avec-lien .brand-emoji{display:none;} }
+  .profil-row .btn-ligne{width:auto; flex:none; min-height:44px; padding:10px 14px; font-size:14px; text-decoration:none;}
   /* ===== Sprint 9C : À propos (« Aider à améliorer MonDjai »), écran de secours ===== */
   .header.ligne-double{padding-top:calc(10px + var(--safe-top)); padding-bottom:7px;}
   .apropos-mesures{margin-top:14px;padding:4px 14px 12px;border-radius:16px;border:1px solid var(--border);background:var(--surface,transparent);}
@@ -1260,8 +1268,18 @@
   //  - Saisie sans clignotement (comme Salon H 7A) : render() ne remplace plus
   //    tout l'écran, seuls les éléments qui changent sont touchés ; écran de
   //    secours « L'application n'a pas pu démarrer » si le démarrage échoue.
+  //
+  // Sprint 9D (avec le D2 de Mèches, cahier v2.7 §5.10) :
+  //  - AUCUN calcul ne change. Bloc MONDJAI-COMPTE v4 (le même que Mèches H) :
+  //    bouton 🛍️ dans l'en-tête si le compte a les deux activités (il ouvre
+  //    Mèches, même compte, même abonnement), bulle du guide sur ce bouton ;
+  //    Réglages › Bientôt : « Ajouter Mèches » à la place de la ligne grisée.
+  //  - Code PIN : celui du compte ferme Coiffure même s'il a été créé dans
+  //    Mèches ; le changer ou le retirer demande le code actuel.
+  //  - Notifications : « Refusées… » une seule fois ; appli ouverte hors de son
+  //    adresse (fichier reçu par WhatsApp) : « Ouvrez MonDjai depuis son adresse ».
 
-/* === MONDJAI-COMPTE v3 === */
+/* === MONDJAI-COMPTE v4 === */
 // Partie « compte » commune aux applis MonDjai (Coiffure, Mèches, Salon H).
 // Ce bloc est IDENTIQUE À L'OCTET PRÈS dans les trois applis : ne jamais le
 // modifier dans une seule. Tout ce qui est propre à une appli passe par
@@ -1275,11 +1293,17 @@
 // « Plus tard » pour la journée), notifications appli fermée (Web Push),
 // comptages anonymes et erreurs (niveau 2, sans aucun lien avec le compte),
 // identifiant affiché « AT 2741 », « Je travaille » d'après l'appli.
+// v4 (sprint D2) : lien Coiffure ⇄ Mèches (bouton de l'en-tête, bulle du
+// guide, « Ajouter Mèches »), formule vérifiée appli par appli, compte déjà
+// présent sur le téléphone reconnu sans nouvelle inscription, sauvegarde en
+// ligne, notifications et rappel de saisie tenus appli par appli (même mémoire
+// sur Android), code PIN actuel demandé pour le changer ou le retirer ;
+// notifications : message en double et appli ouverte hors https corrigés.
 var MonDjaiCompte = (function(){
   "use strict";
 
   /* ---------- Constantes ---------- */
-  var VERSION_BLOC = 3;
+  var VERSION_BLOC = 4;
   var SUPABASE_URL = "https://ullmkguufwzfizcfmezu.supabase.co";
   // Clé PUBLIQUE seulement (jamais de clé secrète dans une appli).
   var SUPABASE_CLE_PUBLIQUE = "sb_publishable_QKLZ2YktHVPFLmoYbMC5Ig_5pEGpbw3";
@@ -1310,6 +1334,23 @@ var MonDjaiCompte = (function(){
   var NOUVELLE_ADRESSE = "";
   var HOTE_ANCIENNE_ADRESSE = "github.io";
   var CHEMINS_NOUVELLE_ADRESSE = { coiffure: "/coiffure/", revente: "/meches/", salonh: "/salonh/" };
+  // v4 : adresses des applis, par famille. La première famille dont l'hôte et
+  // le chemin de cette appli correspondent à l'adresse ouverte donne l'adresse
+  // de l'autre appli (les adresses d'essai passent avant celles des testeuses,
+  // dont le chemin est plus court). Adresse inconnue (fichier, autre site) :
+  // mondjai.ci dès que NOUVELLE_ADRESSE est remplie, sinon les testeuses.
+  var ADRESSES_APPLIS = [
+    { nom: "mondjai", hotes: ["mondjai.ci", "www.mondjai.ci"], coiffure: "/coiffure/", revente: "/meches/", salonh: "/salonh/" },
+    { nom: "essai", hotes: ["mondjai.github.io"], coiffure: "/Salon-F/coiffure-essai/", revente: "/Salon-Revente/meches-essai/" },
+    { nom: "testeuses", hotes: ["mondjai.github.io"], coiffure: "/Salon-F/", revente: "/Salon-Revente/", salonh: "/Salon-H/" }
+  ];
+  var APPLIS_LIEES = ["coiffure", "revente"];              // les deux applis du lien (formule coiffure_revente)
+  var FORMULE_DEUX = "coiffure_revente";
+  var EMOJI_APPLIS = { coiffure: "💇", revente: "🛍️", salonh: "💈" };
+  var TEXTE_BULLE_LIEN = "Passez à votre autre activité.";   // cahier §5.7
+  // Clés des chiffres de chaque appli (même adresse) : lues seulement pour
+  // savoir si une autre appli MonDjai est utilisée sur ce téléphone.
+  var CLES_DONNEES_APPLIS = { coiffure: "mondjai_coiffure_state_v1", revente: "mondjai_revente_state_v1", salonh: "salonh_state_v1" };
   var COMMUNES = ["Abobo", "Adjamé", "Anyama", "Attécoubé", "Bingerville", "Cocody", "Koumassi",
     "Marcory", "Plateau", "Port-Bouët", "Songon", "Treichville", "Yopougon", "Autre ville"];
   var LIBELLES_ACTIVITES = { coiffure: "Coiffure", revente: "Mèches", salonh: "Salon H" };
@@ -1317,6 +1358,7 @@ var MonDjaiCompte = (function(){
 
   // ----- Abonnement (le serveur fait foi ; ces valeurs servent hors ligne) -----
   var JOURS_GRACE = 3;                       // jours de grâce après la fin (réglage du serveur)
+  var HEURES_CONFIANCE = 48;                 // v4 : accès de confiance après « J'ai payé » (réglage du serveur)
   var JOURS_AVIS_ECHEANCE = 3;               // carte « finit le … » de J-3 au jour J
   var JOURS_PAR_MOIS_AFFICHAGE = 30;         // « soit … F par jour »
   var DUREES = [1, 3, 12];
@@ -1592,7 +1634,11 @@ var MonDjaiCompte = (function(){
       // Ajouts du bloc v3 (sprint C), null tant qu'aucun geste ne les concerne :
       rappels: null,             // { saisie: true | false, plusTard: { type: "AAAA-MM-JJ" } }
       guideVu: null,             // { coiffure | revente | salonh: "AAAA-MM-JJ" } guide terminé ou passé
-      notifications: null        // { autorisees, endpoint, cles { p256dh, auth }, demandeesLe, refuseeLe, saisieEnvoyee }
+      notifications: null,       // { autorisees, endpoint, cles { p256dh, auth }, demandeesLe, refuseeLe, saisieEnvoyee }
+      // Ajouts du bloc v4 (sprint D2), null tant qu'aucun geste ne les concerne :
+      lienVu: null,              // { coiffure | revente: "AAAA-MM-JJ" } bulle du bouton de l'autre appli montrée
+      parAppli: null             // { coiffure | revente | salonh: { sauvegarde: { derniereLe, derniereMs, derniereTaille, aRefaire },
+                                 //   notifications: { comme ci-dessus }, rappelSaisie: true | false } } — propre à chaque appli
     };
   }
   function normaliserCompte(o){
@@ -1617,6 +1663,8 @@ var MonDjaiCompte = (function(){
     if(base.rappels && (typeof base.rappels !== "object" || Array.isArray(base.rappels))) base.rappels = null;
     if(base.guideVu && (typeof base.guideVu !== "object" || Array.isArray(base.guideVu))) base.guideVu = null;
     if(base.notifications && (typeof base.notifications !== "object" || Array.isArray(base.notifications))) base.notifications = null;
+    if(base.lienVu && (typeof base.lienVu !== "object" || Array.isArray(base.lienVu))) base.lienVu = null;
+    if(base.parAppli && (typeof base.parAppli !== "object" || Array.isArray(base.parAppli))) base.parAppli = null;
     base.version = 1;
     return base;
   }
@@ -1654,6 +1702,70 @@ var MonDjaiCompte = (function(){
   function estConnecte(){ return !!(compte && compte.session && compte.session.refresh_token); }
   // Inscription à terminer : pas de compte serveur connu et rien en attente d'envoi.
   function inscriptionATerminer(){ return !!compte && !compte.id && !compte.enAttente; }
+
+  /* ---------- v4 : ce qui est propre à chaque appli du téléphone ---------- */
+  // Sur Android, les applis MonDjai d'une même adresse partagent
+  // mondjai_compte_v1. La sauvegarde en ligne du jour, l'adresse de
+  // notification et le rappel de saisie sont propres à chaque appli : ils
+  // vivent dans parAppli[appli]. Les champs d'avant (sauvegardeEnLigne.derniere…,
+  // notifications, rappels.saisie) n'ont été écrits que par Coiffure (9B, 9C) :
+  // ils restent sa valeur de départ, jamais effacés, et Coiffure les tient à jour.
+  function propre(c, appli){
+    var p = c && c.parAppli && typeof c.parAppli === "object" ? c.parAppli[appli] : null;
+    return p && typeof p === "object" && !Array.isArray(p) ? p : null;
+  }
+  // À appeler dans modifierCompte : fn(p) modifie la partie de cette appli.
+  function modifierPropre(c, fn){
+    var tout = c.parAppli && typeof c.parAppli === "object" && !Array.isArray(c.parAppli) ? c.parAppli : {};
+    var p = fusion(propre(c, cfg.appli), null);
+    fn(p);
+    tout[cfg.appli] = p;
+    c.parAppli = tout;
+  }
+  // Sauvegarde en ligne de cette appli : { derniereLe, derniereMs, derniereTaille, aRefaire }
+  function sauvegardeIci(c){
+    c = c || compte;
+    var p = propre(c, cfg.appli), s = p && p.sauvegarde && typeof p.sauvegarde === "object" ? p.sauvegarde : null;
+    if(!s && cfg.appli === "coiffure") s = c.sauvegardeEnLigne || null;
+    s = s || {};
+    return { derniereLe: s.derniereLe || null, derniereMs: s.derniereMs || null, derniereTaille: s.derniereTaille || null, aRefaire: s.aRefaire === true };
+  }
+  function noterSauvegardeIci(c, champs){
+    var s = fusion(sauvegardeIci(c), champs), k;
+    modifierPropre(c, function(p){ p.sauvegarde = s; });
+    if(cfg.appli === "coiffure") for(k in champs) if(Object.prototype.hasOwnProperty.call(champs, k)) c.sauvegardeEnLigne[k] = champs[k];
+  }
+  // Notifications de cette appli (chaque appli a son service worker, donc sa propre adresse).
+  function notifsIci(c){
+    c = c || compte;
+    var p = propre(c, cfg.appli);
+    if(p && p.notifications && typeof p.notifications === "object") return p.notifications;
+    if(cfg.appli === "coiffure" && c.notifications && typeof c.notifications === "object") return c.notifications;
+    return null;
+  }
+  function majNotifsIci(c, champs){
+    var n = fusion(notifsIci(c), champs);
+    modifierPropre(c, function(p){ p.notifications = n; });
+    if(cfg.appli === "coiffure") c.notifications = fusion(n, null);
+  }
+  // Rappel de saisie de cette appli (activé par défaut).
+  function rappelSaisieIci(c){
+    c = c || compte;
+    var p = propre(c, cfg.appli);
+    if(p && typeof p.rappelSaisie === "boolean") return p.rappelSaisie;
+    if(cfg.appli === "coiffure") return !(c.rappels && c.rappels.saisie === false);
+    return true;
+  }
+  // « Plus tard » : la saisie oubliée et la sauvegarde se cachent appli par appli.
+  function clePlusTard(type){ return type === "saisie" || type === "sauvegarde" ? type + "." + cfg.appli : type; }
+  // Une autre appli MonDjai a des chiffres sur ce téléphone (même adresse).
+  function autreAppliSurCeTelephone(){
+    var a;
+    for(a in CLES_DONNEES_APPLIS){
+      if(Object.prototype.hasOwnProperty.call(CLES_DONNEES_APPLIS, a) && a !== cfg.appli && lireStockage(CLES_DONNEES_APPLIS[a]) !== null) return true;
+    }
+    return false;
+  }
 
   /* ---------- Copie de secours (IndexedDB), sans jamais masquer l'écran ---------- */
   // Ouvre une base IndexedDB et crée les magasins qui manquent (jamais
@@ -1746,7 +1858,14 @@ var MonDjaiCompte = (function(){
     o.paiement = null;               // coordonnées : toujours reprises du serveur
     o.merci = null;
     o.notifications = null;          // v3 : l'adresse de notification est propre à ce téléphone
+    o.parAppli = sansNotifications(o.parAppli);   // v4 : idem, appli par appli
     return o;
+  }
+  function sansNotifications(pa){
+    if(!pa || typeof pa !== "object") return null;
+    var out = {}, k;
+    for(k in pa) if(Object.prototype.hasOwnProperty.call(pa, k) && pa[k] && typeof pa[k] === "object"){ out[k] = fusion(pa[k], null); delete out[k].notifications; }
+    return out;
   }
   // À la restauration : le compte du fichier n'est remis en place que s'il
   // manque sur ce téléphone. Renvoie true s'il a été remis.
@@ -1762,6 +1881,7 @@ var MonDjaiCompte = (function(){
     compte.paiement = null;
     compte.merci = null;
     compte.notifications = null;              // v3 : à redemander sur ce téléphone
+    compte.parAppli = sansNotifications(compte.parAppli);
     compte.installations = installations;     // l'installation est celle de CE téléphone
     compte.invitation = invitation;
     enregistrerCompte();
@@ -2117,16 +2237,21 @@ var MonDjaiCompte = (function(){
   // ce compte, l'accès local d'avant (essai ou code du mois) reste valable.
   function statutCourant(){
     chargerCompte();
-    var jour = jourUtc(), s = compte.statut, v, essaiFin, fin, accesFin, graceFin, source;
+    var jour = jourUtc(), s = compte.statut, v, essaiFin, fin, accesFin, graceFin, source, autreFormule = null, confianceIci = null;
     if(s && (s.essaiFin || s.fin)){
       source = "serveur";
       essaiFin = s.essaiFin; fin = s.fin;
+      // v4 : une formule payée qui ne comprend pas cette appli (Coiffure seule,
+      // vue depuis Mèches) n'y ouvre que l'essai, puis la grâce ; l'accès de
+      // confiance, seulement si le paiement en attente comprend cette appli.
+      if(fin && s.formule && !formuleOuvreAppli(s.formule)){ autreFormule = s.formule; fin = null; }
       accesFin = plusTardif(essaiFin, fin);
-      graceFin = s.graceFin || ajouterJours(accesFin, JOURS_GRACE);
+      graceFin = autreFormule ? ajouterJours(accesFin, JOURS_GRACE) : s.graceFin || ajouterJours(accesFin, JOURS_GRACE);
       if(fin && fin >= jour) v = "abonnee";
       else if(essaiFin && essaiFin >= jour) v = "essai";
       else if(jour <= graceFin) v = "grace";
-      else if(s.confianceJusqua && maintenant() < Date.parse(s.confianceJusqua)) v = "confiance";
+      else if(s.confianceJusqua && maintenant() < Date.parse(s.confianceJusqua) && attenteOuvreAppli(s.paiementEnAttente)) v = "confiance";
+      else if(autreFormule && confianceLocale(s)){ v = "confiance"; confianceIci = confianceLocale(s); }
       else v = "lecture_seule";
     } else {
       source = "local";
@@ -2143,14 +2268,29 @@ var MonDjaiCompte = (function(){
     return {
       valeur: v, source: source, saisieOuverte: v !== "lecture_seule",
       essaiFin: essaiFin || null, fin: fin || null, accesFin: accesFin || null, graceFin: graceFin || null,
-      confianceJusqua: s && v === "confiance" ? s.confianceJusqua : null,
+      confianceJusqua: s && v === "confiance" ? confianceIci || s.confianceJusqua : null,
       joursRestants: accesFin && accesFin >= jour ? ecartJours(jour, accesFin) : null,
       joursGrace: v === "grace" ? ecartJours(jour, graceFin) + 1 : null,
       paiementEnAttente: attente,
       dejaAbonnee: !!fin,
-      formule: s ? s.formule || null : null
+      formule: s ? s.formule || null : null,
+      autreFormule: autreFormule           // v4 : formule payée, sans cette appli
     };
   }
+  // v4 : le serveur voit le compte « abonnée » (formule payée sans cette appli)
+  // et ne donne donc pas d'accès de confiance : il est tiré ici de la date du
+  // « J'ai payé » en attente, si sa formule comprend cette appli (comme le
+  // serveur : 48 h, jamais après un refus connu). Renvoie la fin (ISO) ou null.
+  function confianceLocale(s){
+    var p = s && s.paiementEnAttente;
+    if(!p || !p.declare_le || !p.formule || !formuleOuvreAppli(p.formule)) return null;
+    if(compte.declaration && compte.declaration.refusee) return null;
+    var fin = Date.parse(p.declare_le) + HEURES_CONFIANCE * 3600000;
+    return isFinite(fin) && maintenant() < fin ? new Date(fin).toISOString() : null;
+  }
+  // v4 : un paiement en attente (ou déclaré hors ligne) compte pour cette appli
+  // si sa formule la comprend (formule inconnue : oui, comme avant).
+  function attenteOuvreAppli(p){ return !p || !p.formule || formuleOuvreAppli(p.formule); }
 
   /* ---------- Formules et prix ---------- */
   function libelleFormule(code){
@@ -2183,6 +2323,11 @@ var MonDjaiCompte = (function(){
   function formulesProposees(){
     chargerCompte();
     var acts = compte.activites || [], seule = cfg.appli, out = [];
+    // v4 : formule payée et en cours qui ne comprend pas cette appli (Coiffure
+    // seule, vue depuis Mèches) : seule la formule à deux est proposée — payer
+    // l'appli seule remplacerait la formule en cours sur le serveur.
+    var stv = compte.statut;
+    if(APPLIS_LIEES.indexOf(seule) !== -1 && stv && stv.formule && stv.fin && stv.fin >= jourUtc() && !formuleOuvreAppli(stv.formule)) return [FORMULE_DEUX];
     var deux = cfg.appli !== "salonh" && acts.indexOf("coiffure") !== -1 && acts.indexOf("revente") !== -1;
     var enCours = compte.statut && compte.statut.formule && formuleOuvreAppli(compte.statut.formule) ? compte.statut.formule : null;
     if(enCours === "coiffure_revente" || (!enCours && deux)) out.push("coiffure_revente", seule);
@@ -2310,6 +2455,11 @@ var MonDjaiCompte = (function(){
       }
       suite(err, false);
     });
+  }
+  // v4 : le paiement en cours, s'il concerne cette appli.
+  function paiementEnCoursIci(){
+    var p = paiementEnCours();
+    return p && attenteOuvreAppli(p) ? p : null;
   }
   // Ce qui est montré comme « paiement en cours de vérification ».
   function paiementEnCours(){
@@ -2449,7 +2599,7 @@ var MonDjaiCompte = (function(){
   }
   function sauvegardeDue(){
     chargerCompte();
-    var s = compte.sauvegardeEnLigne;
+    var s = sauvegardeIci();
     return !empechementSauvegarde() && (s.aRefaire || s.derniereLe !== jourLocal());
   }
   function planifierSauvegardeAuto(){
@@ -2492,10 +2642,8 @@ var MonDjaiCompte = (function(){
         appelerFonction("deposer_sauvegarde", parametres, null, function(err, data){
           if(err){ finir(err); return; }
           modifierCompte(function(c){
-            c.sauvegardeEnLigne.derniereLe = jourLocal();
-            c.sauvegardeEnLigne.derniereMs = data && data.maj_le ? Date.parse(data.maj_le) || maintenant() : maintenant();
-            c.sauvegardeEnLigne.derniereTaille = data && data.taille ? data.taille : ch.donnees.length;
-            c.sauvegardeEnLigne.aRefaire = false;
+            noterSauvegardeIci(c, { derniereLe: jourLocal(), derniereMs: data && data.maj_le ? Date.parse(data.maj_le) || maintenant() : maintenant(),
+              derniereTaille: data && data.taille ? data.taille : ch.donnees.length, aRefaire: false });
           });
           compter("sauvegarde.en_ligne");
           finir(null);
@@ -2635,8 +2783,10 @@ var MonDjaiCompte = (function(){
     var sel = hasard(16, ALPHABET_ID);
     modifierCompte(function(c){
       c.pin = { empreinte: hacherPin(String(pin), sel), sel: sel };
-      // La prochaine sauvegarde en ligne part avec la clé de ce PIN.
+      // La prochaine sauvegarde en ligne part avec la clé de ce PIN (v4 : dans chaque appli du téléphone).
       c.sauvegardeEnLigne.aRefaire = true;
+      var i;
+      for(i = 0; i < APPLIS.length; i++){ var pa = propre(c, APPLIS[i]); if(pa && pa.sauvegarde && typeof pa.sauvegarde === "object") pa.sauvegarde.aRefaire = true; }
     });
     appel("surPinDefini");
     if(cleTiree) rangerCle(cleTiree, function(){ planifierSauvegardeAuto(); });
@@ -2761,7 +2911,7 @@ var MonDjaiCompte = (function(){
     ".mdc-traits{flex:1;display:flex;margin:0 -3px;}",
     ".mdc-traits i{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 3px;transition:background .25s;}",
     ".mdc-traits i.on{background:#f5a623;}",
-    ".mdc-plus-tard{flex:none;border:0;background:none;color:#f8c877;font-weight:700;font-size:15px;padding:12px 0 12px 16px;}",
+    ".mdc-plus-tard{flex:none;min-height:44px;border:0;background:none;color:#f8c877;font-weight:700;font-size:15px;padding:12px 0 12px 16px;}",
     ".mdc-titre-barre{flex:1;font-size:18px;font-weight:800;}",
     ".mdc-carte{position:relative;display:flex;align-items:center;max-width:340px;min-height:92px;margin:8px auto -42px;padding:14px 16px;border-radius:18px;box-shadow:0 16px 26px -16px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.4);}",
     ".mdc-carte-icone{flex:none;width:48px;height:48px;border-radius:13px;margin-right:13px;box-shadow:0 0 0 1px rgba(0,0,0,.08);background:rgba(255,255,255,.35);}",
@@ -3091,14 +3241,25 @@ var MonDjaiCompte = (function(){
     var b = ecran.b, e = ecran.etape, reconnexion = ecran.mode === "reconnexion";
     var retourVisible = (e > 1 && e < 5) || (reconnexion && e === 1);
     var plusTard = ecran.mode === "invitation" && e <= 2;
+    var reconnue = ecran.mode === "reconnue";
     var barre = '<div class="mdc-barre">' +
       (retourVisible ? '<button type="button" class="mdc-retour" data-mdc="retour" aria-label="Retour">←</button>' : '') +
-      (reconnexion ? '<div class="mdc-titre-barre">Reconnexion</div>' : htmlTraits(e)) +
+      (reconnexion ? '<div class="mdc-titre-barre">Reconnexion</div>' : reconnue ? '<div class="mdc-titre-barre">Mon compte</div>' : htmlTraits(e)) +
       (plusTard ? '<button type="button" class="mdc-plus-tard" data-mdc="plus-tard">Plus tard</button>' : '') +
     '</div>';
     var nomCarte = (b.prenom || compte.prenom || "");
     var carte = htmlCarte(nomCarte, e === 1 ? numeroPourCarte(b.tel) : numeroLisible(compte.telephone || (INDICATIF + b.tel)), e === 5 ? compte.id : null);
     var corps = "", pied = "";
+    if(reconnue && ecran.verrou){
+      // v4 : « Bon retour » fermé par le code PIN du compte (rien de personnel avant).
+      carte = htmlCarte("MonDjai", INDICATIF + " ·· ·· ·· ·· ··", null);
+      corps = '<div class="mdc-centre"><h1 class="mdc-titre" data-test="reconnue-pin">Votre code PIN</h1>' +
+        '<p class="mdc-sous">Le code de votre compte MonDjai.</p>' + htmlPoints(ecran.pin.saisie.length) + '</div>' + htmlPave() +
+        '<div class="mdc-centre">' + htmlMessage() + '</div>';
+      pied = (empreinteActive() ? '<button type="button" class="mdc-btn-2" data-mdc="reconnue-empreinte" data-test="reconnue-empreinte">Utiliser mon empreinte</button>' : '') +
+        '<div class="mdc-centre"><button type="button" class="mdc-lien" data-mdc="terminer" data-test="reconnue-oublie">Code oublié ?</button></div>';
+      return '<div class="mdc-bandeau">' + barre + carte + '</div><div class="mdc-corps">' + corps + '</div><div class="mdc-pied">' + pied + '</div>';
+    }
     if(e === 1){
       corps = '<h1 class="mdc-titre">' + (reconnexion ? 'Votre numéro' : 'Bienvenue 👋') + '</h1>' +
         '<p class="mdc-sous">' + (reconnexion ? 'Vous recevrez un code par SMS.' : 'Votre numéro, puis un code par SMS.') + '</p>' +
@@ -3144,19 +3305,24 @@ var MonDjaiCompte = (function(){
         pied = '<button type="button" class="mdc-btn" data-mdc="empreinte-activer">Activer l’empreinte</button>' +
           '<div class="mdc-centre"><button type="button" class="mdc-lien" data-mdc="empreinte-non">Non merci</button></div>';
       } else {
-        corps = htmlCorpsPin("Protégez vos chiffres");
+        corps = htmlCorpsPin("Protégez vos chiffres") +
+          (ecran.retrouve && autreActiviteDuCompte() ? '<p class="mdc-note" data-test="pin-meme-code">Le même code que dans ' + esc(LIBELLES_ACTIVITES[autreActiviteDuCompte()]) + '.</p>' : '');
         pied = '<div class="mdc-ligne-liens"><button type="button" class="mdc-lien" data-mdc="pin-plus-tard">Plus tard</button>' +
           (memoire.empreintePossible === true ? '<button type="button" class="mdc-lien" data-mdc="pin-vouloir-empreinte">Utiliser mon empreinte</button>' : '') + '</div>' +
           htmlNotesPin();
       }
     } else {
-      var st = compte.statut, petit = "Essai gratuit jusqu’au", date = "";
-      if(st && st.valeur === "abonnee" && st.fin){ petit = "Abonnée jusqu’au"; date = dateFr(st.fin); }
-      else if(st && st.valeur === "essai" && st.essaiFin) date = dateFr(st.essaiFin);
+      // v4 : le statut de CETTE appli (une formule sans elle n'y ouvre que l'essai).
+      var st = compte.statut, sc = statutCourant(), petit = "Essai gratuit jusqu’au", date = "";
+      if(st && sc.valeur === "abonnee" && sc.fin){ petit = "Abonnée jusqu’au"; date = dateFr(sc.fin); }
+      else if(st && sc.valeur === "essai" && sc.essaiFin) date = dateFr(sc.essaiFin);
       else if(!st) date = dateFr(finEssaiLocale());
-      corps = '<h1 class="mdc-titre" data-test="pret">C’est prêt' + (compte.prenom ? ', ' + esc(compte.prenom) : '') + ' 👋</h1>' +
+      corps = '<h1 class="mdc-titre" data-test="pret">' + (reconnue ? 'Bon retour' : 'C’est prêt') + (compte.prenom ? ', ' + esc(compte.prenom) : '') + ' 👋</h1>' +
+        (reconnue ? '<p class="mdc-sous" data-test="reconnue">Votre compte MonDjai est déjà sur ce téléphone.</p>' : '') +
         (date ? '<div class="mdc-pret-date"><small>' + petit + '</small><b data-test="fin-essai">' + esc(date) + '</b></div>'
+              : reconnue ? '<div class="mdc-pret-date"><small>Mon abonnement</small><b data-test="fin-essai">' + esc(resumeStatut()) + '</b></div>'
               : '<p class="mdc-sous">Votre compte est retrouvé.</p>') +
+        (reconnue && ecran.ajoutee ? '<p class="mdc-note" data-test="activite-ajoutee">' + esc(LIBELLES_ACTIVITES[cfg.appli] || "") + ' est ajoutée à votre compte.</p>' : '') +
         (compte.enAttente ? '<p class="mdc-message" data-test="en-attente">Votre compte s’enregistrera au retour du réseau.</p>' : '');
       pied = typeof cfg.guide === "function"
         ? '<button type="button" class="mdc-btn" data-mdc="terminer-guide" data-test="voir-guide">Voir comment ça marche</button>' +
@@ -3171,9 +3337,12 @@ var MonDjaiCompte = (function(){
       '<p class="mdc-note" data-test="note-pin-oublie">Si vous oubliez ce code, la sauvegarde en ligne est perdue.</p>';
   }
   function htmlCorpsPin(titre){
-    var p = ecran.pin;
+    var p = ecran.pin, actuel = p.phase === "ancien" || p.phase === "retirer";
+    // v4 : changer ou retirer le code PIN demande d'abord le code actuel (il
+    // ferme aussi les autres applis MonDjai du téléphone).
+    if(actuel) titre = "Votre code actuel";
     return '<div class="mdc-centre"><h1 class="mdc-titre">' + titre + '</h1>' +
-      '<p class="mdc-sous" data-test="pin-consigne">' + (p.phase === "confirmer" ? 'Retapez votre code.' : 'Choisissez un code à ' + LONGUEUR_PIN + ' chiffres.') + '</p>' +
+      '<p class="mdc-sous" data-test="pin-consigne">' + (actuel ? (p.phase === "retirer" ? 'Pour retirer le code PIN.' : 'Puis le nouveau code.') : p.phase === "confirmer" ? 'Retapez votre code.' : 'Choisissez un code à ' + LONGUEUR_PIN + ' chiffres.') + '</p>' +
       htmlPoints(p.saisie.length) + '</div>' + htmlPave() + '<div class="mdc-centre">' + htmlMessage() + '</div>';
   }
 
@@ -3235,7 +3404,7 @@ var MonDjaiCompte = (function(){
   // Une ligne courte (Mon compte, Réglages).
   function resumeStatut(){
     var st = statutCourant();
-    if(paiementEnCours() || st.valeur === "confiance") return "Paiement en vérification";
+    if(paiementEnCoursIci() || st.valeur === "confiance") return "Paiement en vérification";
     if(st.valeur === "abonnee") return "Jusqu’au " + dateFr(st.fin);
     if(st.valeur === "essai") return st.accesFin ? (st.source === "local" ? "Accès" : "Essai") + " jusqu’au " + dateFr(st.accesFin) : "Essai gratuit";
     if(st.valeur === "grace") return "Terminé · encore " + joursLisibles(st.joursGrace);
@@ -3297,6 +3466,7 @@ var MonDjaiCompte = (function(){
       }
       corps = (ecran.message ? htmlMessage().replace('class="mdc-message', 'style="margin:0 0 10px;" class="mdc-message') : '') +
         htmlStatutAbonnement(st) + htmlPaiementEnCours() +
+        (st.autreFormule ? '<p class="mdc-note" style="text-align:left;margin:-6px 0 12px" data-test="autre-formule">Votre formule ' + esc(libelleFormule(st.autreFormule)) + ' ne comprend pas ' + esc(LIBELLES_ACTIVITES[cfg.appli] || cfg.nomAppli || "") + '.</p>' : '') +
         '<div class="mdc-formule"><b data-test="formule">' + esc(libelleFormule(code)) + '</b>' + autre + '</div>' +
         htmlChoixDuree(code, 1, duree) + htmlChoixDuree(code, 3, duree) + htmlChoixDuree(code, 12, duree) +
         '<p class="mdc-parjour" data-test="par-jour">soit ' + esc(montantLisible(parJour(code))) + ' par jour</p>' +
@@ -3459,6 +3629,8 @@ var MonDjaiCompte = (function(){
         '<p>Même appli fermée : fin d’abonnement, saisie oubliée. Une par jour au plus.</p>' +
         '<button type="button" class="mdc-btn" data-mdc="notif-oui" data-test="notif-oui">Oui</button>' +
         '<div class="mdc-centre"><button type="button" class="mdc-lien" data-mdc="notif-plus-tard" data-test="notif-plus-tard">Plus tard</button></div>';
+    } else if(f === "ajouter-activite"){
+      out = htmlAjouterActivite();
     } else if(f === "demenagement"){
       var lisible = NOUVELLE_ADRESSE.replace(/^https?:\/\//, "");
       out = '<h2>MonDjai déménage</h2>' +
@@ -3468,6 +3640,73 @@ var MonDjaiCompte = (function(){
         '<div class="mdc-centre"><button type="button" class="mdc-lien" data-mdc="fermer-feuille">Plus tard</button></div>';
     }
     return out;
+  }
+  /* ---------- v4 : lien Coiffure ⇄ Mèches ---------- */
+  function autreAppli(){ return cfg.appli === "coiffure" ? "revente" : cfg.appli === "revente" ? "coiffure" : null; }
+  function familleNommee(nom){
+    var i;
+    for(i = 0; i < ADRESSES_APPLIS.length; i++) if(ADRESSES_APPLIS[i].nom === nom) return ADRESSES_APPLIS[i];
+    return ADRESSES_APPLIS[0];
+  }
+  function familleIci(){
+    var hote = "", chemin = "", i, f;
+    try{ hote = String(location.hostname || "").toLowerCase(); chemin = String(location.pathname || ""); }catch(e){}
+    for(i = 0; i < ADRESSES_APPLIS.length; i++){
+      f = ADRESSES_APPLIS[i];
+      if(f.hotes.indexOf(hote) !== -1 && f[cfg.appli] && chemin.indexOf(f[cfg.appli]) === 0) return f;
+    }
+    return null;
+  }
+  // Adresse d'une appli de la famille d'adresses ouverte ici.
+  function adresseAppli(appli){
+    var f = familleIci();
+    if(!f || !f[appli]) f = familleNommee(NOUVELLE_ADRESSE ? "mondjai" : "testeuses");
+    return f[appli] ? "https://" + f.hotes[0] + f[appli] : "";
+  }
+  function adresseAutreAppli(){ var a = autreAppli(); return a ? adresseAppli(a) : ""; }
+  // Le compte a les deux activités du lien (inscrite, ou inscription en attente d'envoi).
+  function lienVisible(){
+    if(!cfg) return false;
+    chargerCompte();
+    var a = compte.activites || [];
+    return !!(autreAppli() && (compte.id || compte.enAttente) && a.indexOf("coiffure") !== -1 && a.indexOf("revente") !== -1);
+  }
+  function autreActiviteDuCompte(){
+    var a = autreAppli();
+    return a && (compte.activites || []).indexOf(a) !== -1 ? a : null;
+  }
+  // Bouton de l'en-tête (💇 dans Mèches, 🛍️ dans Coiffure) : il ouvre l'autre
+  // appli (même adresse, autre chemin) ; installée, le téléphone l'ouvre, sinon
+  // le navigateur, qui propose de l'installer.
+  function boutonAutreAppli(classe){
+    if(!lienVisible()) return "";
+    var a = autreAppli();
+    return '<a class="' + esc(classe || "") + '" href="' + esc(adresseAutreAppli()) + '" target="_blank" rel="noopener" data-mdc="autre-appli" data-test="bouton-autre-appli" aria-label="Ouvrir ' + esc(LIBELLES_ACTIVITES[a]) + '">' + EMOJI_APPLIS[a] + '</a>';
+  }
+  function aActivite(appli){ chargerCompte(); return (compte.activites || []).indexOf(appli) !== -1; }
+  // « Ajouter Mèches » (Coiffure › Réglages › Bientôt) et « Ajouter Coiffure » (Mèches).
+  function ajouterActivite(appli){
+    if(!cfg || APPLIS_LIEES.indexOf(appli) === -1) return;
+    chargerCompte();
+    if(!compte.id && !compte.enAttente){ ouvrirInscription(appel("nouvelleInstallation", false) === true ? "nouvelle" : "invitation"); return; }
+    if(ecran && ecran.type !== "feuille") return;
+    ecran = { type: "feuille", feuille: "ajouter-activite", activite: appli, fait: aActivite(appli), occupe: false, message: null };
+    dessinerFeuille();
+    prevenirAppli();
+  }
+  function htmlAjouterActivite(){
+    var a = ecran.activite, nom = LIBELLES_ACTIVITES[a] || a;
+    if(ecran.fait){
+      return '<h2 data-test="activite-ajoutee">' + esc(nom) + ' est ajoutée ✓</h2><p>Un seul compte, un seul abonnement pour les deux.</p>' +
+        '<a class="mdc-btn" href="' + esc(adresseAppli(a)) + '" target="_blank" rel="noopener" data-mdc="autre-appli" data-test="ouvrir-activite">Ouvrir ' + esc(nom) + '</a>' +
+        '<div class="mdc-centre"><button type="button" class="mdc-lien" data-mdc="fermer-feuille">Plus tard</button></div>';
+    }
+    return '<h2>Ajouter ' + esc(nom) + ' ?</h2>' +
+      '<p>' + (a === "revente" ? 'Vos achats et ventes de mèches, dans une appli à part.' : 'Vos clientes et vos recettes, dans une appli à part.') + '</p>' +
+      '<div class="mdc-statut"><small>' + esc(libelleFormule(FORMULE_DEUX)) + '</small><b data-test="ajout-prix">' + esc(montantLisible(montantPour(FORMULE_DEUX, 1))) + ' par mois</b></div>' +
+      htmlMessage() +
+      '<button type="button" class="mdc-btn" data-mdc="ajouter-activite-oui" data-test="ajouter-activite-oui">Ajouter</button>' +
+      '<div class="mdc-centre"><button type="button" class="mdc-lien" data-mdc="fermer-feuille">Plus tard</button></div>';
   }
   function surAncienneAdresse(){
     var hote = "";
@@ -3586,6 +3825,10 @@ var MonDjaiCompte = (function(){
     if(ecran && ecran.type === "inscription") return;
     chargerCompte();
     mode = mode === "invitation" || mode === "reconnexion" ? mode : "nouvelle";
+    // v4 : un compte MonDjai est déjà sur ce téléphone, connecté (inscrite
+    // dans l'autre appli : même mémoire sur Android) : pas de nouvelle
+    // inscription, ni de nouveau SMS.
+    if(mode !== "reconnexion" && compte.id && estConnecte()){ ouvrirReconnue(); return; }
     ecran = { type: "inscription", mode: mode, etape: 1, b: brouillonDepuisCompte(), pin: { phase: "premier", saisie: "", premier: "" },
       occupe: false, feuille: null, message: null, sansReseau: false, retrouve: false };
     // Reprise : code déjà vérifié, mais fiche pas encore envoyée.
@@ -3596,6 +3839,37 @@ var MonDjaiCompte = (function(){
       ecran.message = { texte: "Pas de réseau ? Commencez, vous vous inscrirez après.", ton: "" };
     }
     montrer();
+  }
+  // v4 : « Bon retour » — le compte de l'autre appli ouvre celle-ci. Son
+  // activité rejoint le compte si elle n'y est pas (Mèches ouverte par une
+  // coiffeuse inscrite « Coiffure » seule). Le code PIN du compte ferme aussi
+  // cette appli (l'appli le lit dans le compte : rien n'est écrit dans ses
+  // chiffres avant la lecture de leur copie de secours).
+  function ouvrirReconnue(){
+    // Un code PIN ferme le compte : il est demandé d'abord (le prénom et le
+    // numéro ne s'affichent qu'ensuite), comme à l'ouverture de l'autre appli.
+    var verrou = !!compte.pin;
+    ecran = { type: "inscription", mode: "reconnue", etape: 5, b: brouillonDepuisCompte(), pin: { phase: "reconnue", saisie: "", premier: "" },
+      occupe: false, feuille: null, message: null, sansReseau: false, retrouve: true, ajoutee: false, verrou: verrou };
+    memoire.premiereSeance = true;
+    compter("inscription.reconnue");
+    if(ajouterActiviteDuCompte(cfg.appli, null)) ecran.ajoutee = true;
+    montrer();
+    rafraichirStatut(function(){ if(ecran && ecran.type === "inscription" && ecran.mode === "reconnue") dessiner(); });
+  }
+  // La fiche du compte, avec l'activité « appli » en plus. Renvoie false si
+  // rien n'est à ajouter (déjà là, Salon homme, appli hors du lien).
+  function ajouterActiviteDuCompte(appli, suite){
+    chargerCompte();
+    var acts = (compte.activites || []).slice(0);
+    if(APPLIS_LIEES.indexOf(appli) === -1 || acts.indexOf(appli) !== -1 || compte.salon === "homme") return false;
+    acts.push(appli);
+    acts.sort(function(a, b){ return APPLIS_LIEES.indexOf(a) - APPLIS_LIEES.indexOf(b); });
+    var mode = cfg.appli === "coiffure" ? appel("modeCoiffure", compte.modeCoiffure) : compte.modeCoiffure;
+    var fiche = { prenom: compte.prenom || "", nom: compte.nom || "", commune: compte.commune || "", salon: compte.salon || "femme",
+      activites: acts, modeCoiffure: acts.indexOf("coiffure") !== -1 ? (mode === "salon" ? "salon" : "domicile") : null };
+    envoyerFiche(fiche, function(err, enAttente){ if(suite) suite(err, enAttente); });
+    return true;
   }
   function allerEtape(n){
     arreterRenvoi();
@@ -3732,7 +4006,7 @@ var MonDjaiCompte = (function(){
       if(!ok){ dire("Cette sauvegarde ne s’ouvre pas.", "alerte"); r.echecs++; dessiner(); return; }
       // Le code tapé devient celui de ce téléphone (avec sa clé, déjà tirée).
       definirPin(pin, res.cle);
-      modifierCompte(function(c){ c.sauvegardeEnLigne.derniereLe = jourLocal(); c.sauvegardeEnLigne.aRefaire = false; });
+      modifierCompte(function(c){ noterSauvegardeIci(c, { derniereLe: jourLocal(), aRefaire: false }); });
       memoire.selMessage = { texte: "Vos chiffres sont revenus.", ton: "ok" };
       dire("Vos chiffres sont revenus.", "ok");
       setTimeout(apresRestauration, 700);
@@ -3827,6 +4101,8 @@ var MonDjaiCompte = (function(){
     if(ecran.type === "inscription" && ecran.restauration){ toucherRestauration(val); return; }
     var p = ecran.pin;
     if(p && p.phase === "verifier"){ toucherPinSauvegarde(val); return; }
+    if(p && (p.phase === "ancien" || p.phase === "retirer")){ toucherPinActuel(val); return; }
+    if(p && p.phase === "reconnue"){ toucherPinReconnue(val); return; }
     if(!p || p.phase === "empreinte") return;
     if(val === "x"){ p.saisie = p.saisie.slice(0, -1); majPoints(false); return; }
     if(p.saisie.length >= LONGUEUR_PIN) return;
@@ -3851,6 +4127,95 @@ var MonDjaiCompte = (function(){
     }
     definirPin(p.saisie);
     apresPin();
+  }
+  // v4 : le code actuel, avant de changer ou de retirer le code PIN.
+  function toucherPinActuel(val){
+    var p = ecran.pin;
+    if(val === "x"){ p.saisie = p.saisie.slice(0, -1); majPoints(false); return; }
+    if(p.saisie.length >= LONGUEUR_PIN) return;
+    p.saisie += val;
+    majPoints(false);
+    if(p.saisie.length < LONGUEUR_PIN) return;
+    var bon = verifierPin(p.saisie) || appel("verifierPinExistant", false, p.saisie) === true;
+    if(!bon){
+      p.saisie = "";
+      majPoints(true); secouer(q(".mdc-points"));
+      dire("Code incorrect, réessayez.", "alerte");
+      return;
+    }
+    if(p.phase === "retirer"){
+      var suite = p.suite || null;
+      retirerPin();
+      if(ecran.direct){ fermerEcran(); prevenirAppli(); }
+      else { ecran.vue = "fiche"; ecran.pin = null; ecran.message = { texte: "Code PIN retiré.", ton: "" }; montrer(); }
+      if(suite) suite(true);
+      return;
+    }
+    ecran.pin = { phase: "premier", saisie: "", premier: "", changement: true };
+    ecran.message = null;
+    dessiner();
+    prevenirAppli();
+  }
+  // v4 : le code PIN du compte avant « Bon retour » ; l'appli est alors ouverte.
+  function toucherPinReconnue(val){
+    var p = ecran.pin;
+    if(!ecran.verrou) return;
+    if(val === "x"){ p.saisie = p.saisie.slice(0, -1); majPoints(false); return; }
+    if(p.saisie.length >= LONGUEUR_PIN) return;
+    p.saisie += val;
+    majPoints(false);
+    if(p.saisie.length < LONGUEUR_PIN) return;
+    if(!verifierPin(p.saisie)){
+      p.saisie = "";
+      majPoints(true); secouer(q(".mdc-points"));
+      dire("Code incorrect, réessayez.", "alerte");
+      return;
+    }
+    var pin = p.saisie;
+    deverrouillerReconnue();
+    pinTape(pin);
+  }
+  function deverrouillerReconnue(){
+    if(!ecran || ecran.mode !== "reconnue") return;
+    ecran.verrou = false;
+    ecran.pin = { phase: "premier", saisie: "", premier: "" };
+    ecran.message = null;
+    appel("deverrouiller");
+    dessiner();
+  }
+  function pinActuelOuNouveau(){
+    var existe = !!compte.pin || appel("pinExistant", false) === true;
+    return { phase: existe ? "ancien" : "premier", saisie: "", premier: "", changement: existe };
+  }
+  // Retirer le code PIN (Réglages de l'appli) : le code actuel d'abord.
+  function demanderRetraitPin(suite){
+    if(!cfg) return;
+    chargerCompte();
+    if(!compte.pin && appel("pinExistant", false) !== true){ retirerPin(); if(suite) suite(true); return; }
+    ecran = { type: "compte", vue: "pin", b: null, occupe: false, feuille: null, message: null, direct: true,
+      pin: { phase: "retirer", saisie: "", premier: "", suite: suite || null } };
+    montrer();
+  }
+  // « Code oublié » puis « Effacer » : le code PIN est retiré, sauf s'il ferme
+  // encore une autre appli MonDjai qui a des chiffres sur ce téléphone.
+  // Renvoie true s'il a été retiré.
+  function pinOublie(){
+    if(!cfg) return false;
+    chargerCompte();
+    if(compte.pin && autreAppliSurCeTelephone()) return false;
+    retirerPin();
+    return true;
+  }
+  // Nom de l'autre appli que le code PIN du compte ferme aussi (ou null).
+  function pinPartage(){
+    if(!cfg) return null;
+    chargerCompte();
+    if(!compte.pin) return null;
+    var a;
+    for(a in CLES_DONNEES_APPLIS){
+      if(Object.prototype.hasOwnProperty.call(CLES_DONNEES_APPLIS, a) && a !== cfg.appli && lireStockage(CLES_DONNEES_APPLIS[a]) !== null) return LIBELLES_ACTIVITES[a] || a;
+    }
+    return null;
   }
   // Feuille « Votre code PIN » (Réglages › Sauvegarde en ligne, sans clé) :
   // vérifie le PIN, tire la clé, puis sauvegarde tout de suite.
@@ -4023,7 +4388,7 @@ var MonDjaiCompte = (function(){
         modifierCompte(function(c){
           var r = fusion(c.rappels, null);
           r.plusTard = fusion(r.plusTard, null);
-          r.plusTard[typeRappel] = jourLocal();
+          r.plusTard[clePlusTard(typeRappel)] = jourLocal();
           c.rappels = r;
         });
         compter("rappel.plus_tard." + typeRappel);
@@ -4033,8 +4398,12 @@ var MonDjaiCompte = (function(){
       case "rappel-noter": compter("rappel.ouvert.saisie"); appel("ouvrirSaisie"); return;
       case "rappel-sauvegarde": compter("rappel.ouvert.sauvegarde"); appel("ouvrirSauvegarde"); return;
       case "rappel-saisie-bascule": {
-        modifierCompte(function(c){ var r = fusion(c.rappels, null); r.saisie = r.saisie === false; c.rappels = r; });
-        compter(compte.rappels.saisie ? "fonction.rappel_saisie.active" : "fonction.rappel_saisie.coupe");
+        var saisieVoulue = !rappelSaisieIci();
+        modifierCompte(function(c){
+          modifierPropre(c, function(p){ p.rappelSaisie = saisieVoulue; });
+          if(cfg.appli === "coiffure"){ var r = fusion(c.rappels, null); r.saisie = saisieVoulue; c.rappels = r; }
+        });
+        compter(saisieVoulue ? "fonction.rappel_saisie.active" : "fonction.rappel_saisie.coupe");
         memoire.rappelsMessage = null;
         if(etatNotifications().actives) envoyerAppareil(true);
         prevenirReglages();
@@ -4065,9 +4434,32 @@ var MonDjaiCompte = (function(){
         return;
       }
       case "notif-plus-tard": {
-        modifierCompte(function(c){ c.notifications = fusion(c.notifications, { refuseeLe: jourLocal() }); });
+        modifierCompte(function(c){ majNotifsIci(c, { refuseeLe: jourLocal() }); });
         compter("notification.plus_tard");
         fermerFeuille();
+        return;
+      }
+      // ----- v4 : lien Coiffure ⇄ Mèches -----
+      case "autre-appli": {
+        compter("lien.autre_appli");
+        // La feuille « … est ajoutée » se ferme après l'ouverture de l'autre appli.
+        if(ecran && ecran.feuille === "ajouter-activite") setTimeout(fermerFeuille, 0);
+        return;   // le lien s'ouvre (jamais empêché)
+      }
+      case "ajouter-activite-oui": {
+        if(!ecran || ecran.feuille !== "ajouter-activite" || ecran.occupe) return;
+        var aj = ecran;
+        aj.occupe = true; aj.message = null;
+        var lance = ajouterActiviteDuCompte(aj.activite, function(err){
+          aj.occupe = false;
+          if(ecran !== aj) return;
+          if(err){ aj.message = { texte: err.code === "sans_session" ? "Reconnectez-vous d’abord (code par SMS)." : "Cela n’a pas marché. Réessayez.", ton: "alerte" }; dessinerFeuille(); return; }
+          aj.fait = true;
+          compter("fonction.activite_ajoutee." + aj.activite);
+          dessinerFeuille();
+          prevenirAppli();
+        });
+        if(!lance){ aj.occupe = false; aj.fait = aActivite(aj.activite); dessinerFeuille(); }
         return;
       }
       case "mesures-bascule": {
@@ -4189,8 +4581,8 @@ var MonDjaiCompte = (function(){
         ecran.message = enAttente ? { texte: "Noté. Envoi au retour du réseau.", ton: "" } : { texte: "Enregistré.", ton: "ok" };
         montrer();
       }); return;
-      case "pin-changer": ecran.vue = "pin"; ecran.pin = { phase: "premier", saisie: "", premier: "", changement: !!compte.pin || appel("pinExistant", false) === true }; ecran.message = null; montrer(); return;
-      case "pin-retirer": retirerPin(); ecran.message = { texte: "Code PIN retiré.", ton: "" }; montrer(); return;
+      case "pin-changer": ecran.vue = "pin"; ecran.pin = pinActuelOuNouveau(); ecran.message = null; montrer(); return;
+      case "pin-retirer": ecran.vue = "pin"; ecran.pin = { phase: "retirer", saisie: "", premier: "" }; ecran.message = null; montrer(); return;
       case "empreinte-bascule": {
         if(compte.empreinte){ modifierCompte(function(c){ c.empreinte = null; }); dessiner(); return; }
         activerEmpreinte(function(ok){
@@ -4229,7 +4621,7 @@ var MonDjaiCompte = (function(){
   function ouvrirPin(){
     chargerCompte();
     ecran = { type: "compte", vue: "pin", b: null, occupe: false, feuille: null, message: null, direct: true,
-      pin: { phase: "premier", saisie: "", premier: "", changement: !!compte.pin || appel("pinExistant", false) === true } };
+      pin: pinActuelOuNouveau() };
     montrer();
   }
   function ouvrirDemenagement(){
@@ -4248,7 +4640,7 @@ var MonDjaiCompte = (function(){
     if(!ecran) return 0;
     var p = ecran.feuille ? 1 + (ecran.feuille === "conditions" && ecran.conditionsVue ? 1 : 0) : 0;
     if(ecran.type === "feuille") return p;
-    if(ecran.type === "inscription") return p + (ecran.mode === "nouvelle" ? 0 : 1) + (ecran.etape - 1);
+    if(ecran.type === "inscription") return ecran.mode === "reconnue" ? p + 1 : p + (ecran.mode === "nouvelle" ? 0 : 1) + (ecran.etape - 1);
     if(ecran.type === "abonnement") return p + (ecran.vue === "declarer" ? 3 : ecran.vue === "payer" ? 2 : 1);
     return p + 1 + (ecran.vue === "fiche" || ecran.direct ? 0 : 1);
   }
@@ -4320,12 +4712,12 @@ var MonDjaiCompte = (function(){
   function reglageSauvegardeEnLigne(){
     if(!cfg) return "";
     chargerCompte();
-    var emp = empechementSauvegarde(), s = compte.sauvegardeEnLigne;
+    var emp = empechementSauvegarde(), s = compte.sauvegardeEnLigne, ici = sauvegardeIci();
     var possible = emp === "" || emp === "desactivee" || emp === "connexion";
     var active = s.active && emp !== "crypto" && emp !== "pin";
     var etat = "", boutons = "", m = memoire.selMessage;
     if(emp === "" ){
-      etat = "Chaque jour, sans rien faire." + (s.derniereLe ? " Dernière : " + dateFr(s.derniereLe) + "." : "");
+      etat = "Chaque jour, sans rien faire." + (ici.derniereLe ? " Dernière : " + dateFr(ici.derniereLe) + "." : "");
       if(memoire.cleLue && !memoire.cle && !enCours.cle) etat += " Tapez votre code PIN une fois pour l’activer.";
       boutons = '<button type="button" class="mdc-btn-2" data-mdc="sel-maintenant" data-test="sel-maintenant">Sauvegarder maintenant</button>';
     } else {
@@ -4406,8 +4798,9 @@ var MonDjaiCompte = (function(){
   }
   function cacheAujourdhui(type){
     var r = compte.rappels;
-    return !!(r && r.plusTard && r.plusTard[type] === jourLocal());
+    return !!(r && r.plusTard && r.plusTard[clePlusTard(type)] === jourLocal());
   }
+  function merciIci(){ var s = compte.statut; return !s || !s.formule || formuleOuvreAppli(s.formule); }
   // Une pastille (et, pour un rappel, son « ✕ » Plus tard).
   function pastilleRappel(type, action, test, texte, avecPlusTard){
     // Sur deux lignes, jamais « · Noter » seul en début de ligne, ni « 3 » séparé de « jours ».
@@ -4419,7 +4812,7 @@ var MonDjaiCompte = (function(){
   }
   function ligneDuJour(){
     if(demenagementVisible()) return { type: "demenagement", html: '<button type="button" class="mdc-pastille" data-mdc="ouvrir-demenagement" data-test="carte-demenagement">MonDjai déménage · 3 gestes</button>' };
-    var st = statutCourant(), enCoursP = paiementEnCours(), jour = jourLocal();
+    var st = statutCourant(), enCoursP = paiementEnCoursIci(), jour = jourLocal();
     if(!enCoursP && (st.valeur === "essai" || st.valeur === "abonnee") && st.joursRestants !== null && st.joursRestants <= JOURS_AVIS_ECHEANCE && (st.source === "serveur" || st.accesFin) && !cacheAujourdhui("echeance")){
       var essai = st.valeur === "essai";
       var debutTexte = st.source === "local" ? "Votre accès finit le " : essai ? "Votre essai finit le " : "Votre abonnement finit le ";
@@ -4431,14 +4824,14 @@ var MonDjaiCompte = (function(){
         esc((st.dejaAbonnee ? "Abonnement terminé" : "Essai terminé") + " · encore " + joursLisibles(st.joursGrace) + " pour noter") + '</button>' };
     }
     if(enCoursP || st.valeur === "confiance") return { type: "verification", html: '<button type="button" class="mdc-pastille" data-mdc="ouvrir-abonnement" data-test="carte-verification">Paiement en cours de vérification</button>' };
-    if(compte.merci && compte.merci.vu && compte.merci.le === jour && !cacheAujourdhui("paiement")){
+    if(compte.merci && compte.merci.vu && compte.merci.le === jour && merciIci() && !cacheAujourdhui("paiement")){
       return { type: "paiement", rappel: true, html: pastilleRappel("paiement", "ouvrir-abonnement", "carte-merci", "Merci ! Abonnée jusqu’au " + dateFr(compte.merci.fin).slice(0, 5), true) };
     }
     if(inscriptionATerminer() && !cacheAujourdhui("inscription")) return { type: "inscription", rappel: true, html: pastilleRappel("inscription", "ouvrir-inscription", "carte-inscription", "Terminez votre inscription · 1 minute", true) };
     if(compte.id && !estConnecte()) return { type: "reconnexion", html: '<button type="button" class="mdc-pastille" data-mdc="ouvrir-reconnexion" data-test="carte-reconnexion">Reconnectez-vous · 1 minute</button>' };
     if(conditionsAAnnoncer()) return { type: "conditions", html: '<button type="button" class="mdc-pastille" data-mdc="lire-conditions-maj" data-test="carte-conditions">Conditions mises à jour · Lire</button>' };
     var n = joursSansSaisie();
-    if(n >= JOURS_SANS_SAISIE && st.saisieOuverte && !(compte.rappels && compte.rappels.saisie === false) && !cacheAujourdhui("saisie")){
+    if(n >= JOURS_SANS_SAISIE && st.saisieOuverte && rappelSaisieIci() && !cacheAujourdhui("saisie")){
       return { type: "saisie", rappel: true, html: pastilleRappel("saisie", "rappel-noter", "carte-saisie", "Rien noté depuis " + n + " jours · Noter", true) };
     }
     if(joursSansSauvegarde() > JOURS_SANS_SAUVEGARDE && !cacheAujourdhui("sauvegarde")){
@@ -4457,7 +4850,7 @@ var MonDjaiCompte = (function(){
   // premier jour d'usage s'il n'y en a jamais eu. 0 tant que rien n'est noté.
   function joursSansSauvegarde(){
     if(appel("etatVide", true) === true) return 0;
-    var s = compte.sauvegardeEnLigne || {};
+    var s = sauvegardeIci();
     var base = plusTardif(s.derniereLe || null, appel("derniereSauvegardeFichier", null)) || appel("debutUsage", null);
     if(!base || !/^\d{4}-\d{2}-\d{2}$/.test(base)) return 0;
     return Math.max(0, ecartJours(base, jourLocal()));
@@ -4491,12 +4884,13 @@ var MonDjaiCompte = (function(){
     chargerCompte();
     // Chiffres retrouvés (copie de secours) pendant que l'écran 1 d'une
     // « nouvelle » installation était affiché, sans rien tapé : on le ferme.
-    if(ecran && ecran.type === "inscription" && ecran.mode === "nouvelle" && ecran.etape === 1 && !ecran.touche && !ecran.occupe &&
+    if(ecran && ecran.type === "inscription" && ((ecran.mode === "nouvelle" && ecran.etape === 1) || ecran.mode === "reconnue") && !ecran.touche && !ecran.occupe &&
        !ecran.feuille && appel("nouvelleInstallation", false) !== true){
       fermerEcran();
     }
     // « Merci ! Abonnée jusqu'au … » : dans Mon abonnement s'il est ouvert, sinon une feuille, appli au repos.
-    if(compte.merci && !compte.merci.vu){
+    // v4 : seulement dans une appli que la formule ouvre (l'autre appli le montrera).
+    if(compte.merci && !compte.merci.vu && merciIci()){
       if(ecran && ecran.type === "abonnement" && !ecran.feuille){
         modifierCompte(function(c){ c.merci.vu = true; });
         ecran.vue = "formules";
@@ -4531,6 +4925,11 @@ var MonDjaiCompte = (function(){
       memoire.guideDemande = false;
       lancerGuide();
       return;
+    }
+    // v4 : la bulle du bouton de l'autre appli, s'il est apparu après le guide.
+    if(!memoire.premiereSeance && lienVisible() && !(compte.lienVu && compte.lienVu[cfg.appli]) &&
+       appel("verrouille", false) !== true && appel("auRepos", true) === true && document.querySelector('[data-mdc="autre-appli"]') !== null){
+      if(lancerBulleLien()) return;
     }
     if(proposerNotificationsSiBesoin()) return;
     // Installation existante : l'inscription est proposée UNE fois, appli au repos.
@@ -4615,9 +5014,9 @@ var MonDjaiCompte = (function(){
     // Le serveur doit connaître le jour de la dernière saisie (jamais un montant)
     // pour ne pas envoyer « Rien noté » à tort : une fois par jour au plus.
     chargerCompte();
-    var n = compte.notifications;
-    if(n && n.autorisees && n.endpoint && !(compte.rappels && compte.rappels.saisie === false) && n.saisieEnvoyee !== jourLocal()){
-      modifierCompte(function(c){ c.notifications = fusion(c.notifications, { saisieEnvoyee: jourLocal() }); });
+    var n = notifsIci();
+    if(n && n.autorisees && n.endpoint && rappelSaisieIci() && n.saisieEnvoyee !== jourLocal()){
+      modifierCompte(function(c){ majNotifsIci(c, { saisieEnvoyee: jourLocal() }); });
       envoyerAppareil(true);
     }
   }
@@ -4742,10 +5141,20 @@ var MonDjaiCompte = (function(){
   function permissionNotifications(){
     try{ return window.Notification && window.Notification.permission ? window.Notification.permission : "default"; }catch(e){ return "default"; }
   }
-  // { possible, raison: "" | "absent" | "iphone" | "refuse", actives }
+  // v4 : appli ouverte hors de son adresse https (fichier reçu par WhatsApp,
+  // adresse content://…) : le navigateur n'y permet jamais les notifications.
+  function adresseSure(){
+    try{
+      if(window.isSecureContext === false) return false;
+      var p = String(location.protocol || "");
+      return p === "https:" || (p === "http:" && /^(localhost|127\.0\.0\.1)$/.test(String(location.hostname || "")));
+    }catch(e){ return true; }
+  }
+  // { possible, raison: "" | "adresse" | "absent" | "iphone" | "refuse", actives }
   function etatNotifications(){
     chargerCompte();
-    var n = compte.notifications || {};
+    var n = notifsIci() || {};
+    if(!adresseSure()) return { possible: false, raison: "adresse", actives: false };
     if(surIphone() && !decrireAppareil().installee) return { possible: false, raison: "iphone", actives: false };
     if(!pushPresent()) return { possible: false, raison: "absent", actives: false };
     var p = permissionNotifications();
@@ -4753,6 +5162,7 @@ var MonDjaiCompte = (function(){
     return { possible: true, raison: "", actives: p === "granted" && n.autorisees === true && !!n.endpoint };
   }
   function messageNotifications(raison){
+    if(raison === "adresse") return "Ouvrez MonDjai depuis son adresse pour recevoir les notifications.";
     if(raison === "iphone") return "Sur iPhone : ajoutez d’abord l’appli à l’écran d’accueil.";
     if(raison === "refuse") return "Refusées dans les réglages du téléphone.";
     if(raison === "absent") return "Ce téléphone ne permet pas les notifications.";
@@ -4763,10 +5173,10 @@ var MonDjaiCompte = (function(){
   // Le jour de la dernière saisie (jamais un montant) sert seulement au rappel
   // « Rien noté », et seulement si ce rappel est activé.
   function pushPourServeur(){
-    var n = compte.notifications;
+    var n = notifsIci();
     if(!n || n.autorisees === undefined) return null;
     if(!n.autorisees || !n.endpoint || !n.cles) return { actif: false };
-    var saisie = !(compte.rappels && compte.rappels.saisie === false);
+    var saisie = rappelSaisieIci();
     var o = { actif: true, endpoint: n.endpoint, keys: { p256dh: n.cles.p256dh, auth: n.cles.auth }, appli: cfg.appli, saisie: saisie };
     if(saisie){
       var jour = plusTardif(appel("derniereSaisie", null), appel("debutUsage", null));
@@ -4794,7 +5204,7 @@ var MonDjaiCompte = (function(){
           var j = sub && typeof sub.toJSON === "function" ? sub.toJSON() : null;
           if(!j || !j.endpoint || !j.keys || !j.keys.p256dh || !j.keys.auth){ suite(false, "erreur"); return; }
           modifierCompte(function(c){
-            c.notifications = fusion(c.notifications, { autorisees: true, endpoint: j.endpoint, cles: { p256dh: j.keys.p256dh, auth: j.keys.auth }, le: jourLocal() });
+            majNotifsIci(c, { autorisees: true, endpoint: j.endpoint, cles: { p256dh: j.keys.p256dh, auth: j.keys.auth }, le: jourLocal() });
           });
           envoyerAppareil(true);
           suite(true, "");
@@ -4808,14 +5218,14 @@ var MonDjaiCompte = (function(){
     if(!et.possible){ suite(false, et.raison); return; }
     chargerCompte();
     if(!estInscrit() || !estConnecte()){ suite(false, "inscription"); return; }
-    modifierCompte(function(c){ c.notifications = fusion(c.notifications, { demandeesLe: jourLocal() }); });
+    modifierCompte(function(c){ majNotifsIci(c, { demandeesLe: jourLocal() }); });
     var repondu = false;
     function reponse(p){
       if(repondu) return;
       repondu = true;
       if(p === "granted"){ abonnerPush(suite); return; }
       // Refus, ou fenêtre fermée sans réponse : pas de nouvelle demande avant 30 jours.
-      modifierCompte(function(c){ c.notifications = fusion(c.notifications, { autorisees: false, refuseeLe: jourLocal() }); });
+      modifierCompte(function(c){ majNotifsIci(c, { autorisees: false, refuseeLe: jourLocal() }); });
       suite(false, p === "denied" ? "refuse" : "plus_tard");
     }
     try{
@@ -4824,7 +5234,7 @@ var MonDjaiCompte = (function(){
     }catch(e){ suite(false, "erreur"); }
   }
   function desactiverNotifications(){
-    modifierCompte(function(c){ c.notifications = fusion(c.notifications, { autorisees: false, endpoint: null, cles: null }); });
+    modifierCompte(function(c){ majNotifsIci(c, { autorisees: false, endpoint: null, cles: null }); });
     enregistrementSw(function(reg){
       try{ if(reg && reg.pushManager) reg.pushManager.getSubscription().then(function(s){ if(s) s.unsubscribe(); }, function(){}); }catch(e){}
     });
@@ -4833,10 +5243,10 @@ var MonDjaiCompte = (function(){
   // À l'ouverture : l'abonnement est-il toujours là, et toujours le même ?
   function maintenirAbonnementPush(){
     chargerCompte();
-    var n = compte.notifications;
+    var n = notifsIci();
     if(!n || !n.autorisees || !pushPresent()) return;
     if(permissionNotifications() !== "granted"){
-      modifierCompte(function(c){ c.notifications = fusion(c.notifications, { autorisees: false, endpoint: null, cles: null }); });
+      modifierCompte(function(c){ majNotifsIci(c, { autorisees: false, endpoint: null, cles: null }); });
       envoyerAppareil(true);
       return;
     }
@@ -4847,8 +5257,9 @@ var MonDjaiCompte = (function(){
           var j = sub && typeof sub.toJSON === "function" ? sub.toJSON() : null;
           chargerCompte();
           if(!j || !j.endpoint){ abonnerPush(function(){}); return; }
-          if(j.endpoint !== (compte.notifications && compte.notifications.endpoint)){
-            modifierCompte(function(c){ c.notifications = fusion(c.notifications, { endpoint: j.endpoint, cles: { p256dh: j.keys.p256dh, auth: j.keys.auth } }); });
+          var ni = notifsIci();
+          if(j.endpoint !== (ni && ni.endpoint)){
+            modifierCompte(function(c){ majNotifsIci(c, { endpoint: j.endpoint, cles: { p256dh: j.keys.p256dh, auth: j.keys.auth } }); });
             envoyerAppareil(true);
           }
         }, function(){});
@@ -4861,10 +5272,10 @@ var MonDjaiCompte = (function(){
   function proposerNotificationsSiBesoin(){
     if(memoire.notifProposee || memoire.premiereSeance) return false;
     var et = etatNotifications();
-    if(!et.possible || et.actives || permissionNotifications() !== "default") return false;
+    if(!et.possible || et.actives || permissionNotifications() === "denied") return false;
     chargerCompte();
     if(!estInscrit() || !estConnecte()) return false;
-    var n = compte.notifications || {};
+    var n = notifsIci() || {};
     if(n.demandeesLe || (n.refuseeLe && ecartJours(n.refuseeLe, jourLocal()) < JOURS_REDEMANDE_NOTIFICATIONS)) return false;
     if(!(compte.guideVu && compte.guideVu[cfg.appli]) && appel("etatVide", true) === true) return false;
     if(appel("verrouille", false) === true || appel("auRepos", true) !== true) return false;
@@ -4879,20 +5290,20 @@ var MonDjaiCompte = (function(){
   function reglageRappels(){
     if(!cfg) return "";
     chargerCompte();
-    var r = compte.rappels || {}, et = etatNotifications(), m = memoire.rappelsMessage;
+    var et = etatNotifications(), m = memoire.rappelsMessage;
     var etat = et.actives ? "Activées sur ce téléphone." : et.possible ? "Fin d’abonnement, saisie oubliée : une par jour au plus." : messageNotifications(et.raison);
     return '<div class="mdc-sel" data-test="rappels">' +
-      '<button type="button" class="mdc-rang" role="switch" data-mdc="rappel-saisie-bascule" data-test="rappel-saisie" aria-checked="' + (r.saisie !== false) + '">Rappel de saisie<i class="mdc-inter"></i></button>' +
+      '<button type="button" class="mdc-rang" role="switch" data-mdc="rappel-saisie-bascule" data-test="rappel-saisie" aria-checked="' + rappelSaisieIci() + '">Rappel de saisie<i class="mdc-inter"></i></button>' +
       '<p data-test="rappel-saisie-etat">' + esc("Après " + JOURS_SANS_SAISIE + " jours sans rien noter.") + '</p>' +
       '<button type="button" class="mdc-rang" role="switch" data-mdc="notif-bascule" data-test="notif-bascule" aria-checked="' + !!et.actives + '"' + (et.possible || et.actives ? '' : ' aria-disabled="true"') + '>Notifications<i class="mdc-inter"></i></button>' +
       '<p data-test="notif-etat">' + esc(etat) + '</p>' +
-      (m ? '<p class="' + esc(m.ton || "") + '" role="status" data-test="rappels-message">' + esc(m.texte) + '</p>' : '') +
+      (m && m.texte !== etat ? '<p class="' + esc(m.ton || "") + '" role="status" data-test="rappels-message">' + esc(m.texte) + '</p>' : '') +
       '</div>';
   }
   function resumeRappels(){
     if(!cfg) return "";
     chargerCompte();
-    var saisie = !(compte.rappels && compte.rappels.saisie === false), notif = etatNotifications().actives;
+    var saisie = rappelSaisieIci(), notif = etatNotifications().actives;
     return saisie && notif ? "Activés" : saisie ? "Saisie" : notif ? "Notifications" : "Éteints";
   }
   // Notification touchée : l'adresse porte ?ecran=… (ou le service worker
@@ -4923,7 +5334,20 @@ var MonDjaiCompte = (function(){
     }
     var g = appel("guide", null);
     if(!g || !Array.isArray(g.bulles) || !g.bulles.length) return false;
-    guide = { bulles: g.bulles.slice(0, GUIDE_BULLES_MAX), i: -1, fin: g.fin || null, el: null, minuteur: null };
+    var bulles = g.bulles.slice(0, GUIDE_BULLES_MAX), lien = lienVisible();
+    // v4 : compte « les deux » : une bulle de plus, sur le bouton de l'autre appli.
+    if(lien) bulles.push(bulleLien());
+    guide = { bulles: bulles, i: -1, fin: g.fin || null, el: null, minuteur: null, lien: lien, seul: false };
+    allerBulle(0);
+    prevenirAppli();
+    return true;
+  }
+  function bulleLien(){ return { cible: '[data-mdc="autre-appli"]', texte: TEXTE_BULLE_LIEN }; }
+  // v4 : le bouton apparaît après le guide (activité ajoutée, mise à jour du
+  // 9C) : sa bulle, seule, une fois, appli au repos.
+  function lancerBulleLien(){
+    if(!cfg || guide || ecran) return false;
+    guide = { bulles: [bulleLien()], i: -1, fin: null, el: null, minuteur: null, lien: true, seul: true };
     allerBulle(0);
     prevenirAppli();
     return true;
@@ -4934,7 +5358,7 @@ var MonDjaiCompte = (function(){
     var b = guide.bulles[i];
     if(b && typeof b.avant === "function"){ try{ b.avant(); }catch(e){} }
     if(!guide) return;
-    compter("guide.etape_" + (i + 1));
+    compter(guide.seul ? "guide.lien" : "guide.etape_" + (i + 1));
     dessinerGuide();
   }
   function dessinerGuide(){
@@ -5006,8 +5430,11 @@ var MonDjaiCompte = (function(){
     if(g.minuteur) clearTimeout(g.minuteur);
     if(g.el && g.el.parentNode) g.el.parentNode.removeChild(g.el);
     try{ if(typeof g.fin === "function") g.fin(); }catch(e){}
-    compter(passe ? "guide.passe" : "guide.termine");
-    modifierCompte(function(c){ var v = fusion(c.guideVu, null); v[cfg.appli] = jourLocal(); c.guideVu = v; });
+    if(!g.seul) compter(passe ? "guide.passe" : "guide.termine");
+    modifierCompte(function(c){
+      if(!g.seul){ var v = fusion(c.guideVu, null); v[cfg.appli] = jourLocal(); c.guideVu = v; }
+      if(g.lien){ var l = fusion(c.lienVu, null); l[cfg.appli] = jourLocal(); c.lienVu = l; }
+    });
     prevenirAppli();
   }
 
@@ -5148,6 +5575,16 @@ var MonDjaiCompte = (function(){
     resumeRappels: resumeRappels,
     reglageAiderAmeliorer: reglageAiderAmeliorer,
     identifiantLisible: identifiantLisible,
+    // v4 : lien Coiffure ⇄ Mèches, code PIN
+    boutonAutreAppli: boutonAutreAppli,
+    lienVisible: lienVisible,
+    adresseAutreAppli: adresseAutreAppli,
+    ajouterActivite: ajouterActivite,
+    aActivite: aActivite,
+    demanderRetraitPin: demanderRetraitPin,
+    pinOublie: pinOublie,
+    pinPartage: pinPartage,
+    sauvegardeEnLigneLe: function(){ chargerCompte(); return compte.sauvegardeEnLigne.active ? sauvegardeIci().derniereLe : null; },
     // Serveur
     appelerFonction: appelerFonction,
     mettreEnFile: mettreEnFile,
@@ -5177,12 +5614,18 @@ var MonDjaiCompte = (function(){
       demanderNotifications: demanderNotifications, maintenirAbonnementPush: maintenirAbonnementPush,
       guide: function(){ return guide ? { i: guide.i, n: guide.bulles.length } : null; }, positionnerGuide: positionnerGuide,
       memoireV3: function(){ return { premiereSeance: memoire.premiereSeance, notifProposee: memoire.notifProposee, guideDemande: memoire.guideDemande, ecranDemande: memoire.ecranDemande }; },
+      // v4
+      adresseAppli: adresseAppli, familleIci: function(){ var f = familleIci(); return f ? f.nom : null; }, autreAppliSurCeTelephone: autreAppliSurCeTelephone,
+      sauvegardeIci: function(){ chargerCompte(); return sauvegardeIci(); }, notifsIci: function(){ chargerCompte(); return copier(notifsIci()); },
+      rappelSaisieIci: function(){ chargerCompte(); return rappelSaisieIci(); }, adresseSure: adresseSure, messageNotifications: messageNotifications,
+      lancerBulleLien: lancerBulleLien,
       constantes: { SUPABASE_URL: SUPABASE_URL, NOUVELLE_ADRESSE: NOUVELLE_ADRESSE, EMAIL_CONTACT: EMAIL_CONTACT, DELAI_MAX_MS: DELAI_MAX_MS,
         DELAI_RENVOI_S: DELAI_RENVOI_S, VALIDITE_CODE_S: VALIDITE_CODE_S, CLE_COMPTE: CLE_COMPTE, CLE_FILE: CLE_FILE, BASE_SECOURS: BASE_SECOURS,
         PAIEMENT_SECOURS: PAIEMENT_SECOURS, FORMULES_SECOURS: FORMULES_SECOURS, PBKDF2_ITERATIONS: PBKDF2_ITERATIONS, CONDITIONS_VERSION: CONDITIONS_VERSION,
         JOURS_GRACE: JOURS_GRACE, TAILLE_MAX_SAUVEGARDE: TAILLE_MAX_SAUVEGARDE,
         VAPID_CLE_PUBLIQUE: VAPID_CLE_PUBLIQUE, JOURS_SANS_SAISIE: JOURS_SANS_SAISIE, JOURS_SANS_SAUVEGARDE: JOURS_SANS_SAUVEGARDE,
-        CLE_MESURES: CLE_MESURES, ERREURS_PAR_JOUR: ERREURS_PAR_JOUR, COMPTEURS_MAX: COMPTEURS_MAX }
+        CLE_MESURES: CLE_MESURES, ERREURS_PAR_JOUR: ERREURS_PAR_JOUR, COMPTEURS_MAX: COMPTEURS_MAX,
+        ADRESSES_APPLIS: ADRESSES_APPLIS, TEXTE_BULLE_LIEN: TEXTE_BULLE_LIEN, VERSION_BLOC: VERSION_BLOC }
     }
   };
 })();
@@ -5194,7 +5637,7 @@ var MonDjaiCompte = (function(){
   // Version affichée dans Réglages → À propos, pour vérifier d'un coup d'œil
   // quelle version tourne sur un téléphone. Le numéro de cache doit être le
   // même que VERSION_CACHE dans sw.js.
-  var VERSION_APP = "Coiffure-9C · cache 16";
+  var VERSION_APP = "Coiffure-9D · cache 17";
   var PREFIXE_CACHE_APP = "mondjai-coiffure-";
 
   /* ================= Sprint 9A : compte en ligne ================= */
@@ -5264,7 +5707,10 @@ var MonDjaiCompte = (function(){
     ouvrirSauvegarde: function(){ ouvrirReglagesSauvegarde(); },
     ouvrirEcran: function(e){ ouvrirEcranDemande(e); },
     ecranCourant: function(){ return nomEcranCourant(); },
-    guide: function(){ return guideCoiffure(); }
+    guide: function(){ return guideCoiffure(); },
+    // Sprint 9D (bloc v4) : code PIN du compte tapé sur « Bon retour » (compte
+    // venu de Mèches, même téléphone) : Coiffure est ouverte.
+    deverrouiller: function(){ ui.locked = false; ui.pinLockInput = ""; ui.pinLockErreur = false; }
   };
   /* ================= Sprint 9C : rappels, guide, comptages (avec le bloc v3) ================= */
   function jourDeTs(ts){ var d = new Date(ts); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
@@ -5416,7 +5862,9 @@ var MonDjaiCompte = (function(){
   }
   // Code PIN demandé à l'ouverture ? (ancien PIN en clair, ou PIN du compte)
   function pinRequis(){
-    return !!(state.config.pinActif && (state.config.pinCode || MonDjaiCompte.pinDefini()));
+    // Sprint 9D : le code PIN du compte ferme Coiffure, même s'il a été créé
+    // dans Mèches (un seul code pour le compte) ; l'ancien code en clair reste valable.
+    return !!(state.config.pinActif && state.config.pinCode) || MonDjaiCompte.pinDefini();
   }
   function pinCorrect(saisie){
     if(state.config.pinCode) return saisie === state.config.pinCode;
@@ -6366,6 +6814,7 @@ var MonDjaiCompte = (function(){
     if(ui.modal.confirmErase){
       return (
         '<div class="confirm-box"><p>Effacer toutes les données de l’appareil ? Prestations, charges et objectif — tout sera perdu, cette action est définitive.</p>' +
+          (MonDjaiCompte.pinPartage() ? '<p data-test="pin-partage">Le code PIN reste : il ferme aussi ' + esc(MonDjaiCompte.pinPartage()) + '.</p>' : '') +
           '<div class="btn-row">' +
             '<button type="button" class="btn btn-secondary" data-action="annuler-erase">Annuler</button>' +
             '<button type="button" class="btn btn-danger" data-action="confirmer-erase">Oui, tout effacer</button>' +
@@ -6374,7 +6823,7 @@ var MonDjaiCompte = (function(){
     }
     return (
       '<div>' +
-        '<div class="hint" style="margin-bottom:14px;">Vous pouvez restaurer une sauvegarde JSON — le code PIN qu’elle contient s’appliquera, sans connaître le code actuel — ou repartir de zéro.</div>' +
+        '<div class="hint" style="margin-bottom:14px;">Vous pouvez restaurer une sauvegarde JSON ou repartir de zéro.</div>' +
         '<label class="btn btn-secondary" style="display:flex; cursor:pointer; margin-bottom:10px;">📂 Restaurer une sauvegarde JSON' +
           '<input type="file" accept="application/json" style="display:none;" data-action-change="importer-json-lock"></label>' +
         (ui.backupMsg ? '<div class="hint tight" style="margin-bottom:10px;">' + esc(ui.backupMsg) + '</div>' : '') +
@@ -6438,7 +6887,7 @@ var MonDjaiCompte = (function(){
 
   function renderHeader(){
     return (
-      '<div class="header">' +
+      '<div class="header' + (MonDjaiCompte.lienVisible() ? ' avec-lien' : '') + '">' +
         '<div class="brand">' +
           '<div class="brand-emoji">💇</div>' +
           '<div class="brand-text">' +
@@ -6450,6 +6899,7 @@ var MonDjaiCompte = (function(){
         '</div>' +
         '<div class="header-icons">' +
           renderEpargneShortcut() +
+          MonDjaiCompte.boutonAutreAppli("icon-btn lien-appli") +   // Sprint 9D : 🛍️ ouvre Mèches (compte « les deux »)
           '<button type="button" class="icon-btn" data-action="ouvrir-telecharger" aria-label="Télécharger" data-test="bouton-telecharger">📤</button>' +
         '</div>' +
       '</div>'
@@ -11029,7 +11479,7 @@ var MonDjaiCompte = (function(){
     );
   }
   function renderReglagesSecurite(){
-    var pinActif = state.config.pinActif;
+    var pinActif = pinRequis();   // Sprint 9D : le code du compte, d'où qu'il vienne
     return (
       '<div class="profil-row">' +
         '<div class="pr-emoji">🔒</div>' +
@@ -11063,10 +11513,14 @@ var MonDjaiCompte = (function(){
         '<div class="pr-text"><div class="pr-title">Pédicure / Manicure</div></div>' +
         '<button type="button" class="switch' + (ui.abonnementToggles.pedicure?" on":"") + '" data-action="toggle-abonnement-premium" data-id="pedicure" aria-label="Pédicure / Manicure"><span class="knob"></span></button>' +
       '</div>' +
-      '<div class="profil-row soon">' +
+      // Sprint 9D : Mèches n'est plus « bientôt » : on l'ajoute au compte.
+      '<div class="profil-row" data-test="bientot-meches">' +
         '<div class="pr-emoji">🛍️</div>' +
-        '<div class="pr-text"><div class="pr-title">Mèches</div></div>' +
-        '<button type="button" class="switch' + (ui.abonnementToggles.revente?" on":"") + '" data-action="toggle-abonnement-premium" data-id="revente" aria-label="Mèches"><span class="knob"></span></button>' +
+        '<div class="pr-text"><div class="pr-title">Mèches</div>' +
+          (MonDjaiCompte.aActivite("revente") ? '<div class="pr-desc">Dans votre compte</div>' : '') + '</div>' +
+        (MonDjaiCompte.aActivite("revente")
+          ? '<a class="btn btn-secondary btn-ligne" href="' + esc(MonDjaiCompte.adresseAutreAppli()) + '" target="_blank" rel="noopener" data-mdc="autre-appli" data-test="ouvrir-meches">Ouvrir</a>'
+          : '<button type="button" class="btn btn-secondary btn-ligne" data-action="ajouter-meches" data-test="ajouter-meches">Ajouter Mèches</button>') +
       '</div>' +
       (ui.reglagesMsg ? '<div class="hint tight" role="status">' + esc(ui.reglagesMsg) + '</div>' : '')
     );
@@ -11111,7 +11565,7 @@ var MonDjaiCompte = (function(){
       }
       case "rappels": return MonDjaiCompte.resumeRappels();   // Sprint 9C
       case "affichage": return NOMS_THEMES[choixTheme()];
-      case "bientot": return "Pédicure · Mèches";
+      case "bientot": return MonDjaiCompte.aActivite("revente") ? "Pédicure" : "Pédicure · Mèches";
       case "apropos": return VERSION_APP.split(" · ")[0].replace("Coiffure-", "");
     }
     return "";
@@ -11566,12 +12020,9 @@ var MonDjaiCompte = (function(){
       }
 
       case "toggle-pin-reglages": {
-        if(state.config.pinActif){
-          state.config.pinActif = false;
-          state.config.pinCode = null;
-          saveState();
-          MonDjaiCompte.retirerPin();
-          render();
+        if(pinRequis()){
+          // Sprint 9D : le code actuel d'abord (il ferme aussi Mèches).
+          MonDjaiCompte.demanderRetraitPin(function(){ render(); });
         } else {
           // Sprint 9A : un seul pavé pour créer le code PIN (celui du compte).
           MonDjaiCompte.ouvrirPin();
@@ -11584,6 +12035,7 @@ var MonDjaiCompte = (function(){
         });
         return;
       }
+      case "ajouter-meches": MonDjaiCompte.ajouterActivite("revente"); return;   // Sprint 9D
       case "toggle-abonnement-premium": {
         var idAbo = el.getAttribute("data-id");
         ui.abonnementToggles[idAbo] = !ui.abonnementToggles[idAbo];
@@ -11602,9 +12054,11 @@ var MonDjaiCompte = (function(){
       case "confirmer-erase": {
         try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
         state = defaultState();
-        ui.locked = false;
         ui.modal = null;
-        MonDjaiCompte.retirerPin();   // le code PIN oublié ne doit pas suivre
+        // Sprint 9D : le code PIN oublié ne suit pas, sauf s'il ferme encore
+        // une autre appli MonDjai qui a des chiffres sur ce téléphone.
+        MonDjaiCompte.pinOublie();
+        ui.locked = pinRequis();
         render();
         return;
       }
